@@ -1,0 +1,33 @@
+name: News Digest
+
+on:
+  schedule:
+    # Toronto ET (UTC-4 EDT / UTC-5 EST). Adjust ±1 hour on DST change.
+    - cron: '0 12 * * *'   # 08:00 AM ET
+    - cron: '0 15 * * *'   # 11:00 AM ET
+    - cron: '0 19 * * *'   # 03:00 PM ET
+    - cron: '0 22 * * *'   # 06:00 PM ET
+  workflow_dispatch:       # manual test run from GitHub UI
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run digest and send to Telegram
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python digest.py
