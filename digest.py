@@ -20,10 +20,15 @@ import requests
 # --- Secrets from GitHub Actions env ---
 BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
+RECIPIENT_EMAIL = os.environ.get("RECIPIENT_EMAIL", "PYRAMIDMANAN@gmail.com")
 
 if not BOT_TOKEN or not CHAT_ID:
     print("FATAL: Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID as repository secrets.")
     sys.exit(1)
+
+if not RESEND_API_KEY:
+    print("WARN: RESEND_API_KEY not set — email delivery will be skipped.")
 
 ET = ZoneInfo("America/Toronto")
 NOW = datetime.now(ET)
@@ -192,6 +197,139 @@ def send_telegram(message: str):
             print(f"[TELEGRAM] sent part {i + 1}/{len(chunks)}")
 
 
+def send_email(subject: str, html_content: str):
+    if not RESEND_API_KEY:
+        print("[EMAIL] skipped — RESEND_API_KEY not set")
+        return
+
+    url = "https://api.resend.com/emails"
+    headers = {
+        "Authorization": f"Bearer {RESEND_API_KEY}",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "from": "News Digest <onboarding@resend.dev>",
+        "to": [RECIPIENT_EMAIL],
+        "subject": subject,
+        "html": html_content,
+    }
+    resp = requests.post(url, json=payload, headers=headers, timeout=20)
+    if resp.status_code == 200:
+        print("[EMAIL] sent successfully")
+    else:
+        print(f"[EMAIL ERROR] {resp.status_code}: {resp.text}")
+
+
+def build_email_html(domain_items: dict, breaking: list) -> str:
+    date_str = NOW.strftime("%b %d, %Y")
+    time_str = NOW.strftime("%I:%M %p ET")
+
+    def esc(text):
+        return html.escape(text or "")
+
+    rows = []
+
+    if breaking:
+        rows.append("""
+        <tr>
+          <td style="padding: 12px 0; border-bottom: 2px solid #e74c3c;">
+            <div style="font-size: 14px; font-weight: bold; color: #e74c3c; margin-bottom: 6px;">🔴 BREAKING — Last 6 Hours</div>
+        """)
+        for it in breaking[:5]:
+            rows.append(f"""
+            <div style="margin-bottom: 8px;">
+              <a href="{esc(it['link'])}" style="color: #1a73e8; text-decoration: none; font-weight: 600;">{esc(it['title'])}</a>
+              <div style="font-size: 12px; color: #555; margin-top: 2px;">{esc(it['source'])} — {esc(it['summary'])}</div>
+            </div>
+            """)
+        rows.append("</td></tr>")
+
+    for domain in DOMAIN_ORDER:
+        items = domain_items[domain]
+        if not items:
+            continue
+        emoji = EMOJI.get(domain, "•")
+        rows.append(f"""
+        <tr>
+          <td style="padding: 16px 0 10px 0; border-bottom: 1px solid #eee;">
+            <div style="font-size: 16px; font-weight: bold; color: #222; margin-bottom: 8px;">{emoji} {domain.upper()}</div>
+        """)
+        for it in items:
+            rows.append(f"""
+            <div style="margin-bottom: 10px;">
+              <a href="{esc(it['link'])}" style="color: #1a73e8; text-decoration: none; font-weight: 600; display: block; margin-bottom: 3px;">{esc(it['title'])}</a>
+              <div style="font-size: 13px; color: #444; line-height: 1.4;">{esc(it['summary'])}</div>
+              <div style="font-size: 11px; color: #888; margin-top: 2px;">Source: {esc(it['source'])}</div>
+            </div>
+            """)
+        rows.append("</td></tr>")
+
+    rows.append("""
+    <tr>
+      <td style="padding: 16px 0 0 0; border-top: 2px solid #333;">
+        <div style="font-size: 16px; font-weight: bold; color: #222; margin-bottom: 8px;">📉 MARKET SNAPSHOT</div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #444;">
+          <tr><td style="padding: 4px 0;">S&P 500</td><td style="padding: 4px 0; text-align: right;">— coming next step</td></tr>
+          <tr><td style="padding: 4px 0;">Nasdaq</td><td style="padding: 4px 0; text-align: right;">— coming next step</td></tr>
+          <tr><td style="padding: 4px 0;">Nifty 50</td><td style="padding: 4px 0; text-align: right;">— coming next step</td></tr>
+          <tr><td style="padding: 4px 0;">TSX</td><td style="padding: 4px 0; text-align: right;">— coming next step</td></tr>
+          <tr><td style="padding: 4px 0;">USD/INR</td><td style="padding: 4px 0; text-align: right;">— coming next step</td></tr>
+          <tr><td style="padding: 4px 0;">USD/CAD</td><td style="padding: 4px 0; text-align: right;">— coming next step</td></tr>
+          <tr><td style="padding: 4px 0;">Gold</td><td style="padding: 4px 0; text-align: right;">— coming next step</td></tr>
+          <tr><td style="padding: 4px 0;">WTI Crude</td><td style="padding: 4px 0; text-align: right;">— coming next step</td></tr>
+          <tr><td style="padding: 4px 0;">BTC</td><td style="padding: 4px 0; text-align: right;">— coming next step</td></tr>
+        </table>
+      </td>
+    </tr>
+    """)
+
+    html_body = f"""<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>News Brief — {date_str}</title>
+</head>
+<body style="margin: 0; padding: 0; background: #f5f5f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background: #f5f5f5;">
+    <tr>
+      <td align="center" style="padding: 20px 10px;">
+        <table cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          
+          <!-- Header -->
+          <tr>
+            <td style="padding: 20px 24px; background: #1a73e8; color: #ffffff;">
+              <div style="font-size: 20px; font-weight: bold;">📰 News Brief</div>
+              <div style="font-size: 13px; color: #cbd6f2; margin-top: 4px;">{date_str} &nbsp;•&nbsp; {time_str}</div>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding: 0 24px 24px 24px;">
+              <table cellpadding="0" cellspacing="0" width="100%">
+                {''.join(rows)}
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 16px 24px; background: #f8f9fa; color: #888; font-size: 11px; text-align: center; border-top: 1px solid #eee;">
+              — Auto-generated by News Digest Bot • Free sources only • Sent via Resend
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
+
+    return html_body
+
+
 def main():
     from datetime import timezone
     cutoff = NOW - timedelta(hours=LOOKBACK_HOURS)
@@ -277,6 +415,11 @@ def main():
     message = "\n".join(lines)
     print(message[:800] + ("…" if len(message) > 800 else ""))
     send_telegram(message)
+
+    # Send email with same content
+    email_html = build_email_html(domain_items, breaking)
+    email_subject = f"📰 News Brief — {NOW.strftime('%b %d')} {NOW.strftime('%I:%M %p ET')}"
+    send_email(email_subject, email_html)
 
 
 if __name__ == "__main__":
