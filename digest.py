@@ -129,11 +129,24 @@ EMOJI = {
 def save_digest(domain_items: dict, breaking: list):
     os.makedirs(SAVE_DIR, exist_ok=True)
     timestamp = NOW.strftime("%Y%m%d_%H%M")
+
+    def clean_item(it):
+        return {
+            "title": it["title"],
+            "summary": it["summary"],
+            "link": it["link"],
+            "source": it["source"],
+            "published": it["published"].isoformat(),
+        }
+
     data = {
         "timestamp": timestamp,
         "datetime": NOW.isoformat(),
-        "breaking": breaking,
-        "domains": {domain: domain_items[domain] for domain in DOMAIN_ORDER},
+        "breaking": [clean_item(it) for it in breaking],
+        "domains": {
+            domain: [clean_item(it) for it in domain_items[domain]]
+            for domain in DOMAIN_ORDER
+        },
     }
     filepath = os.path.join(SAVE_DIR, f"digest_{timestamp}.json")
     with open(filepath, "w", encoding="utf-8") as f:
