@@ -10,7 +10,9 @@ import sys
 import html
 import re
 import hashlib
-from datetime import datetime, timedelta
+import json
+import glob
+from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
 
@@ -34,6 +36,8 @@ ET = ZoneInfo("America/Toronto")
 NOW = datetime.now(ET)
 LOOKBACK_HOURS = 24
 MAX_PER_DOMAIN = 8
+SAVE_DIR = "_data"
+MAX_SAVED_DIGESTS = 4
 
 # (domain_tag, source_name, rss_url)
 # All free / non-paywalled. Broken feeds are skipped at runtime.
@@ -120,6 +124,31 @@ EMOJI = {
     "Wars & Conflicts": "⚔️",
     "Commodities & Prices": "📊",
 }
+
+
+def save_digest(domain_items: dict, breaking: list):
+    os.makedirs(SAVE_DIR, exist_ok=True)
+    timestamp = NOW.strftime("%Y%m%d_%H%M")
+    data = {
+        "timestamp": timestamp,
+        "datetime": NOW.isoformat(),
+        "breaking": breaking,
+        "domains": {domain: domain_items[domain] for domain in DOMAIN_ORDER},
+    }
+    filepath = os.path.join(SAVE_DIR, f"digest_{timestamp}.json")
+    with open(filepath, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+    # Keep only the latest N digest files
+    files = sorted(glob.glob(os.path.join(SAVE_DIR, "digest_*.json")), reverse=True)
+    for old_file in files[MAX_SAVED_DIGESTS:]:
+        try:
+            os.remove(old_file)
+            print(f"[CLEANUP] removed {old_file}")
+        except Exception as e:
+            print(f"[CLEANUP ERROR] {old_file}: {e}")
+
+    print(f"[SAVE] digest written to {filepath}")
 
 
 def normalize_url(url: str) -> str:
@@ -414,6 +443,10 @@ def main():
 
     message = "\n".join(lines)
     print(message[:800] + ("…" if len(message) > 800 else ""))
+
+    # Save digest data for the web page
+    save_digest(domain_items, breaking)
+
     send_telegram(message)
 
     # Send email with same content
