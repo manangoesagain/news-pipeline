@@ -39,6 +39,14 @@ MAX_PER_DOMAIN = 8
 SAVE_DIR = "_data"
 MAX_SAVED_DIGESTS = 4
 
+# Allowed run hours in America/Toronto time
+ALLOWED_HOURS = {8, 11, 15, 18}
+
+# Hourly cron gate — exit immediately if not a scheduled digest time
+if NOW.hour not in ALLOWED_HOURS:
+    print(f"[SKIP] Not a digest hour ({NOW.strftime('%I %p ET')}). Exiting.")
+    sys.exit(0)
+
 # (domain_tag, source_name, rss_url)
 # All free / non-paywalled. Broken feeds are skipped at runtime.
 SOURCES = [

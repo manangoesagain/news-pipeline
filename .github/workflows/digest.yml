@@ -2,11 +2,8 @@ name: News Digest
 
 on:
   schedule:
-    # Toronto ET (UTC-4 EDT / UTC-5 EST). Adjust ±1 hour on DST change.
-    - cron: '0 12 * * *'   # 08:00 AM ET
-    - cron: '0 15 * * *'   # 11:00 AM ET
-    - cron: '0 19 * * *'   # 03:00 PM ET
-    - cron: '0 22 * * *'   # 06:00 PM ET
+    # Every hour UTC; script gating ensures it only acts at 8/11/15/18 ET
+    - cron: '0 * * * *'
   workflow_dispatch:       # manual test run from GitHub UI
 
 jobs:
