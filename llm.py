@@ -56,7 +56,59 @@ def _extract_json(text: str, require: str = None):
             continue
         if isinstance(obj, dict) and (not require or require in obj) and end - m.start() > best_len:
             best, best_len = obj, end - m.start()
-    return best
+    return best or _repair_truncated(text, require)
+
+
+def _repair_truncated(text: str, require: str = None):
+    """Close brackets on a reply cut off mid-JSON (token limit) and keep what parsed."""
+    start = text.find("{")
+    if start < 0:
+        return None
+    stack, in_str, esc, last_ok = [], False, False, None
+    for i in range(start, len(text)):
+        ch = text[i]
+        if in_str:
+            if esc:
+                esc = False
+            elif ch == "\\":
+                esc = True
+            elif ch == '"':
+                in_str = False
+            continue
+        if ch == '"':
+            in_str = True
+        elif ch in "{[":
+            stack.append("}" if ch == "{" else "]")
+        elif ch in "}]":
+            if stack:
+                stack.pop()
+            last_ok = i  # a complete value ended here
+        if not stack:
+            return None  # fully closed yet unparseable: genuinely malformed
+    if last_ok is None:
+        return None
+    # Cut back to the last complete value, then re-close whatever was open there
+    head = text[start:last_ok + 1]
+    stack, in_str, esc = [], False, False
+    for ch in head:
+        if in_str:
+            if esc:
+                esc = False
+            elif ch == "\\":
+                esc = True
+            elif ch == '"':
+                in_str = False
+        elif ch == '"':
+            in_str = True
+        elif ch in "{[":
+            stack.append("}" if ch == "{" else "]")
+        elif ch in "}]":
+            stack.pop()
+    try:
+        obj = json.loads(head + "".join(reversed(stack)))
+    except json.JSONDecodeError:
+        return None
+    return obj if isinstance(obj, dict) and (not require or require in obj) else None
 
 
 def _gemini(model, prompt, label, max_tokens, temperature):
