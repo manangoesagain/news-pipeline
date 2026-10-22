@@ -2,14 +2,32 @@ name: News Digest
 
 on:
   schedule:
-    # Every hour UTC; script gating ensures it only acts at 8/11/15/18 ET
+    # Every hour UTC; digest.py delivers each 8/11/15/18 ET slot once (late runs still count)
     - cron: '0 * * * *'
   workflow_dispatch:       # manual test run from GitHub UI
+    inputs:
+      force:
+        description: "Run now even outside a digest hour"
+        type: boolean
+        default: false
+      dry_run:
+        description: "Build everything but send nothing and don't deploy (preview uploaded as artifact)"
+        type: boolean
+        default: false
+      intel:
+        description: "Include the intelligence brief (normally 6 PM only)"
+        type: boolean
+        default: false
+
+# One digest at a time so two runs never race on gh-pages
+concurrency:
+  group: news-digest
+  cancel-in-progress: false
 
 jobs:
   digest:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     permissions:
       contents: write
       pages: write
@@ -25,6 +43,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: pip
 
       - name: Install dependencies
         run: |
@@ -32,24 +51,48 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run digest and send to Telegram + Email
+        id: digest
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          GNEWS_API_KEY: ${{ secrets.GNEWS_API_KEY }}
+          NEWSDATA_API_KEY: ${{ secrets.NEWSDATA_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          FORCE_RUN: ${{ inputs.force }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          FORCE_INTEL: ${{ inputs.intel }}
         run: python digest.py
 
       - name: Build static HTML page
-        run: python build_page.py
+        if: steps.digest.outputs.ran == 'true'
+        run: |
+          python build_page.py
+          mkdir -p site
+          cp index.html site/
+          cp -r _data site/
+
+      - name: Upload preview
+        if: steps.digest.outputs.ran == 'true' && inputs.dry_run
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview
+          path: |
+            preview/
+            site/index.html
 
       - name: Deploy to GitHub Pages
+        if: steps.digest.outputs.ran == 'true' && !inputs.dry_run
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./
+          publish_dir: ./site
           publish_branch: gh-pages
-          keep_files: false
+          # Single-commit branch: the 7-day article store would otherwise bloat history
+          force_orphan: true
 
       - name: Request Pages rebuild
+        if: steps.digest.outputs.ran == 'true' && !inputs.dry_run
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh api -X POST repos/${{ github.repository }}/pages/builds || true

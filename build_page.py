@@ -63,26 +63,84 @@ def format_time(iso_str):
         return iso_str
 
 
+def item_html(it, extra_class=""):
+    sources = it.get("sources") or [it.get("source", "")]
+    src = ", ".join(sources[:3]) + (f" +{len(sources) - 3}" if len(sources) > 3 else "")
+    why = f'<div class="why">↳ {esc(it["why"])}</div>' if it.get("why") else ""
+    summary = f" &bull; {esc(it['summary'])}" if it.get("summary") else ""
+    return f"""
+        <div class="item {extra_class}">
+          <a href="{esc(it['link'])}" class="title" target="_blank" rel="noopener">{esc(it['title'])}</a>
+          <div class="meta">{esc(src)}{summary}</div>
+          {why}
+        </div>
+        """
+
+
 def domain_html(domain, items):
     if not items:
         return ""
     emoji = EMOJI.get(domain, "•")
-    items_html = []
-    for it in items:
-        items_html.append(f"""
-        <div class="item">
-          <a href="{esc(it['link'])}" class="title" target="_blank" rel="noopener">{esc(it['title'])}</a>
-          <div class="meta">{esc(it['source'])} &bull; {esc(it['summary'])}</div>
-        </div>
-        """)
     return f"""
     <details class="domain">
       <summary>{emoji} {domain.upper()} <span class="count">({len(items)})</span></summary>
       <div class="domain-content">
-        {''.join(items_html)}
+        {''.join(item_html(it) for it in items)}
       </div>
     </details>
     """
+
+
+def fmt_price(m):
+    if m.get("price") is None:
+        return "n/a"
+    return f"{m['price']:,.{m.get('decimals', 2)}f}"
+
+
+def market_html(rows):
+    if not rows:
+        return '<p class="placeholder">Market data unavailable for this run.</p>'
+    cells = []
+    for m in rows:
+        c = m.get("change_pct")
+        cls = "up" if (c or 0) > 0 else ("down" if (c or 0) < 0 else "")
+        change = f"{'▲' if (c or 0) > 0 else '▼' if (c or 0) < 0 else '•'} {c:+.2f}%" if c is not None else ""
+        cells.append(f"""
+        <div class="tick">
+          <div class="tick-label">{esc(m['label'])}</div>
+          <div class="tick-price">{esc(fmt_price(m))}</div>
+          <div class="tick-change {cls}">{esc(change)}</div>
+        </div>""")
+    return f'<div class="ticks">{"".join(cells)}</div>'
+
+
+def intel_html(intel):
+    if not intel:
+        return ""
+    parts = ['<div class="intel"><h3>🔗 Intelligence Brief</h3>']
+    if intel.get("bottom_line"):
+        parts.append(f'<p class="bottom-line">{esc(intel["bottom_line"])}</p>')
+    if intel.get("causal_chains"):
+        parts.append("<h4>Causal chains</h4>")
+        for c in intel["causal_chains"]:
+            parts.append(f'<div class="intel-item"><b>{esc(c.get("title"))}</b><br>{esc(" → ".join(c.get("chain", [])))}</div>')
+    if intel.get("second_order"):
+        parts.append("<h4>Second-order effects</h4>")
+        for e in intel["second_order"]:
+            parts.append(f'<div class="intel-item">{esc(e.get("event"))} ⇒ <b>{esc(e.get("effect"))}</b></div>')
+    if intel.get("scenarios"):
+        parts.append("<h4>If-then scenarios (1-2 weeks)</h4>")
+        for sc in intel["scenarios"]:
+            watch = f'<br><span class="muted">Watch: {esc(sc["signpost"])}</span>' if sc.get("signpost") else ""
+            parts.append(f'<div class="intel-item"><b>If</b> {esc(sc.get("if"))} <b>then</b> {esc(sc.get("then"))} '
+                         f'<span class="badge">{esc(sc.get("likelihood", "?"))}</span>{watch}</div>')
+    if intel.get("contrarian"):
+        parts.append("<h4>Contrarian signals</h4>")
+        for c in intel["contrarian"]:
+            parts.append(f'<div class="intel-item">{esc(c.get("signal"))}<br><span class="muted">Consensus: '
+                         f'{esc(c.get("mainstream_view"))}</span></div>')
+    parts.append('<p class="muted small">AI-generated analysis from headlines; not investment advice.</p></div>')
+    return "".join(parts)
 
 
 def digest_card(digest):
@@ -93,18 +151,10 @@ def digest_card(digest):
 
     breaking_html = ""
     if breaking:
-        items_html = []
-        for it in breaking[:5]:
-            items_html.append(f"""
-            <div class="item breaking-item">
-              <a href="{esc(it['link'])}" class="title" target="_blank" rel="noopener">{esc(it['title'])}</a>
-              <div class="meta">{esc(it['source'])} &bull; {esc(it['summary'])}</div>
-            </div>
-            """)
         breaking_html = f"""
         <div class="breaking">
-          <div class="breaking-label">🔴 Breaking — Last 6 Hours</div>
-          {''.join(items_html)}
+          <div class="breaking-label">🔴 Breaking</div>
+          {''.join(item_html(it, "breaking-item") for it in breaking[:5])}
         </div>
         """
 
@@ -123,8 +173,9 @@ def digest_card(digest):
       </div>
       <div class="market-snapshot">
         <h3>📉 Market Snapshot</h3>
-        <p class="placeholder">Live market data coming next step (S&amp;P 500, Nifty 50, TSX, USD/INR, USD/CAD, Gold, WTI, BTC)</p>
+        {market_html(digest.get("market"))}
       </div>
+      {intel_html(digest.get("intelligence"))}
     </section>
     """
 
@@ -332,6 +383,44 @@ def generate_html(digests):
       font-size: 13px;
     }}
 
+    .why {{
+      font-size: 13px;
+      color: var(--accent);
+      margin-top: 2px;
+    }}
+
+    .ticks {{
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 8px;
+    }}
+
+    .tick {{
+      background: var(--code-bg);
+      border-radius: 8px;
+      padding: 8px 10px;
+    }}
+
+    .tick-label {{ font-size: 12px; color: var(--muted); }}
+    .tick-price {{ font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums; }}
+    .tick-change {{ font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }}
+    .tick-change.up {{ color: #16a34a; }}
+    .tick-change.down {{ color: var(--breaking); }}
+
+    .intel {{
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 2px solid #7c3aed;
+    }}
+
+    .intel h3 {{ font-size: 16px; color: #7c3aed; margin-bottom: 8px; }}
+    .intel h4 {{ font-size: 14px; margin: 14px 0 6px; }}
+    .intel-item {{ font-size: 14px; margin-bottom: 8px; }}
+    .bottom-line {{ font-style: italic; background: var(--code-bg); padding: 10px 12px; border-radius: 6px; }}
+    .badge {{ font-size: 11px; color: #7c3aed; border: 1px solid #7c3aed; border-radius: 10px; padding: 0 6px; }}
+    .muted {{ color: var(--muted); }}
+    .small {{ font-size: 12px; margin-top: 8px; }}
+
     .empty {{
       text-align: center;
       color: var(--muted);
@@ -359,7 +448,7 @@ def generate_html(digests):
   <div class="container">
     <header>
       <h1>📰 News Digest</h1>
-      <p>Free sources &bull; 4 runs daily &bull; Toronto time (ET)</p>
+      <p>Free sources &bull; 4 runs daily (8, 11, 3, 6) &bull; Toronto time (ET)</p>
     </header>
 
     <div class="updated">Last updated: {esc(last_updated) if last_updated else '—'}</div>
@@ -367,7 +456,7 @@ def generate_html(digests):
     {cards}
 
     <footer>
-      Auto-generated by News Digest Bot &bull; <a href="https://github.com" style="color: var(--accent); text-decoration: none;">GitHub</a>
+      Auto-generated by News Digest Bot &bull; <a href="https://github.com/manangoesagain/news-pipeline" style="color: var(--accent); text-decoration: none;">GitHub</a>
     </footer>
   </div>
 </body>
