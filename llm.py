@@ -93,28 +93,62 @@ def _nvidia_live_models():
         return NVIDIA_MODELS
 
 
+def _nvidia_stream(model, prompt, label, max_tokens, temperature, deadline_s=420):
+    """Stream a chat completion (slow models time out on a single blocking read)."""
+    headers = {"Authorization": f"Bearer {NVIDIA_API_KEY}", "Content-Type": "application/json",
+               "Accept": "text/event-stream"}
+    body = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": "You are a precise news analyst. Reply with valid JSON only, no prose."},
+            {"role": "user", "content": prompt},
+        ],
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+        "stream": True,
+    }
+    started = time.time()
+    for attempt in range(2):
+        try:
+            with requests.post(f"{NVIDIA_API}/chat/completions", json=body, headers=headers,
+                               stream=True, timeout=(15, 90)) as resp:
+                if resp.status_code in (429, 500, 502, 503) and attempt == 0:
+                    print(f"[{label}] {model} HTTP {resp.status_code}, retrying in 20s")
+                    time.sleep(20)
+                    continue
+                if resp.status_code != 200:
+                    print(f"[{label}] {model} HTTP {resp.status_code}: {resp.text[:200]}")
+                    return None
+                parts, usage = [], {}
+                for raw in resp.iter_lines(decode_unicode=True):
+                    if time.time() - started > deadline_s:
+                        print(f"[{label}] {model} exceeded {deadline_s}s — giving up")
+                        return None
+                    if not raw or not raw.startswith("data:"):
+                        continue
+                    data = raw[5:].strip()
+                    if data == "[DONE]":
+                        break
+                    chunk = json.loads(data)
+                    usage = chunk.get("usage") or usage
+                    for choice in chunk.get("choices") or []:
+                        parts.append((choice.get("delta") or {}).get("content") or "")
+                text = "".join(parts)
+                if text.strip():
+                    return text, model, usage.get("prompt_tokens"), usage.get("completion_tokens")
+                print(f"[{label}] {model} empty response")
+                return None
+        except (requests.RequestException, json.JSONDecodeError) as e:
+            print(f"[{label}] {model} error: {e}")
+            return None
+    return None
+
+
 def _nvidia(prompt, label, max_tokens, temperature):
-    headers = {"Authorization": f"Bearer {NVIDIA_API_KEY}", "Content-Type": "application/json"}
     for model in _nvidia_live_models():
-        body = {
-            "model": model,
-            "messages": [
-                {"role": "system", "content": "You are a precise news analyst. Reply with valid JSON only, no prose."},
-                {"role": "user", "content": prompt},
-            ],
-            "temperature": temperature,
-            "max_tokens": max_tokens,
-        }
-        resp = _post(f"{NVIDIA_API}/chat/completions", body, headers, label, model, 240)
-        if not resp:
-            continue
-        data = resp.json()
-        choice = (data.get("choices") or [{}])[0]
-        text = (choice.get("message") or {}).get("content") or ""
-        if text.strip():
-            usage = data.get("usage", {})
-            return text, model, usage.get("prompt_tokens"), usage.get("completion_tokens")
-        print(f"[{label}] {model} empty response (finish={choice.get('finish_reason')})")
+        out = _nvidia_stream(model, prompt, label, max_tokens, temperature)
+        if out:
+            return out
     return None
 
 
@@ -145,3 +179,13 @@ def generate_json(prompt: str, label: str = "LLM", max_tokens: int = 8192, tempe
         return result
     print(f"[{label}] all models failed — using fallback")
     return None
+
+
+if __name__ == "__main__":
+    # Probe: which NVIDIA models answer for this key, and how fast
+    import sys
+    for model in sys.argv[1:]:
+        t0 = time.time()
+        out = _nvidia_stream(model, 'Return JSON {"ok": true, "n": 3}.', "PROBE", 200, 0.0, deadline_s=120)
+        print(f"[PROBE] {model}: {'OK' if out else 'FAIL'} in {time.time() - t0:.1f}s "
+              f"{(out[0][:80] if out else '')!r}")

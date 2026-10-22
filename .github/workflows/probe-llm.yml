@@ -1,0 +1,16 @@
+name: Probe LLM models (temporary)
+on: workflow_dispatch
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests
+      - env:
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+        run: >
+          python llm.py deepseek-ai/deepseek-v4.1-flash z-ai/glm-5.3-flash z-ai/glm-5.3 openai/gpt-oss-20b
+          google/gemma-4-31b-it nvidia/nemotron-3.5-lightning-30b-a3b nvidia/nemotron-nano-3-30b-a3b
+          nvidia/llama-3.1-nemotron-70b-instruct mistralai/mistral-large stepfun-ai/step-5-preview
+          nvidia/nemotron-3-ultra-550b-a55b meta/llama-3.2-90b-vision-instruct nvidia/llama-3.1-nemotron-ultra-253b-v1
+          writer/palmyra-fin-70b-32k mistralai/mistral-large-2-instruct moonshotai/kimi-k2.6 nvidia/nemotron-3-super-120b-a12b
