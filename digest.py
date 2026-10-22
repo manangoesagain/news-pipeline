@@ -462,9 +462,9 @@ Tasks:
 3. Rate importance 1-10 for an informed professional: real-world consequences, market impact, policy change, scale. Celebrity, lifestyle, sports, opinion pieces, product deals and minor local crime are 1-3 and should normally be left out.
 4. Tag the main region: India, US, Canada, China, Global or Other.
 5. Mark breaking=true only for major developments that are under {breaking_h} hours old.
-6. Give a one-line "why" (max 15 words) explaining why it matters.
+6. Give a short "why" (max 10 words) explaining why it matters.
 
-Select up to 7 stories per domain (fewer if the domain has nothing important). Return JSON only:
+Select up to 6 stories per domain (fewer if the domain has nothing important). Be brief; return JSON only:
 {{"stories": [{{"ids": [12, 40], "domain": "...", "importance": 8, "region": "India", "breaking": false, "why": "..."}}]}}
 
 Candidates:
@@ -473,7 +473,9 @@ Candidates:
 
 
 def rank_with_llm(clusters):
-    candidates = clusters[:250]
+    # Send the 160 most promising stories (by coverage breadth and recency) to keep the call fast
+    candidates = sorted(clusters, key=lambda c: (-len({it["source"] for it in c}),
+                                                 -max(it["published"] for it in c).timestamp()))[:160]
     lines = []
     for i, c in enumerate(candidates):
         lead = c[0]
@@ -484,7 +486,7 @@ def rank_with_llm(clusters):
 
     prompt = RANK_PROMPT.format(n=len(candidates), domains="; ".join(DOMAIN_ORDER),
                                 breaking_h=BREAKING_HOURS, lines="\n".join(lines))
-    result = llm.generate_json(prompt, label="RANK", require="stories")
+    result = llm.generate_json(prompt, label="RANK", require="stories", max_tokens=6000, budget_s=240)
     if not result or not isinstance(result.get("stories"), list):
         return None
 
@@ -557,7 +559,8 @@ def build_intelligence(stories, articles_today, snapshot):
     rows += [(a.get("domain", ""), a.get("region", ""), a.get("source", ""), a["title"]) for a in extra[:220]]
     lines = "\n".join(f"{i} | {d} | {r} | {src} | {t}" for i, (d, r, src, t) in enumerate(rows))
     mkt = "\n".join(f"{m['label']}: {market.fmt_price(m)} {market.fmt_change(m)}" for m in snapshot) or "n/a"
-    result = llm.generate_json(INTEL_PROMPT.format(lines=lines, market=mkt), label="INTEL", require="causal_chains", temperature=0.4)
+    result = llm.generate_json(INTEL_PROMPT.format(lines=lines, market=mkt), label="INTEL", require="causal_chains",
+                              temperature=0.4, budget_s=300)
     if not result or not any(result.get(k) for k in ("causal_chains", "scenarios", "second_order")):
         return None
     return result

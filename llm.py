@@ -143,8 +143,9 @@ def _nvidia_live_models():
 
 
 def generate_json(prompt: str, label: str = "LLM", require: str = None,
-                  max_tokens: int = 16384, temperature: float = 0.2):
-    """Try each configured model until one returns a JSON object (containing `require`)."""
+                  max_tokens: int = 16384, temperature: float = 0.2, budget_s: int = 300):
+    """Try each configured model until one returns a JSON object (containing `require`).
+    Gives up once `budget_s` seconds have been spent across all models."""
     global last_model
     candidates = []
     if GEMINI_API_KEY:
@@ -155,9 +156,15 @@ def generate_json(prompt: str, label: str = "LLM", require: str = None,
         print(f"[{label}] skipped — no GEMINI_API_KEY or NVIDIA_API_KEY set")
         return None
 
+    deadline = time.time() + budget_s
     for call, model in candidates:
+        remaining = deadline - time.time()
+        if remaining < 20:
+            print(f"[{label}] time budget ({budget_s}s) used up")
+            break
         started = time.time()
-        text = call(model, prompt, label, max_tokens, temperature)
+        text = (call(model, prompt, label, max_tokens, temperature, deadline_s=remaining)
+                if call is _nvidia else call(model, prompt, label, max_tokens, temperature))
         if not text:
             continue
         result = _extract_json(text, require)

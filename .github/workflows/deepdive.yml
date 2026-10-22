@@ -1,0 +1,38 @@
+name: Deep Dive Bot
+
+on:
+  schedule:
+    # Poll Telegram for /deepdive commands (GitHub may delay scheduled runs)
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: "Run a deep dive on this topic now (sent to Telegram)"
+        type: string
+        required: false
+
+# Never poll twice at once, or one message could be answered twice
+concurrency:
+  group: deepdive
+  cancel-in-progress: false
+
+jobs:
+  deepdive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Answer /deepdive commands
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          TOPIC: ${{ inputs.topic }}
+        run: python deepdive.py
