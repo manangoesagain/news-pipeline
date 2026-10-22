@@ -12,8 +12,14 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: write
+      pages: write
     steps:
       - uses: actions/checkout@v4
+
+      - name: Restore saved digests from gh-pages
+        run: |
+          git fetch origin gh-pages --depth=1 || true
+          git checkout origin/gh-pages -- _data 2>/dev/null || echo "No saved digests yet"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -42,3 +48,8 @@ jobs:
           publish_dir: ./
           publish_branch: gh-pages
           keep_files: false
+
+      - name: Request Pages rebuild
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh api -X POST repos/${{ github.repository }}/pages/builds || true
