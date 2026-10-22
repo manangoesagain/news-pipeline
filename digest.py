@@ -473,7 +473,7 @@ Candidates:
 
 
 def rank_with_llm(clusters):
-    candidates = clusters[:300]
+    candidates = clusters[:250]
     lines = []
     for i, c in enumerate(candidates):
         lead = c[0]
@@ -484,7 +484,7 @@ def rank_with_llm(clusters):
 
     prompt = RANK_PROMPT.format(n=len(candidates), domains="; ".join(DOMAIN_ORDER),
                                 breaking_h=BREAKING_HOURS, lines="\n".join(lines))
-    result = llm.generate_json(prompt, label="RANK")
+    result = llm.generate_json(prompt, label="RANK", require="stories")
     if not result or not isinstance(result.get("stories"), list):
         return None
 
@@ -557,7 +557,7 @@ def build_intelligence(stories, articles_today, snapshot):
     rows += [(a.get("domain", ""), a.get("region", ""), a.get("source", ""), a["title"]) for a in extra[:220]]
     lines = "\n".join(f"{i} | {d} | {r} | {src} | {t}" for i, (d, r, src, t) in enumerate(rows))
     mkt = "\n".join(f"{m['label']}: {market.fmt_price(m)} {market.fmt_change(m)}" for m in snapshot) or "n/a"
-    result = llm.generate_json(INTEL_PROMPT.format(lines=lines, market=mkt), label="INTEL", temperature=0.4)
+    result = llm.generate_json(INTEL_PROMPT.format(lines=lines, market=mkt), label="INTEL", require="causal_chains", temperature=0.4)
     if not result or not any(result.get(k) for k in ("causal_chains", "scenarios", "second_order")):
         return None
     return result
