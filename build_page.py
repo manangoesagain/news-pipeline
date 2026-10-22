@@ -8,6 +8,7 @@ import json
 import glob
 import os
 import html
+import re
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -37,7 +38,9 @@ DOMAIN_ORDER = [
 
 
 def esc(text):
-    return html.escape(text or "")
+    # Also drops "(ids 6, 33)" citations the LLM sometimes leaves in the brief
+    text = re.sub(r"\s*\((?:ids?|per [^()]*?id)\s*[\d,\s]+(?:and\s*\d+)?\)", "", str(text or ""))
+    return html.escape(text)
 
 
 def load_digests():

@@ -499,6 +499,12 @@ def rank_with_llm(clusters):
         domain = s.get("domain")
         if not ids or domain not in DOMAIN_ORDER:
             continue
+        # Only merge clusters whose headlines actually overlap with the first one
+        lead_tokens = candidates[ids[0]][0]["tokens"]
+        kept = [ids[0]] + [i for i in ids[1:] if len(lead_tokens & candidates[i][0]["tokens"]) >= 2]
+        if len(kept) < len(ids):
+            s["why"] = ""  # the model's note may describe a story we didn't merge
+        ids = kept
         used.update(ids)
         merged = [it for i in ids for it in candidates[i]]
         merged.sort(key=lambda x: (not x["summary"], -x["published"].timestamp()))
@@ -514,6 +520,12 @@ def rank_with_llm(clusters):
     if len(stories) < 10:
         print(f"[RANK] LLM returned only {len(stories)} usable stories — using fallback")
         return None
+
+    # Backfill thin domains from the heuristic ranking; scaled down so LLM picks stay on top
+    leftovers, _ = rank_heuristic([c for i, c in enumerate(candidates) if i not in used])
+    for h in leftovers:
+        h["score"] = round(h["score"] / 10, 2)
+    stories += leftovers
     return stories, sorted(breaking, key=lambda s: -s["score"])[:MAX_BREAKING]
 
 
@@ -539,7 +551,7 @@ Today's headlines (id | topic | region | sources | headline):
 Market snapshot (price, daily change):
 {market}
 
-Write an analytical brief grounded ONLY in these headlines and figures. Be specific, name actors, countries, sectors and tickers; avoid generic statements. Return JSON only:
+Today is {today}. Write an analytical brief grounded ONLY in these headlines and figures. Be specific, name actors, countries, sectors and tickers; avoid generic statements. Do not cite id numbers in the text. Return JSON only:
 {{
   "causal_chains": [{{"title": "short name", "chain": ["event A", "leads to B", "which pressures C"], "domains": ["..."], "ids": [1, 2]}}],
   "second_order": [{{"event": "headline-level fact", "effect": "non-obvious knock-on effect", "who_is_affected": "..."}}],
@@ -559,7 +571,7 @@ def build_intelligence(stories, articles_today, snapshot):
     rows += [(a.get("domain", ""), a.get("region", ""), a.get("source", ""), a["title"]) for a in extra[:220]]
     lines = "\n".join(f"{i} | {d} | {r} | {src} | {t}" for i, (d, r, src, t) in enumerate(rows))
     mkt = "\n".join(f"{m['label']}: {market.fmt_price(m)} {market.fmt_change(m)}" for m in snapshot) or "n/a"
-    result = llm.generate_json(INTEL_PROMPT.format(lines=lines, market=mkt), label="INTEL", require="causal_chains",
+    result = llm.generate_json(INTEL_PROMPT.format(lines=lines, market=mkt, today=NOW.strftime("%A, %B %d, %Y")), label="INTEL", require="causal_chains",
                               temperature=0.4, budget_s=300)
     if not result or not any(result.get(k) for k in ("causal_chains", "scenarios", "second_order")):
         return None
@@ -672,9 +684,14 @@ def save_digest(domain_items, breaking, snapshot, intel, ranked_by):
 
 # ---------------------------------------------------------------- Telegram
 
+def strip_ids(text) -> str:
+    """Drop '(id 3)' / '(ids 6, 33)' citations the LLM sometimes leaves in."""
+    return re.sub(r"\s*\((?:ids?|per [^()]*?id)\s*[\d,\s]+(?:and\s*\d+)?\)", "", str(text or ""))
+
+
 def t(text) -> str:
     """Escape for Telegram HTML parse mode."""
-    return html.escape(str(text or ""), quote=False)
+    return html.escape(strip_ids(text), quote=False)
 
 
 def sources_label(s) -> str:
@@ -812,7 +829,7 @@ def build_email_html(domain_items: dict, breaking: list, snapshot: list, intel) 
     time_str = NOW.strftime("%I:%M %p ET")
 
     def esc(text):
-        return html.escape(str(text or ""))
+        return html.escape(strip_ids(text))
 
     def story_html(s, size=14):
         why = f'<div style="font-size: 12px; color: #1a73e8; margin-top: 2px;">↳ {esc(s["why"])}</div>' if s.get("why") else ""
