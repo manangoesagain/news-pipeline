@@ -21,8 +21,10 @@ GEMINI_MODELS = [m for m in [os.environ.get("GEMINI_MODEL"),
 GEMINI_API = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 
 NVIDIA_MODELS = [m for m in [os.environ.get("NVIDIA_MODEL"),
-                             "deepseek-ai/deepseek-v4.1-flash", "moonshotai/kimi-k2.6",
-                             "nvidia/nemotron-3-super-120b-a12b", "mistralai/mistral-large-2-instruct"] if m]
+                             # Models that answered for this account's key (probed Oct 2026);
+                             # many others in /v1/models return 404 or time out
+                             "nvidia/nemotron-3-ultra-550b-a55b", "z-ai/glm-5.3-flash",
+                             "stepfun-ai/step-5-preview", "z-ai/glm-5.3"] if m]
 NVIDIA_API = "https://integrate.api.nvidia.com/v1"
 
 last_model = None
