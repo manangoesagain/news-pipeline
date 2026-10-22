@@ -99,6 +99,10 @@ def _nvidia(model, prompt, label, max_tokens, temperature, deadline_s=420):
         "max_tokens": max_tokens,
         "stream": True,
     }
+    if "nemotron" in model:
+        # Nemotron reasons in plain text by default and can run out of tokens before the JSON
+        body["messages"][0]["content"] = "/no_think " + SYSTEM_PROMPT
+        body["chat_template_kwargs"] = {"enable_thinking": False}
     started = time.time()
     for attempt in range(2):
         try:
