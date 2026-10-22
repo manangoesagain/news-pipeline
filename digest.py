@@ -4,7 +4,7 @@ Daily News Digest — fetch, dedupe, rank, deliver.
 Runs on GitHub Actions hourly; acts only on the 8/11/15/18 Toronto-time slots.
 
 Sources: free RSS feeds, Google News RSS (incl. Reuters/AP via site: search),
-GNews and NewsData.io APIs. Gemini ranks and merges stories when available;
+GNews and NewsData.io APIs. An LLM (Gemini or NVIDIA NIM) ranks and merges stories when available;
 otherwise a keyword/heuristic fallback is used. Delivery: Telegram + email,
 plus JSON files in _data/ for the web page and the /deepdive bot.
 """
@@ -16,6 +16,7 @@ import re
 import hashlib
 import json
 import glob
+import time
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse, quote_plus
 from zoneinfo import ZoneInfo
@@ -23,7 +24,7 @@ from zoneinfo import ZoneInfo
 import feedparser
 import requests
 
-import gemini
+import llm
 import market
 
 # --- Secrets from GitHub Actions env ---
@@ -326,7 +327,9 @@ def fetch_gnews():
         print("[GNEWS] skipped — GNEWS_API_KEY not set")
         return []
     items = []
-    for hint, category, country in GNEWS_CALLS:
+    for n, (hint, category, country) in enumerate(GNEWS_CALLS):
+        if n:
+            time.sleep(1.5)  # free plan rejects bursts (HTTP 429)
         try:
             resp = requests.get("https://gnews.io/api/v4/top-headlines", timeout=15, params={
                 "category": category, "lang": "en", "country": country, "max": 10,
@@ -469,7 +472,7 @@ Candidates:
 """
 
 
-def rank_with_gemini(clusters):
+def rank_with_llm(clusters):
     candidates = clusters[:300]
     lines = []
     for i, c in enumerate(candidates):
@@ -481,7 +484,7 @@ def rank_with_gemini(clusters):
 
     prompt = RANK_PROMPT.format(n=len(candidates), domains="; ".join(DOMAIN_ORDER),
                                 breaking_h=BREAKING_HOURS, lines="\n".join(lines))
-    result = gemini.generate_json(prompt, label="RANK")
+    result = llm.generate_json(prompt, label="RANK")
     if not result or not isinstance(result.get("stories"), list):
         return None
 
@@ -507,7 +510,7 @@ def rank_with_gemini(clusters):
             breaking.append(story)
         stories.append(story)
     if len(stories) < 10:
-        print(f"[RANK] Gemini returned only {len(stories)} usable stories — using fallback")
+        print(f"[RANK] LLM returned only {len(stories)} usable stories — using fallback")
         return None
     return stories, sorted(breaking, key=lambda s: -s["score"])[:MAX_BREAKING]
 
@@ -554,7 +557,7 @@ def build_intelligence(stories, articles_today, snapshot):
     rows += [(a.get("domain", ""), a.get("region", ""), a.get("source", ""), a["title"]) for a in extra[:220]]
     lines = "\n".join(f"{i} | {d} | {r} | {src} | {t}" for i, (d, r, src, t) in enumerate(rows))
     mkt = "\n".join(f"{m['label']}: {market.fmt_price(m)} {market.fmt_change(m)}" for m in snapshot) or "n/a"
-    result = gemini.generate_json(INTEL_PROMPT.format(lines=lines, market=mkt), label="INTEL", temperature=0.4)
+    result = llm.generate_json(INTEL_PROMPT.format(lines=lines, market=mkt), label="INTEL", temperature=0.4)
     if not result or not any(result.get(k) for k in ("causal_chains", "scenarios", "second_order")):
         return None
     return result
@@ -950,8 +953,8 @@ def main():
     items = fetch_rss() + fetch_google_news() + fetch_gnews() + fetch_newsdata()
     clusters = build_clusters(items)
 
-    ranked = rank_with_gemini(clusters) if gemini.available() else None
-    ranked_by = "gemini" if ranked else "heuristic"
+    ranked = rank_with_llm(clusters) if llm.available() else None
+    ranked_by = llm.last_model if ranked else "heuristic"
     stories, breaking = ranked or rank_heuristic(clusters)
     domain_items = select_digest(stories, breaking)
     print(f"[RANK] by {ranked_by}: {sum(len(v) for v in domain_items.values())} stories, {len(breaking)} breaking")
