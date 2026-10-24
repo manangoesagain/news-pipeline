@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>News Digest</title>
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --card: #ffffff;
+      --text: #1a1a1a;
+      --muted: #666666;
+      --border: #e0e0e0;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --breaking: #dc2626;
+      --code-bg: #f3f4f6;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --card: #1e293b;
+        --text: #f1f5f9;
+        --muted: #94a3b8;
+        --border: #334155;
+        --accent: #3b82f6;
+        --accent-hover: #60a5fa;
+        --breaking: #ef4444;
+        --code-bg: #1e293b;
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      padding: 30px 0 20px;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 30px;
+    }
+
+    header h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .updated {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+
+    .digest-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .card-header h2 {
+      font-size: 20px;
+      margin-bottom: 16px;
+      color: var(--accent);
+    }
+
+    .breaking {
+      background: #fef2f2;
+      border: 1px solid var(--breaking);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 20px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .breaking {
+        background: rgba(239, 68, 68, 0.15);
+        border-color: var(--breaking);
+      }
+    }
+
+    .breaking-label {
+      color: var(--breaking);
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .domains {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    details.domain {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    details.domain summary {
+      padding: 12px 16px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      list-style: none;
+      background: var(--code-bg);
+      color: var(--text);
+    }
+
+    details.domain summary .count {
+      float: right;
+      font-weight: 400;
+      opacity: 0.8;
+    }
+
+    details.domain[open] summary {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .domain-content {
+      padding: 0 16px 16px;
+    }
+
+    .item {
+      margin-bottom: 12px;
+    }
+
+    .item.breaking-item {
+      background: var(--code-bg);
+      padding: 10px 14px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    .title {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 15px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .title:hover {
+      text-decoration: underline;
+    }
+
+    .meta {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .market-snapshot {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .market-snapshot h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .placeholder {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .why {
+      font-size: 13px;
+      color: var(--accent);
+      margin-top: 2px;
+    }
+
+    .ticks {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 8px;
+    }
+
+    .tick {
+      background: var(--code-bg);
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+
+    .tick-label { font-size: 12px; color: var(--muted); }
+    .tick-price { font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .tick-change { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .tick-change.up { color: #16a34a; }
+    .tick-change.down { color: var(--breaking); }
+
+    .intel {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 2px solid #7c3aed;
+    }
+
+    .intel h3 { font-size: 16px; color: #7c3aed; margin-bottom: 8px; }
+    .intel h4 { font-size: 14px; margin: 14px 0 6px; }
+    .intel-item { font-size: 14px; margin-bottom: 8px; }
+    .bottom-line { font-style: italic; background: var(--code-bg); padding: 10px 12px; border-radius: 6px; }
+    .badge { font-size: 11px; color: #7c3aed; border: 1px solid #7c3aed; border-radius: 10px; padding: 0 6px; }
+    .muted { color: var(--muted); }
+    .small { font-size: 12px; margin-top: 8px; }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 40px 0;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 12px; }
+      .digest-card { padding: 16px; }
+      header h1 { font-size: 22px; }
+      .card-header h2 { font-size: 17px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📰 News Digest</h1>
+      <p>Free sources &bull; 4 runs daily (8, 11, 3, 6) &bull; Toronto time (ET)</p>
+    </header>
+
+    <div class="updated">Last updated: 03:53 PM ET — Oct 24, 2026</div>
+
+    
+    <section class="digest-card">
+      <div class="card-header">
+        <h2>03:53 PM ET — Oct 24, 2026</h2>
+      </div>
+      
+        <div class="breaking">
+          <div class="breaking-label">🔴 Breaking</div>
+          
+        <div class="item breaking-item">
+          <a href="https://news.google.com/rss/articles/CBMiXkFVX3lxTFBiblkxNnVtVlJKZk9CWDVFRTZvY2F6bWZORmVtSkR4NVY4VzZQa3dPZy1KNE5EbUpvMWF3TDk0VEY5QnAzTmFWS3FjenBLRHdpU2UtMjVKZlphZl9tRkE?oc=5" class="title" target="_blank" rel="noopener">Live - US warships ready for potential strikes on Iran, WSJ reports</a>
+          <div class="meta">Iran International</div>
+          <div class="why">↳ US warships ready for potential strikes on Iran</div>
+        </div>
+        
+        <div class="item breaking-item">
+          <a href="https://www.thehindu.com/news/international/iran-warns-of-apocalyptic-war-if-attacked-again/article71620849.ece" class="title" target="_blank" rel="noopener">Iran vows ‘apocalyptic war’ if U.S. strikes again</a>
+          <div class="meta">The Hindu &bull; Iranian officials have warned in recent days that they would retaliate by targeting Persian Gulf countries in the event of renewed U.S. attacks; in the first and second phases of the war, Iran had retaliated by striking…</div>
+          <div class="why">↳ Iran vows apocalyptic war if US strikes again</div>
+        </div>
+        
+        <div class="item breaking-item">
+          <a href="https://www.theguardian.com/world/live/2026/oct/24/france-demonstrations-police-macron-italy-albania-belgium-spain-ukraine-russia-europe-latest-news" class="title" target="_blank" rel="noopener">Hundreds of thousands march in France as protests take place across Europe – Europe live</a>
+          <div class="meta">The Guardian &bull; French police have made 1,000 arrests and Italian officers have raided homes in Milan, with protests also taking place in Spain and Albania Jesse, 40, a charity worker from the north of Paris, had turned out for the…</div>
+          <div class="why">↳ Hundreds of thousands protest across Europe</div>
+        </div>
+        
+        </div>
+        
+      <div class="domains">
+        
+    <details class="domain">
+      <summary>🤖 AI & ML <span class="count">(5)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://www.ndtv.com/world-news/openai-resumes-training-ai-models-without-internet-after-cyber-incidents-12228398#publisher=newsstand" class="title" target="_blank" rel="noopener">OpenAI Resumes Training AI Models Without Internet After Cyber Incidents</a>
+          <div class="meta">NDTV, TechCrunch, The Verge +3 &bull; Concerns are mounting over the ability of AI agents to exploit software flaws</div>
+          <div class="why">↳ OpenAI resumes training after cyber incidents</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.theverge.com/ai-artificial-intelligence/1018187/pennsylvania-ai-deceptive-advertising-act" class="title" target="_blank" rel="noopener">Pennsylvania will require labels on AI-generated ads</a>
+          <div class="meta">The Verge &bull; On Thursday, Pennsylvania Governor Josh Shapiro signed the Artificial Intelligence Deceptive Advertising Act into law, requiring disclosures on AI-generated ads. The law requires any ad - whether it&#x27;s a still image,…</div>
+          <div class="why">↳ Pennsylvania requires labels on AI-generated ads</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://techcrunch.com/2026/10/24/instacart-reportedly-discussed-selling-itself-with-doordash-and-uber/" class="title" target="_blank" rel="noopener">Instacart reportedly discussed selling itself with DoorDash and Uber</a>
+          <div class="meta">TechCrunch &bull; Instacart might sell itself to a larger competitor.</div>
+          <div class="why">↳ Instacart discusses sale to DoorDash or Uber</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://techcrunch.com/2026/10/24/blocks-new-voice-model-sounds-eerily-human/" class="title" target="_blank" rel="noopener">Block’s new voice model sounds eerily human</a>
+          <div class="meta">TechCrunch, The Economic Times &bull; Block said that the voice model can run locally on a MacBook M4 Max</div>
+          <div class="why">↳ Block&#x27;s voice model runs locally on MacBook</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMitAFBVV95cUxOUFQtRVl6RlNLamoyU0lPMnBjSExMWG84UmFwa0FnaEh3RUJrWk5URFd4R0dYZkxLZlFvQmxSR1o1NGYteGQyUlJBUUJKeFo2a3NTeXFvWDNucGEtc3dGaFNCYU5MeUF1ekczUjN2bHRiUklrRmRJWjAtWnU0WHVSUEl2UEY1MS1xQzJGUzZhWmJsR1lXZTVGSXpjU1VfV05qWWE0LWdmWnBMa2FKZ0dyZ19lVDI?oc=5" class="title" target="_blank" rel="noopener">Think young Canadians don’t read newspapers? Think again.</a>
+          <div class="meta">St. Albert Gazette</div>
+          <div class="why">↳ Anthropic admits Indian subsidiary in court</div>
+        </div>
+        
+      </div>
+    </details>
+    
+    <details class="domain">
+      <summary>💻 TECHNOLOGY & SEMICONDUCTORS <span class="count">(5)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://www.thehindu.com/news/national/andhra-pradesh/centre-backs-aps-semiconductor-push-approves-rail-links-for-nine-ports/article71621247.ece" class="title" target="_blank" rel="noopener">Centre backs A.P.’s semiconductor push, approves rail links for nine ports</a>
+          <div class="meta">The Hindu &bull; Ashwini Vaishnaw assures support for chip-sector research, skilling and AI; agrees to a Vande Bharat sleeper train between Visakhapatnam and Bengaluru via Tirupati as Chandrababu Naidu seeks approval for key railway…</div>
+          <div class="why">↳ Centre backs Andhra semiconductor push with rail links</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMifkFVX3lxTFBiNjZOalgwaTZNLVlEOXN0M2drOWxvOFRGQmcya1d4bE5mc2tWOTcxNnlTN3VNQUFFQTJrMG90Y3dzT25FUVR3aWFKeVk4ZzdwNzNvMjQ2TFVIWTNjT3lCNXVzbHFOR292RGY1REdkVGRJOGw0ZXk1aWNQY3pTZw?oc=5" class="title" target="_blank" rel="noopener">Apple Joins Nvidia in the $5 Trillion Club. Here&#x27;s Which Stock I Think Can Get to $10 Trillion First.</a>
+          <div class="meta">AOL.com</div>
+          <div class="why">↳ Apple joins Nvidia in $5 trillion market cap club</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.thehindu.com/news/cities/chennai/healthcare-challenges-require-collaborative-technology-ledsolutions-says-health-secretary/article71619284.ece" class="title" target="_blank" rel="noopener">Healthcare challenges require collaborative, technology-ledsolutions, says Health Secretary</a>
+          <div class="meta">The Hindu &bull; He was speaking at the Confederation of Indian Industry’s TN MedClave, 2026</div>
+          <div class="why">↳ Health Secretary urges tech-led healthcare solutions</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMioAFBVV95cUxQSjdFbE5UNFJNYUluMnhDd0xoZm9WSWNZVXpZdHRPYzRYOXhicjdyZDBIUXZ4dWtoNVAxS1N4Y1V1akR1c2I3dVJ4SVBuLVRiM3BiMGFxNnRETW9UR2VyWklpWjFxUGNzejE0blhFYU44U1NVcmlHODRLbUVYUm9DNHZiS19jbkg0TVFRMzlBcEJMNENwOUE0RzJTcE5PTWtj?oc=5" class="title" target="_blank" rel="noopener">Mercedes-Benz And Nvidia Are Taking Their Self-Driving Partnership To Level 4</a>
+          <div class="meta">Yahoo Autos</div>
+          <div class="why">↳ Mercedes-Benz and Nvidia advance self-driving partnership</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.thehindu.com/news/national/karnataka/eight-kle-tech-varsity-researchers-feature-in-global-top-2-list-of-scientists/article71619939.ece" class="title" target="_blank" rel="noopener">Eight KLE tech varsity researchers feature in global top 2% list of scientists</a>
+          <div class="meta">The Hindu &bull; Eight researchers from KLE Technological University, Hubballi, have been featured in the 2026 single-year rankings of the world’s top 2% scientists, while five have been recognised for their career-long scientific impact</div>
+          <div class="why">↳ KLE Tech researchers in global top 2% list</div>
+        </div>
+        
+      </div>
+    </details>
+    
+    <details class="domain">
+      <summary>💰 FINANCE & BANKING <span class="count">(5)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://economictimes.indiatimes.com/markets/stocks/earnings/kotak-mahindra-bank-q2-results-consolidated-pat-rises-26-yoy-to-rs-5645-crore-lenders-nii-up-16/articleshow/135165924.cms" class="title" target="_blank" rel="noopener">Kotak Mahindra Bank Q2 results: Consolidated PAT rises 26% YoY to Rs 5,645 crore; NII up 16%</a>
+          <div class="meta">Economic Times Markets, Moneycontrol &bull; Kotak Mahindra Bank has announced an impressive 26% year-on-year increase in consolidated profit after tax for the second quarter, highlighting strong financial performance. Their standalone profit after tax surged by…</div>
+          <div class="why">↳ Kotak Mahindra Bank Q2 PAT rises 26% YoY</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.thehindu.com/business/Industry/au-small-finance-bank-q2-profit-jumps-53-to-858-crore/article71621133.ece" class="title" target="_blank" rel="noopener">AU Small Finance Bank Q2 profit jumps 53% to 858 crore</a>
+          <div class="meta">The Hindu Business, Economic Times Markets &bull; “Total income rose to ₹6,382 crore in the quarter under review from ₹5,224 crore in the same period a year ago,” AU Small Finance Bank said in a regulatory filing</div>
+          <div class="why">↳ AU Small Finance Bank Q2 profit jumps 53%</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.moneycontrol.com/news/business/earnings/kotak-mahindra-bank-s-q2-net-profit-jumps-27-to-rs-5-634-crore-14058928.html" class="title" target="_blank" rel="noopener">Kotak Mahindra Bank&#x27;s Q2 net profit jumps 27% to Rs 5,634 crore</a>
+          <div class="meta">Moneycontrol, Google News &bull; The company had reported a net profit of Rs 5,487.06 crore in the June quarter of the current financial year.</div>
+          <div class="why">↳ Kotak Mahindra Bank Q2 net profit jumps 27%</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.thehindu.com/business/Industry/irdai-extends-distribution-reforms-feedback-timeline-to-oct-31/article71620935.ece" class="title" target="_blank" rel="noopener">IRDAI extends distribution reforms feedback timeline to Oct 31</a>
+          <div class="meta">The Hindu Business &bull; The consultation process has received an encouraging response, with over 650 comments received thus far.</div>
+          <div class="why">↳ IRDAI extends distribution reforms feedback timeline</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.cbc.ca/news/canada/toronto/mother-abduction-three-children-toronto-police-9.7394791?cmp=rss" class="title" target="_blank" rel="noopener">Toronto police seeking mother, 22, for allegedly abducting her 3 children</a>
+          <div class="meta">CBC News &bull; Toronto police are seeking the public’s help in locating three missing children, allegedly abducted by their mother from the Midland Avenue and Eglinton Avenue East area.</div>
+          <div class="why">↳ Toronto police seek mother for child abduction</div>
+        </div>
+        
+      </div>
+    </details>
+    
+    <details class="domain">
+      <summary>📈 STOCK MARKETS & TRADING <span class="count">(5)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://www.livemint.com/market/stock-market-news/big-action-who-is-avadhut-sathe-why-sebi-ordered-avadhut-sathe-trading-academy-to-refund-rs-546-cr-what-he-did-11792848745624.html" class="title" target="_blank" rel="noopener">Big action! Who is Avadhut Sathe? Why SEBI ordered Avadhut Sathe Trading Academy to refund ₹546 cr - What he did?</a>
+          <div class="meta">Mint Markets, Economic Times Markets &bull; SEBI ordered Avadhut Sathe and his trading academy to refund ₹546.17 crore, plus ₹67.87 crore in interest, for providing unregistered investment advice and research services. The regulator also imposed ₹11.5 crore in…</div>
+          <div class="why">↳ SEBI orders Avadhut Sathe Academy to refund ₹546 cr</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.cnbc.com/2026/10/24/iran-threats-us-embassies-middle-east.html" class="title" target="_blank" rel="noopener">American embassies tighten security as Iran threat warnings intensify ahead of U.S. midterm elections</a>
+          <div class="meta">CNBC &bull; A memo from DNI director Jay Clayton said Iran is in the &quot;advanced stages&quot; of planning attacks against Americans.</div>
+          <div class="why">↳ US embassies tighten security on Iran threat warnings</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.cnbc.com/investingclub/2026/10/24/ai-funding-fears-rattle-wall-street-heres-how-were-adjusting-our-portfolio.html" class="title" target="_blank" rel="noopener">AI funding fears rattle Wall Street. Here&#x27;s how we&#x27;re adjusting our portfolio</a>
+          <div class="meta">CNBC &bull; The rotation out of AI stocks benefited several defensive Club stocks.</div>
+          <div class="why">↳ AI funding fears rattle Wall Street portfolios</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.cnbc.com/2026/10/23/alaska-senate-election-doj-lawsuit-sullivan.html" class="title" target="_blank" rel="noopener">Trump says he ordered DOJ suit to block Alaska Senate race certification if Republican loses</a>
+          <div class="meta">CNBC, AP News &bull; There are two Dan Sullivans on the ballot in the Senate race in Alaska. The DOJ says that fact could help Democratic nominee Mary Peltola defeat both of them.</div>
+          <div class="why">↳ Trump orders DOJ suit on Alaska Senate race</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMihAFBVV95cUxQaXR6aVAzc3Y3UHctRW9HeXpBdDF4QWItU1lEbU1JWGVlRFpnazlLeDZxX2hDTmJMaXNJSUo3Z1FxQzhNZzF6MjQ5ZFRZakVMckRYM1Nwb2t3R1c4VldfTUNoRlMyUjNiVGFMVV9HNmNiZmVBbU02enhuVUM2TkhvNEdiTHg?oc=5" class="title" target="_blank" rel="noopener">Wall Street loses ground under pressure from rising oil prices, more swings for Big Tech stocks</a>
+          <div class="meta">Chicago Tribune, AP News</div>
+          <div class="why">↳ Wall Street falls on rising oil prices</div>
+        </div>
+        
+      </div>
+    </details>
+    
+    <details class="domain">
+      <summary>🌍 GEOPOLITICS & DIPLOMACY <span class="count">(5)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://www.aljazeera.com/video/newsfeed/2026/10/24/kim-jong-un-crosses-new-bridge-linking-north-korea-and-china?traffic_source=rss" class="title" target="_blank" rel="noopener">Kim Jong Un crosses new bridge linking North Korea and China</a>
+          <div class="meta">Al Jazeera, NDTV, The Guardian +3 &bull; Kim Jong Un crosses new bridge linking North Korea and China</div>
+          <div class="why">↳ Kim Jong Un crosses new bridge linking North Korea and China</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMivgFBVV95cUxPSUNBemN1dGZEdUhsOE9hUklJdk44TXFSWTNBOFZMSWxwcmRDeWUwcmZkRDE5Ny1lcUdjamoyU05XcHdXeXdIVXQ0NnVjRlFSeWkxOHVEbVhCbXdVUFB1alZqTHJwYThweHB4VHVwaV9GcE4wcXc1eUtka0d2TUNTWk91aVlFdnZfdFFGUUJGSWlmZlFMYjVDbkFXZnRjZWJ0NFJKV3loYW1QdWVhTHN1SEJ1MVR6ZkcyY09zRmJ3?oc=5" class="title" target="_blank" rel="noopener">Industry Minister Mélanie Joly wants to build an aluminum rolling mill in Canada</a>
+          <div class="meta">CTV News</div>
+          <div class="why">↳ Minister Joly wants aluminum rolling mill in Canada</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.thehindu.com/news/national/jammu-and-kashmir/ias-officer-sajjan-singh-yadav-to-be-new-jk-chief-secretary/article71619495.ece" class="title" target="_blank" rel="noopener">J&amp;K gets IAS officer Sajjan Singh Yadav as new Chief Secretary, will face files with CM-LG on different pages</a>
+          <div class="meta">The Hindu, NDTV, Greater Kashmir &bull; Sajjan Singh Yadav will be succeeding Atal Dulloo who is due to retire on October 31, 2026</div>
+          <div class="why">↳ J&amp;K gets new Chief Secretary Sajjan Singh Yadav</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.ndtv.com/world-news/us-asked-elon-musk-for-years-to-alter-starlink-service-in-ukraine-middle-east-report-12228449#publisher=newsstand" class="title" target="_blank" rel="noopener">US Asked Musk For Years To Alter Starlink Service In Ukraine, Middle East: Report</a>
+          <div class="meta">NDTV, Reuters &bull; A Ukrainian serviceman of 47th brigade prepares a Starlink satellite internet systems</div>
+          <div class="why">↳ US asked Musk to alter Starlink in Ukraine, Middle East</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.thehindu.com/news/cities/chennai/tn-awaits-centres-response-to-letters-regarding-chennais-existing-and-proposed-airports/article71620279.ece" class="title" target="_blank" rel="noopener">T.N. awaits Centre’s response to letters regarding Chennai’s existing and proposed airports</a>
+          <div class="meta">The Hindu &bull; The State government’s letter in August asked the Centre to replace the AAI as the airport’s operator; in September, it sent a letter asking for a pre-feasibility study on two sites — Gummidipoondi and Cheyyur —…</div>
+          <div class="why">↳ TN awaits Centre response on Chennai airports</div>
+        </div>
+        
+      </div>
+    </details>
+    
+    <details class="domain">
+      <summary>⚔️ WARS & CONFLICTS <span class="count">(5)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://www.ndtv.com/world-news/trump-warns-of-another-little-epic-fury-irans-dont-play-with-fire-reply-us-iran-war-israel-12228279#publisher=newsstand" class="title" target="_blank" rel="noopener">Trump&#x27;s &#x27;Epic Fury&#x27; Warning After US Envoy&#x27;s &#x27;Strike This Weekend&#x27; Remark, Iran Responds</a>
+          <div class="meta">NDTV, Kyiv Post &bull; According to Trump, he sees ending the war with Iran &quot;soon&quot;.</div>
+          <div class="why">↳ Trump warns of Iran strike, sees ending war soon</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMiowFBVV95cUxOMldnTDh6RTlnd0w5Zm1ObjZVcU1pN196X3ZWQUNkbDg1M21abDFmUTU5MGpyRk1fcWVtS2hyOXRHaFFyOGUtMU5VX0FWbHNFMVBGdzdIZkNSVHN3eGdJRzMtWHlwM2NUYWVMSU5vNEtQc2E5YnczS2xEMDdDd2psY3Y4bDJWX3QyZ2lQMWQ3V0RpTEJad05oQm9vT0NkcENMVVFR?oc=5" class="title" target="_blank" rel="noopener">Trump Warns of Possible New US Military Operation Against Iran</a>
+          <div class="meta">Modern Diplomacy, Reuters</div>
+          <div class="why">↳ Trump warns of possible US military operation vs Iran</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMijwFBVV95cUxNTngtWlZKb2lHN2huS0pfMUtPZi1SYm0tOHRhMVpRV3ZpbW5ydGZfUVJ2SGtLTGZTR2ZQS1RpZEtzeDhQcUYwOVdyUGZoc1dlQVpUbTdJbGp1UTU4aFplZkJFX0pGMm1JSmVaOVpTN3BVbHZURkpUXzN1b3IyQ05TZ1VkYlp5dlJYTE9aRGZETQ?oc=5" class="title" target="_blank" rel="noopener">Middle East latest: Trump warns of &#x27;another little Epic Fury&#x27; amid fears of renewed conflict</a>
+          <div class="meta">The National</div>
+          <div class="why">↳ Trump warns of &#x27;Epic Fury&#x27; amid renewed conflict fears</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.npr.org/2026/10/23/nx-s1-6013613/israeli-pm-pledges-massive-military-operation-after-west-bank-checkpoint-attack" class="title" target="_blank" rel="noopener">Israeli PM pledges massive military operation after West Bank checkpoint attack</a>
+          <div class="meta">NPR, The Washington Post &bull; Israel&#x27;s Prime Minister is vowing to launch a major military operation in the West Bank in response to an attack by two Palestinian gunmen on an Israeli military checkpoint that killed two soldiers.</div>
+          <div class="why">↳ Israeli PM pledges massive West Bank operation</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.theguardian.com/world/2026/oct/24/seven-killed-and-40-injured-after-gunmen-open-fire-at-church-funeral-in-jordan" class="title" target="_blank" rel="noopener">Nine killed and 40 injured after gunmen open fire at church funeral in Jordan</a>
+          <div class="meta">The Guardian, NPR &bull; Footage broadcast on state TV shows three attackers approaching Greek Orthodox church and firing shots Nine people have been killed after gunmen opened fire at a funeral at a church in Jordan in a rare attack ⁠on the…</div>
+          <div class="why">↳ Nine killed in Jordan church funeral shooting</div>
+        </div>
+        
+      </div>
+    </details>
+    
+    <details class="domain">
+      <summary>📊 COMMODITIES & PRICES <span class="count">(5)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMisgFBVV95cUxOMHpfQWhCN2haOVlaTXBiMVo2ZGNmMURKdG54TVM1MGQwc2pSb29tZFNUYjJBM1V3VEthdl9OMGlwbHRlb1BXM2hzWUtZU3FWZnhEb1NfNlMwRGw2OWoyeGpoZ2EwRUhleWtENXUzWU1qMEpjamJQNTBoT2NZZGdCU1FQMEV0RjlyNktjX0pfbUpCX1dtTG41anpZcVdSMy1POVlnYnNPTEpnSkJPOEJ6cENR?oc=5" class="title" target="_blank" rel="noopener">Gold Falls to Three-Month Low, Oil Prices Fuel Fed Rate Concerns</a>
+          <div class="meta">Morocco World News</div>
+          <div class="why">↳ Gold falls to three-month low, oil fuels rate concerns</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMiugFBVV95cUxQRmlodXU2TGlMWm1VZ0NYV3o5Qng3OVBxRDBKRGZJUjAxUVYwMnlOLUdyb1VQdFJYY21VMi1BZF9iZ3JFUm9lTVlZS2ZuNE5VNktvRllkc3E5eFplMzVwb182SFplZ1FJQ3doM1lkSnl3amd5OGw0UVpieGVEMU5fdExIdGY1d1Ezb0pYZV82RnAxbmhNNE9JWDJqNW52WnNRSWlEUXljRURDNExOM1BlVlp0Y0FWRHhJQ0E?oc=5" class="title" target="_blank" rel="noopener">Voters angry about high prices may get little relief from the next Congress</a>
+          <div class="meta">The Washington Post</div>
+          <div class="why">↳ Voters angry about high prices may get little relief</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.ndtv.com/world-news/yemen-houthis-say-targeted-3-saudi-airports-in-riyadh-dammam-najran-oil-facilities-in-last-24-hours-12231046#publisher=newsstand" class="title" target="_blank" rel="noopener">Houthis Claim They Targeted Riyadh, 2 Other Airports, Oil Facilities In Saudi</a>
+          <div class="meta">NDTV &bull; The targets included a pipeline. (File Photo)</div>
+          <div class="why">↳ Houthis claim targeting Riyadh, airports, oil facilities</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMiqgFBVV95cUxQblB0dUxILXJhU2VFME93LVcyV0lzcUhwR0hLUjZ2RFluMEFyTVM3SS1UVXVNLWE5VUpfWkR1UngtOW85YzNSNEJNNXFRTG9SajlMcTNsTFNKdXRiWTliM2NDRVYwQkR4VXZHMUNyS1VwNzhXdlRjbnN6RkVpZ1ppMXJKbENDbW1RbnZrdEFhaHVDMU1WaFpRLWF5LUtiUlJrNEhpT210REJ0QQ?oc=5" class="title" target="_blank" rel="noopener">LA, Orange County Gas Prices Drop Another 3 Cents Per Gallon</a>
+          <div class="meta">MyNewsLA.com</div>
+          <div class="why">↳ LA, Orange County gas prices drop 3 cents</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMioAFBVV95cUxQYXJQWFZ2cW1yTG5WbUR4anhuUHBoWDhMUmZ4QjQ0QkRNLTYtWngwNGtZUU5fbjZoUTF5clJlZXVHUjRvanJNVjhpakFXcTQtbThUSi0yZmVrTGRDNmZ6M3J1UXV5NGc3RjJ6QlpiSTY0dGJzRTUwN2dOdDY2RkhfWUpsa24zbzVfRGhJZWx6cGQ3VHY0NTF5UThMZXAxRDBj?oc=5" class="title" target="_blank" rel="noopener">Riverside County Gas Prices Drop For 22nd Straight Day</a>
+          <div class="meta">MyNewsLA.com</div>
+          <div class="why">↳ Riverside County gas prices drop for 22nd day</div>
+        </div>
+        
+      </div>
+    </details>
+    
+      </div>
+      <div class="market-snapshot">
+        <h3>📉 Market Snapshot</h3>
+        <div class="ticks">
+        <div class="tick">
+          <div class="tick-label">S&amp;P 500</div>
+          <div class="tick-price">7,623.68</div>
+          <div class="tick-change down">▼ -0.52%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">Nasdaq</div>
+          <div class="tick-price">25,955.34</div>
+          <div class="tick-change down">▼ -0.21%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">Nifty 50</div>
+          <div class="tick-price">22,600.00</div>
+          <div class="tick-change down">▼ -0.39%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">TSX</div>
+          <div class="tick-price">35,788.18</div>
+          <div class="tick-change down">▼ -0.52%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">USD/INR</div>
+          <div class="tick-price">94.940</div>
+          <div class="tick-change up">▲ +0.24%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">USD/CAD</div>
+          <div class="tick-price">1.4004</div>
+          <div class="tick-change up">▲ +0.01%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">Gold</div>
+          <div class="tick-price">4,007.90</div>
+          <div class="tick-change down">▼ -1.29%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">WTI Crude</div>
+          <div class="tick-price">103.27</div>
+          <div class="tick-change up">▲ +3.82%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">BTC</div>
+          <div class="tick-price">80,446</div>
+          <div class="tick-change down">▼ -0.96%</div>
+        </div></div>
+      </div>
+      
+    </section>
+    
+    <section class="digest-card">
+      <div class="card-header">
+        <h2>01:44 PM ET — Oct 24, 2026</h2>
+      </div>
+      
+        <div class="breaking">
+          <div class="breaking-label">🔴 Breaking</div>
+          
+        <div class="item breaking-item">
+          <a href="https://www.cnbc.com/2026/10/24/iran-threats-us-embassies-middle-east.html" class="title" target="_blank" rel="noopener">American embassies tighten security as Iran threat warnings intensify ahead of U.S. midterm elections</a>
+          <div class="meta">CNBC &bull; A memo from DNI director Jay Clayton said Iran is in the &quot;advanced stages&quot; of planning attacks against Americans.</div>
+          <div class="why">↳ Iran threat to US embassies intensifies</div>
+        </div>
+        
+        <div class="item breaking-item">
+          <a href="https://techcrunch.com/2026/10/24/php-ocalypse-how-two-critical-web-bugs-almost-broke-the-internet/" class="title" target="_blank" rel="noopener">PHP-ocalypse: How two critical web bugs almost broke the internet</a>
+          <div class="meta">TechCrunch &bull; Two critical bugs in the PHP web programming language, used by the majority of the internet, threatened to upend the internet — and it&#x27;s unlikely to be the last major software scare.</div>
+          <div class="why">↳ Critical PHP bugs threatened internet</div>
+        </div>
+        
+        <div class="item breaking-item">
+          <a href="https://www.ndtv.com/world-news/yemen-houthis-say-targeted-3-saudi-airports-in-riyadh-dammam-najran-oil-facilities-in-last-24-hours-12231046#publisher=newsstand" class="title" target="_blank" rel="noopener">Houthis Claim They Targeted Riyadh, 2 Other Airports, Oil Facilities In Saudi</a>
+          <div class="meta">NDTV &bull; The targets included a pipeline. (File Photo)</div>
+          <div class="why">↳ Houthis target Saudi oil facilities</div>
+        </div>
+        
+        </div>
+        
+      <div class="domains">
+        
+    <details class="domain">
+      <summary>🤖 AI & ML <span class="count">(4)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://www.ndtv.com/world-news/openai-resumes-training-ai-models-without-internet-after-cyber-incidents-12228398#publisher=newsstand" class="title" target="_blank" rel="noopener">OpenAI Resumes Training AI Models Without Internet After Cyber Incidents</a>
+          <div class="meta">NDTV, TechCrunch, The Verge +4 &bull; Concerns are mounting over the ability of AI agents to exploit software flaws</div>
+          <div class="why">↳ Major AI labs changing training methods</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://techcrunch.com/2026/10/24/blocks-new-voice-model-sounds-eerily-human/" class="title" target="_blank" rel="noopener">Block’s new voice model sounds eerily human</a>
+          <div class="meta">TechCrunch, The Economic Times, The Indian Express &bull; Block said that the voice model can run locally on a MacBook M4 Max</div>
+          <div class="why">↳ Block&#x27;s voice model runs locally</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://techcrunch.com/2026/10/24/instacart-reportedly-discussed-selling-itself-with-doordash-and-uber/" class="title" target="_blank" rel="noopener">Instacart reportedly discussed selling itself with DoorDash and Uber</a>
+          <div class="meta">TechCrunch &bull; Instacart might sell itself to a larger competitor.</div>
+          <div class="why">↳ Instacart exploring sale to rivals</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://techcrunch.com/2026/10/24/forced-to-pick-groks-ai-model-chooses-republicans-openais-picks-democrats/" class="title" target="_blank" rel="noopener">Forced to pick, Grok’s AI model chooses Republicans. OpenAI’s picks Democrats.</a>
+          <div class="meta">TechCrunch &bull; A new study found Grok&#x27;s AI overwhelmingly recommends Republican candidates while OpenAI&#x27;s GPT favors Democrats, with the two AI models disagreeing in more than 90% of nearly 500 election races.</div>
+          <div class="why">↳ AI models show political bias</div>
+        </div>
+        
+      </div>
+    </details>
+    
+    <details class="domain">
+      <summary>💻 TECHNOLOGY & SEMICONDUCTORS <span class="count">(5)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMi8gFBVV95cUxOQ296eGZsT0J4ZXhoWnJrcmlOaC0wUEx5QlNQN2R6b3luMklwSTkxOHpsZ3d6aEtPbTVOaWFpSjZPUlRMOW5YOEQ5d04zU0VtQ1JiWUtSM1ZHV0dfUGpsUGlLQmFQVmtDRk5URkpRcmd3ZG5YcUZGOFV1SkJLd1RST1VjTkt2YkRNaDdPcjJMZ2hGT0tPaVYwSG1XdC1Nc0JEQjdJSzVsendNZ1dtdHlXQWRzQm5kaF83TFNsUFYtY2RTaE1qd2dJVTBkNkI0ZEYxUG5wX3VtdjNMREJpR05WcjhvYnhJeFp4b1lwR2FUbFJtUQ?oc=5" class="title" target="_blank" rel="noopener">AI bear slams Nvidia&#x27;s GPU pitch: &#x27;There&#x27;s not scarcity other than that which is created by Jensen Huang&#x27;</a>
+          <div class="meta">Yahoo Finance</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.thehindu.com/news/national/road-ministry-seeks-forensic-audit-of-its-portals-after-vehicle-data-leak/article71620455.ece" class="title" target="_blank" rel="noopener">Road Ministry seeks forensic audit of its portals after vehicle data leak</a>
+          <div class="meta">The Hindu &bull; A senior Ministry official says they have sought the intervention of the Ministry of Electronics and Information Technology to review its data-sharing policy and suggest ways to strengthen it</div>
+          <div class="why">↳ Govt portals audited after data leak</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMifkFVX3lxTE8zT2RqQmdqVklPdHFaT0FwRkV1MmlVc1haeVc0Z2NWWWh1UFVNNlR1blFjNHA0VVNDYzJGRG5BVVBGTVJCNU0wZkxXaUstaEx4TzlhQ3JpSzJHRVVxbnpRblA3TUpMRjJOb0cyZW5NdDNjS0x3NFc3VzdjN3Y1UQ?oc=5" class="title" target="_blank" rel="noopener">Can Amazon Take Market Share From Nvidia in the AI Chip Race?</a>
+          <div class="meta">AOL.com</div>
+          <div class="why">↳ Amazon challenging Nvidia in AI chips</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.ndtv.com/feature/google-might-use-your-gmail-and-photos-data-for-targeted-ads-12230403#publisher=newsstand" class="title" target="_blank" rel="noopener">Google Might Use Your Gmail And Photos Data For Targeted Ads</a>
+          <div class="meta">NDTV, The Times Of India, Google News &bull; Google updates policy allowing use of Gmail and Photos data for personalised ads via connected apps.</div>
+          <div class="why">↳ Google using Gmail data for ads</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMijwFBVV95cUxNQnZzVWVvN1ZJT19fTTlZQ1o3M1ZuNmZDcHZ0NGpRR3ZGUjBvNXJESjdFMXQ0OFNkZzdTd0Y4UGlocTdjNmU5VHZUbTBNa0JJa3VZVUZsOXVhMUt4LU1XWjlZUGE3bVM2MVpYMDJyTktvVHcyQmxVRE9KSWR4UGJaTGhBbUt4TEcwc2JzY2JJSQ?oc=5" class="title" target="_blank" rel="noopener">Apple Joins Nvidia in the $5 Trillion Club. Here&#x27;s Which Stock I Think Can Get to $10 Trillion First.</a>
+          <div class="meta">The Motley Fool</div>
+          
+        </div>
+        
+      </div>
+    </details>
+    
+    <details class="domain">
+      <summary>💰 FINANCE & BANKING <span class="count">(5)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://www.thehindu.com/news/national/11-crore-farmers-get-unique-digital-id/article71620704.ece" class="title" target="_blank" rel="noopener">11 crore farmers get unique digital ID</a>
+          <div class="meta">The Hindu &bull; Farmer IDs are expected to enable ‘transparent, efficient and timely’ access for farmers to government schemes, bank credit, crop insurance, and disaster relief</div>
+          <div class="why">↳ 11 crore farmers get digital IDs</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.thehindu.com/business/idfc-first-bank-q2-pat-rises-197-to-1045-crore-on-lower-provisions/article71620674.ece" class="title" target="_blank" rel="noopener">IDFC First Bank Q2 PAT rises 197% to ₹1,045 crore on lower provisions</a>
+          <div class="meta">The Hindu Business &bull; The bank mobilised ₹34,390 crore in FCNR(B) deposits despite having no branch, subsidiary or representative office outside India.</div>
+          <div class="why">↳ IDFC First Bank profit doubles</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.thehindu.com/business/Industry/au-small-finance-bank-q2-profit-jumps-53-to-858-crore/article71621133.ece" class="title" target="_blank" rel="noopener">AU Small Finance Bank Q2 profit jumps 53% to 858 crore</a>
+          <div class="meta">The Hindu, Economic Times Markets &bull; “Total income rose to ₹6,382 crore in the quarter under review from ₹5,224 crore in the same period a year ago,” AU Small Finance Bank said in a regulatory filing</div>
+          <div class="why">↳ AU Small Finance Bank profit up 53%</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMirgFBVV95cUxNRHNLSXpMVmtYQ3JMZDE5UW81bFo4cG5VT04zWFBSUm1XeWhnWURVZlpMdmZ2b0F3RWo4RUxZekt2ZUFMbkwwN1E5R1M3TXhaeU5SdXltUlJEYk5oY21TU1lUMWota1BFZ19yVVNFSWt6WUxsa00zVXpmTDB1Sm83X2E3VkhOVFVnY1ZDRVZhTU9jY3EtbzR0MG5RZTNBZmtrVWdmamluektNOGFFdlE?oc=5" class="title" target="_blank" rel="noopener">Canadian dollar hits five-week high as data supports rate hike bets</a>
+          <div class="meta">Reuters, Finimize</div>
+          <div class="why">↳ Canadian dollar hits 5-week high</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.marketwatch.com/story/i-want-to-pay-off-4-500-in-credit-card-debt-in-2-months-is-this-possible-059d9a21?mod=mw_rss_topstories" class="title" target="_blank" rel="noopener">I want to pay off $4,500 in credit-card debt in 2 months. Is this possible?</a>
+          <div class="meta">MarketWatch &bull; “I’m 32 years old and feel like I should know how to do this stuff by now.”</div>
+          
+        </div>
+        
+      </div>
+    </details>
+    
+    <details class="domain">
+      <summary>📈 STOCK MARKETS & TRADING <span class="count">(5)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://www.livemint.com/market/stock-market-news/reliance-jio-ipo-listing-on-oct-28-will-mukesh-ambanis-firm-be-in-top-5-m-cap-ril-to-hold-top-spot-11792854254054.html" class="title" target="_blank" rel="noopener">Reliance Jio IPO listing on Oct 28: Will Mukesh Ambani&#x27;s firm be in top 5 m-cap? RIL to hold top spot</a>
+          <div class="meta">Mint Markets &bull; Jio Platforms’ IPO was subscribed 22.19 times, with allotment expected on October 26. Based on its upper price band and post-issue share count, the company is estimated to have a market capitalisation of ₹10.30 lakh…</div>
+          <div class="why">↳ Reliance Jio IPO listing imminent</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.livemint.com/market/stock-market-news/big-action-who-is-avadhut-sathe-why-sebi-ordered-avadhut-sathe-trading-academy-to-refund-rs-546-cr-what-he-did-11792848745624.html" class="title" target="_blank" rel="noopener">Big action! Who is Avadhut Sathe? Why SEBI ordered Avadhut Sathe Trading Academy to refund ₹546 cr - What he did?</a>
+          <div class="meta">Mint Markets, Economic Times Markets &bull; SEBI ordered Avadhut Sathe and his trading academy to refund ₹546.17 crore, plus ₹67.87 crore in interest, for providing unregistered investment advice and research services. The regulator also imposed ₹11.5 crore in…</div>
+          <div class="why">↳ SEBI orders ₹546 cr refund</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.cnbc.com/investingclub/2026/10/24/ai-funding-fears-rattle-wall-street-heres-how-were-adjusting-our-portfolio.html" class="title" target="_blank" rel="noopener">AI funding fears rattle Wall Street. Here&#x27;s how we&#x27;re adjusting our portfolio</a>
+          <div class="meta">CNBC &bull; The rotation out of AI stocks benefited several defensive Club stocks.</div>
+          <div class="why">↳ AI funding fears rattle Wall St</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.tickerreport.com/banking-finance/13634701/ardent-health-inc-nyseardt-stock-has-consensus-price-target-of-12-79.html" class="title" target="_blank" rel="noopener">Ardent Health, Inc. (NYSE:ARDT) Stock Has Consensus Price Target of $12.79</a>
+          <div class="meta">Ticker Report, Watch List News, The Lincolnian Online &bull; Shares of Ardent Health, Inc. (NYSE:ARDT – Get Free Report) have been assigned an average rating of “Hold” from the fifteen brokerages that are presently covering the stock, MarketBeat reports. Two equities research…</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.livemint.com/market/stock-market-news/high-dividend-low-price-4-stocks-under-rs-200-with-high-yield-iocl-ptc-india-central-bank-ptl-enterprises-11792860259451.html" class="title" target="_blank" rel="noopener">High dividend, low price: 4 stocks under ₹200 with high yield - IOCL, PTC India, Central Bank, PTL Enterprises</a>
+          <div class="meta">Mint Markets &bull; Indian Oil Corporation, PTC India, Central Bank of India, and PTL Enterprises are highlighted as stocks priced below ₹200 with dividend yields of 5.5%, 19%, 2.53%, and 6.25%, respectively. Dividend yield estimates…</div>
+          
+        </div>
+        
+      </div>
+    </details>
+    
+    <details class="domain">
+      <summary>🌍 GEOPOLITICS & DIPLOMACY <span class="count">(5)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://www.thehindu.com/news/national/irans-ghalibaf-will-not-attend-brics-parliamentary-forum-in-delhi-embassy/article71619999.ece" class="title" target="_blank" rel="noopener">Iran Speaker to skip BRICS meet, as Iran seeks bilateral air route for ‘humanitarian aid’ from India</a>
+          <div class="meta">The Hindu &bull; Iran Air not allowed to fly medicines directly from India to Tehran, due to fear of U.S. sanctions; India says medicines can be taken through a third country; Tehran says humanitarian aid is exempted from sanctions</div>
+          <div class="why">↳ Iran seeks India air route for aid</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.thehindu.com/videos/shorts/pakistan-protecting-kashmiris-farooq-abdullahs-remarks-on-pakistan-and-kashmir-spark-row/article71621022.ece" class="title" target="_blank" rel="noopener">Pakistan “protecting” Kashmiris: Farooq Abdullah’s remarks on Pakistan and Kashmir spark row</a>
+          <div class="meta">The Hindu, NDTV &bull; Former Jammu and Kashmir chief minister Farooq Abdullah sparked a political controversy during a rally in Baramulla by suggesting that a “neighbour” is protecting Kashmir and urging residents to confront Delhi,…</div>
+          <div class="why">↳ Farooq Abdullah Kashmir remarks spark row</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.ndtv.com/world-news/north-koreas-kim-jong-un-visits-china-says-south-korea-12230276#publisher=newsstand" class="title" target="_blank" rel="noopener">North Korea&#x27;s Kim Jong Un Is In China, Claims South Korea</a>
+          <div class="meta">NDTV, The Guardian, Firstpost +1 &bull; Kim Jong Un has recently sought to strengthen ties with China.</div>
+          <div class="why">↳ Kim Jong Un visits China</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.ndtv.com/business-news/infosys-cuts-sales-forecast-after-companies-curb-it-spending-12230824#publisher=newsstand" class="title" target="_blank" rel="noopener">Infosys Cuts Sales Forecast After Companies Curb IT Spending</a>
+          <div class="meta">NDTV &bull; Infosys is India&#x27;s second-largest IT outsourcer. (Representational Photo)</div>
+          <div class="why">↳ Infosys cuts forecast on IT spending</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.ndtv.com/world-news/us-asked-elon-musk-for-years-to-alter-starlink-service-in-ukraine-middle-east-report-12228449#publisher=newsstand" class="title" target="_blank" rel="noopener">US Asked Musk For Years To Alter Starlink Service In Ukraine, Middle East: Report</a>
+          <div class="meta">NDTV, Reuters &bull; A Ukrainian serviceman of 47th brigade prepares a Starlink satellite internet systems</div>
+          <div class="why">↳ US asked Musk to alter Starlink</div>
+        </div>
+        
+      </div>
+    </details>
+    
+    <details class="domain">
+      <summary>⚔️ WARS & CONFLICTS <span class="count">(5)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://www.ndtv.com/world-news/trump-warns-of-another-little-epic-fury-irans-dont-play-with-fire-reply-us-iran-war-israel-12228279#publisher=newsstand" class="title" target="_blank" rel="noopener">Trump&#x27;s &#x27;Epic Fury&#x27; Warning After US Envoy&#x27;s &#x27;Strike This Weekend&#x27; Remark, Iran Responds</a>
+          <div class="meta">NDTV, Kyiv Post, Modern Diplomacy +2 &bull; According to Trump, he sees ending the war with Iran &quot;soon&quot;.</div>
+          <div class="why">↳ Trump warns of Iran military action</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.thehindu.com/news/international/israel-launches-major-west-bank-operation-after-soldiers-killed/article71619178.ece" class="title" target="_blank" rel="noopener">Around 1,200 Palestinians are displaced in Hebron as Israel begins military operation</a>
+          <div class="meta">The Hindu, Al Jazeera &bull; The operation &quot;is expected to continue for several days,&quot; a statement, released late on Friday (October 23, 2026), said</div>
+          <div class="why">↳ Israel launches West Bank operation</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.thehindu.com/news/international/iran-president-says-many-struggling-for-food-as-war-bites/article71620956.ece" class="title" target="_blank" rel="noopener">Iran president says many struggling for food as war bites</a>
+          <div class="meta">The Hindu &bull; Masoud Pezeshkian called for an end to what he described as a &quot;state of neither war nor peace&quot;</div>
+          <div class="why">↳ Iran president: war hurting civilians</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.theguardian.com/world/2026/oct/24/ukraine-zelenskyy-military-starlink-satellite-connection-stable-after-restrictions" class="title" target="_blank" rel="noopener">Ukraine’s military says Starlink satellite connection stable after recent restrictions</a>
+          <div class="meta">The Guardian &bull; Volodymyr Zelenskyy offers thanks to US allies for restoring system key to air defence and ‘frontline logistics’ Ukraine’s military has a “stable connection to Starlink”, the Ukrainian government has said, 10 days after…</div>
+          <div class="why">↳ Ukraine Starlink restored after limits</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMisgFBVV95cUxQV2Rvbm1TRkJrZXNvVWdvSzJGSVV4Q1NxaUJNQnd1RUNpeWwteTlNZ29rSEZZcWo4ZFduQm1LMlc4VzJ4a2wzeGV5S3hQT01JR041Vy1paGp4aDVHaXVLMTZWRmtadXdQVGFhZk1sVndkaExWZ09CLXJVd3hUSnNDdFlqam9RMnFmVDMtZk1fREJBWlQ0bHFpXzQwU0p6MktFeEpUT0lCRGhMeUhvakJuODJB?oc=5" class="title" target="_blank" rel="noopener">Iran warns of response ‘several times greater’ to any military action</a>
+          <div class="meta">Anadolu Ajansı</div>
+          <div class="why">↳ Iran warns of massive retaliation</div>
+        </div>
+        
+      </div>
+    </details>
+    
+    <details class="domain">
+      <summary>📊 COMMODITIES & PRICES <span class="count">(5)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMi0wFBVV95cUxQY0lTMmdMVkdXTUREZzVmTzRiT1E4WXlySlVMMFVUUmhtLXZuY2VNbDRaN0ZoRWRMU3R1b3hGQTlYdkR5SHYzSnlJN1N4S29pdS1zVDlnVkRVVUpiSFJwTEY3VzJGWDhvc25Wb2F5bFQ1bzBKUC1VMkRQcnhqdHAzRkZxUTFBOXNzX3cwUGN5ZVB0WGZxSC11RmZmX0dQNnQ0U1NkOXdpY2Uwc1lOMDZWQmRSZXVXVXpLMjhsck5pcVJfbzhYLXg2Rks2OU5XaGF0RENz?oc=5" class="title" target="_blank" rel="noopener">Global oil prices jump as Middle East conflict grows</a>
+          <div class="meta">WKYC, WSJ</div>
+          <div class="why">↳ Oil prices jump on Mideast conflict</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.ndtv.com/world-news/first-tanker-carrying-russian-diesel-sets-sail-for-us-under-donald-trump-vladimir-putin-deal-12228241#publisher=newsstand" class="title" target="_blank" rel="noopener">First Tanker Carrying Russian Diesel Sets Sail For US Under Trump-Putin Deal</a>
+          <div class="meta">NDTV, AP News &bull; The diesel deal was seen as an attempt by Trump to address high fuel prices</div>
+          <div class="why">↳ Russian diesel to US under Trump deal</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMiugFBVV95cUxQRmlodXU2TGlMWm1VZ0NYV3o5Qng3OVBxRDBKRGZJUjAxUVYwMnlOLUdyb1VQdFJYY21VMi1BZF9iZ3JFUm9lTVlZS2ZuNE5VNktvRllkc3E5eFplMzVwb182SFplZ1FJQ3doM1lkSnl3amd5OGw0UVpieGVEMU5fdExIdGY1d1Ezb0pYZV82RnAxbmhNNE9JWDJqNW52WnNRSWlEUXljRURDNExOM1BlVlp0Y0FWRHhJQ0E?oc=5" class="title" target="_blank" rel="noopener">Voters angry about high prices may get little relief from the next Congress</a>
+          <div class="meta">The Washington Post</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.aljazeera.com/news/2026/10/24/about-25000-rally-in-madrid-in-support-of-spains-state-pension-scheme?traffic_source=rss" class="title" target="_blank" rel="noopener">About 25,000 rally in Madrid in support of Spain’s state pension scheme</a>
+          <div class="meta">Al Jazeera &bull; Demonstrators want pensions to remain indexed to inflation and the gender pension gap to be eliminated.</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMioAFBVV95cUxQYXJQWFZ2cW1yTG5WbUR4anhuUHBoWDhMUmZ4QjQ0QkRNLTYtWngwNGtZUU5fbjZoUTF5clJlZXVHUjRvanJNVjhpakFXcTQtbThUSi0yZmVrTGRDNmZ6M3J1UXV5NGc3RjJ6QlpiSTY0dGJzRTUwN2dOdDY2RkhfWUpsa24zbzVfRGhJZWx6cGQ3VHY0NTF5UThMZXAxRDBj?oc=5" class="title" target="_blank" rel="noopener">Riverside County Gas Prices Drop For 22nd Straight Day</a>
+          <div class="meta">MyNewsLA.com</div>
+          
+        </div>
+        
+      </div>
+    </details>
+    
+      </div>
+      <div class="market-snapshot">
+        <h3>📉 Market Snapshot</h3>
+        <div class="ticks">
+        <div class="tick">
+          <div class="tick-label">S&amp;P 500</div>
+          <div class="tick-price">7,623.68</div>
+          <div class="tick-change down">▼ -0.52%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">Nasdaq</div>
+          <div class="tick-price">25,955.34</div>
+          <div class="tick-change down">▼ -0.21%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">Nifty 50</div>
+          <div class="tick-price">22,600.00</div>
+          <div class="tick-change down">▼ -0.39%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">TSX</div>
+          <div class="tick-price">35,788.18</div>
+          <div class="tick-change down">▼ -0.52%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">USD/INR</div>
+          <div class="tick-price">94.940</div>
+          <div class="tick-change up">▲ +0.24%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">USD/CAD</div>
+          <div class="tick-price">1.4004</div>
+          <div class="tick-change up">▲ +0.01%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">Gold</div>
+          <div class="tick-price">4,007.90</div>
+          <div class="tick-change down">▼ -1.29%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">WTI Crude</div>
+          <div class="tick-price">103.27</div>
+          <div class="tick-change up">▲ +3.82%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">BTC</div>
+          <div class="tick-price">80,122</div>
+          <div class="tick-change down">▼ -1.70%</div>
+        </div></div>
+      </div>
+      
+    </section>
+    
+    <section class="digest-card">
+      <div class="card-header">
+        <h2>10:57 AM ET — Oct 24, 2026</h2>
+      </div>
+      
+        <div class="breaking">
+          <div class="breaking-label">🔴 Breaking</div>
+          
+        <div class="item breaking-item">
+          <a href="https://www.aljazeera.com/news/2026/10/24/iran-says-wont-allow-us-warships-to-get-close-as-trump-ponders-new-attacks?traffic_source=rss" class="title" target="_blank" rel="noopener">Iran says won’t allow US warships to get close as Trump ponders new attacks</a>
+          <div class="meta">Al Jazeera, NDTV, Iran International +2 &bull; Iranian officials, media and analysts sense war is closer, but signal there will be no backing down.</div>
+          
+        </div>
+        
+        <div class="item breaking-item">
+          <a href="https://www.theguardian.com/world/2026/oct/24/kim-jong-un-crosses-newly-opened-bridge-into-china" class="title" target="_blank" rel="noopener">Kim Jong-un crosses newly opened bridge into China</a>
+          <div class="meta">The Guardian, The Boston Globe, Reuters &bull; North Korean leader travels over New Yalu River Bridge to meet senior Communist party member Kim Jong-un has visited China, inaugurating a bridge that connects the two countries and saying he hopes to expand cooperation…</div>
+          <div class="why">↳ Kim Jong Un visits China, opens new bridge</div>
+        </div>
+        
+        <div class="item breaking-item">
+          <a href="https://www.livemint.com/market/stock-market-news/big-action-who-is-avadhut-sathe-why-sebi-ordered-avadhut-sathe-trading-academy-to-refund-rs-546-cr-what-he-did-11792848745624.html" class="title" target="_blank" rel="noopener">Big action! Who is Avadhut Sathe? Why SEBI ordered Avadhut Sathe Trading Academy to refund ₹546 cr - What he did?</a>
+          <div class="meta">Mint Markets, Economic Times Markets, NDTV Profit &bull; SEBI ordered Avadhut Sathe and his trading academy to refund ₹546.17 crore, plus ₹67.87 crore in interest, for providing unregistered investment advice and research services. The regulator also imposed ₹11.5 crore in…</div>
+          <div class="why">↳ SEBI orders ₹546 cr refund from trading academy</div>
+        </div>
+        
+        <div class="item breaking-item">
+          <a href="https://techcrunch.com/2026/10/23/openai-says-it-will-no-longer-train-its-ai-models-on-the-live-internet-citing-significant-risks/" class="title" target="_blank" rel="noopener">OpenAI says it will no longer train its AI models on the live internet, citing “significant risks”</a>
+          <div class="meta">TechCrunch, Українські Національні Новини (УНН) &bull; OpenAI will cut frontier models off from the internet weeks after one of its engineers said that solution wouldn&#x27;t work.</div>
+          <div class="why">↳ OpenAI stops training models on live internet</div>
+        </div>
+        
+        <div class="item breaking-item">
+          <a href="https://www.ndtv.com/world-news/israeli-forces-displace-families-in-west-banks-hebron-after-deadly-attack-12230249#publisher=newsstand" class="title" target="_blank" rel="noopener">Israeli Forces Displace Families In West Bank&#x27;s Hebron After Deadly Attack</a>
+          <div class="meta">NDTV, The Guardian &bull; Around one-third of Hebron has been targeted, Hebron Governor Khaled Dudin said.</div>
+          <div class="why">↳ Israeli forces raze Hebron, displace families</div>
+        </div>
+        
+        </div>
+        
+      <div class="domains">
+        
+    <details class="domain">
+      <summary>🤖 AI & ML <span class="count">(4)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://www.ndtv.com/world-news/openai-resumes-training-ai-models-without-internet-after-cyber-incidents-12228398#publisher=newsstand" class="title" target="_blank" rel="noopener">OpenAI Resumes Training AI Models Without Internet After Cyber Incidents</a>
+          <div class="meta">NDTV, صحيفة مال &bull; Concerns are mounting over the ability of AI agents to exploit software flaws</div>
+          <div class="why">↳ OpenAI resumes offline training after cyber issues</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://techcrunch.com/2026/10/24/all-the-ai-agents-that-can-live-in-your-text-messages/" class="title" target="_blank" rel="noopener">Here are the top AI agents that can live in your text messages</a>
+          <div class="meta">TechCrunch &bull; We created a list of the most notable AI agents that can live in your text messages, from general assistants to agents designed for families, travel, and work.</div>
+          <div class="why">↳ Top AI agents for text messaging listed</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMinwFBVV95cUxPZTVmY3RjbFEzeDNnb2xOa0FDUm9Ga2VRMXM4ODZlOEd5YkdWMUhoRU4xTnJaTWF0MzRjZ0E3SWpCRGV2NXdaeDhKTTRlNEszMmk5cVdPR2RqdWl4YWlkd0Z6cE9sQWNkMVdOTHBVYlJhbkVhRW1LOE5VMUpBdUdKbm9JYWlwdEk4ZWQ4c2FZZ0lJTVlaTzRZZEE4MmVLc2s?oc=5" class="title" target="_blank" rel="noopener">Anthropic’s AI Hid a Secret Message in the Stars. OpenAI’s Bot Found It.</a>
+          <div class="meta">Gizmodo</div>
+          <div class="why">↳ Anthropic AI hides message, OpenAI finds it</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMiiwFBVV95cUxNREtLaXlJXzg5TzFHRktTNUlBU0dUeUVCVTlQMVY2YnlFS1pjY28wRHlKbHpFenB3dE9xN1pDUnFXLXRmcFYydHdRb3h5RkJGRDFOd3FWYXZwU3JMd29qSjlMOTJtVElOVVpyN0dSR2pabURROWtNT1BEVWVlUzFGemg4SXg0czJpZS00?oc=5" class="title" target="_blank" rel="noopener">Is the best mathematician in the world an AI model?</a>
+          <div class="meta">mronline.org</div>
+          
+        </div>
+        
+      </div>
+    </details>
+    
+    <details class="domain">
+      <summary>💻 TECHNOLOGY & SEMICONDUCTORS <span class="count">(5)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://economictimes.indiatimes.com/markets/us-stocks/wall-street-guide/data-centre-spending-seen-more-than-doubling-to-2-1-trillion-by-2028/articleshow/135153616.cms" class="title" target="_blank" rel="noopener">US data centre spending seen more than doubling to $2.1 trillion by 2028, estimates BoFA</a>
+          <div class="meta">Economic Times Markets, Reuters &bull; Global data centre spending is expected to reach $1 trillion in 2026 and more than double to $2.1 trillion by 2028, driven by rising demand for AI services, BofA Global Research estimates. The data centre market could…</div>
+          <div class="why">↳ US data centre spending to hit $2.1T by 2028</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.ndtv.com/world-news/ndtv-world-summit-2026-indias-next-tech-push-from-smartphone-manufacturing-to-ai-and-homegrown-innovation-12225118#publisher=newsstand" class="title" target="_blank" rel="noopener">AI, Smartphones And Mobility: Global Tech Leaders Discuss India&#x27;s Next Growth Phase At NDTV World Summit</a>
+          <div class="meta">NDTV &bull; At the NDTV World Summit 2026, technology leaders discussed India&#x27;s potential in AI adoption, research and development, smartphone innovation and affordable mobility.</div>
+          <div class="why">↳ Global tech leaders discuss India&#x27;s AI growth</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMioAFBVV95cUxNREdBbUlzTjJwaVZxY2oyTF9BM05GbTZ3U0dUOFZOMkxoME00ZTRoMmZzdTZYODdLWnk3MU0tb0hoWTZGdmZiR3RKNkVuZnNFXzBPT0xVcTNFSEhTcDlXeUJzRFQ1Vkd4YkxJQzE1VVg3WUlRc2JzOFJoZ0VOdWZNaFE5c2Zpa05BbDB4WGZYVTk2Z0JaYXlySWQ3aUFzM1FQ?oc=5" class="title" target="_blank" rel="noopener">Georgia&#x27;s Silk Cloud deploys Nvidia Blackwell Ultra GPUs</a>
+          <div class="meta">Data Center Dynamics</div>
+          <div class="why">↳ Georgia deploys Nvidia Blackwell Ultra GPUs</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.ndtv.com/feature/google-might-use-your-gmail-and-photos-data-for-targeted-ads-12230403#publisher=newsstand" class="title" target="_blank" rel="noopener">Google Might Use Your Gmail And Photos Data For Targeted Ads</a>
+          <div class="meta">NDTV &bull; Google updates policy allowing use of Gmail and Photos data for personalised ads via connected apps.</div>
+          <div class="why">↳ Google may use Gmail/Photos for targeted ads</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.theverge.com/tech/1018169/what-to-expect-apple-pro-and-tell-event-touchscreen-macbook-pro" class="title" target="_blank" rel="noopener">What to expect from Apple’s ‘Pro and tell’ event</a>
+          <div class="meta">The Verge &bull; It feels like Apple&#x27;s Welcome Home event just happened. And the iPhone Duo announcement isn&#x27;t all that far in our rearview mirror, either. Yet, the company is back with another launch, focused on the MacBook Pro, it…</div>
+          <div class="why">↳ Apple &#x27;Pro and tell&#x27; event expectations</div>
+        </div>
+        
+      </div>
+    </details>
+    
+    <details class="domain">
+      <summary>💰 FINANCE & BANKING <span class="count">(5)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://www.bbc.co.uk/news/articles/c60qk573yzz8o?at_medium=RSS&amp;at_campaign=rss" class="title" target="_blank" rel="noopener">White House lifts tariffs on some Canadian goods as midterm elections loom</a>
+          <div class="meta">BBC World, NDTV, Global News +1 &bull; From 30 October, tariffs will be eased on some products, including certain machinery, and placed on others, such as carpets.</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMi4wFBVV95cUxNQkczNHZldDdxazMwSVota0l0cXl2OWthSXlPaG5PYkpWR0xLWGFHcTNzYTk1Um5XODBZZG5fSEM1dm1vdW9WY2FSMGJUSld4NjBJelZRdkIxWkJsOGo1aXFjODRzdnpZMkRUaGF2aV9TTl8xSUpibDFMbGg0dUhQc3o4eVh2UXhzNlplQkJOMHRqXzFJUjc5UGJjbW5QSUlLLW41TjNoVXJhZ2pVWnB0dmtzc2gxVE5zbGtIdXZRa0pMejJsZmNSODJWUlk4SXJ5QUVUcy16YjVNSTRkNC0zcERpOA?oc=5" class="title" target="_blank" rel="noopener">Bank of Canada to raise rates to 2.50% on October 28 and once again by end-March</a>
+          <div class="meta">TradingView, The Daily News | Texas&#x27; Oldest Newspaper</div>
+          <div class="why">↳ Bank of Canada to raise rates to 2.50%</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.thehindu.com/business/Industry/ethanol-tender-sparks-feedstock-concerns-as-rice-gains-ground-over-maize/article71620019.ece" class="title" target="_blank" rel="noopener">Ethanol tender sparks feedstock concerns as rice gains ground over maize</a>
+          <div class="meta">The Hindu Business &bull; The competing concerns highlight the challenge facing the ethanol procurement framework: balancing the availability and cost of different feedstocks.</div>
+          <div class="why">↳ Ethanol tender sparks feedstock concerns</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.aljazeera.com/video/newsfeed/2026/10/24/full-lockdown-of-occupied-west-bank-begins-2?traffic_source=rss" class="title" target="_blank" rel="noopener">Full lockdown of occupied West Bank begins</a>
+          <div class="meta">Al Jazeera &bull; The Israeli army begins its lockdown and military operations across the West Bank.</div>
+          <div class="why">↳ Full lockdown of occupied West Bank begins</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.marketwatch.com/story/everyones-talking-about-roth-conversions-but-heres-how-few-people-really-do-them-and-why-you-shouldnt-have-fomo-about-it-1b50db07?mod=mw_rss_topstories" class="title" target="_blank" rel="noopener">Everyone’s talking about Roth conversions, but here’s how few people really do them — and why you shouldn’t have FOMO about it</a>
+          <div class="meta">MarketWatch &bull; You have to do the math to figure out your best tax strategy in retirement, and converting might not be for you.</div>
+          
+        </div>
+        
+      </div>
+    </details>
+    
+    <details class="domain">
+      <summary>📈 STOCK MARKETS & TRADING <span class="count">(5)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://www.livemint.com/market/ipo/reliance-jio-platforms-ipo-gmp-listing-date-and-time-share-price-prediction-for-nse-bse-debut-details-11792848439962.html" class="title" target="_blank" rel="noopener">Reliance Jio Platforms IPO GMP, listing date and time, share price prediction for NSE, BSE debut - Details</a>
+          <div class="meta">Mint Markets &bull; Reliance Jio Platforms’ IPO was subscribed 22.19 times, led by 70.55-times demand from qualified institutional buyers. Its grey market premium was reported at ₹248, suggesting an estimated listing price of ₹1,367, or a…</div>
+          <div class="why">↳ Reliance Jio Platforms IPO subscribed 22x</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.cnbc.com/2026/10/24/berkshire-record-high-without-buffett.html" class="title" target="_blank" rel="noopener">Berkshire shares shake the Buffett blues with new all-time highs</a>
+          <div class="meta">CNBC &bull; After almost 18 months, Berkshire Hathaway shares have entirely erased all the ground they lost in the wake of Warren Buffett&#x27;s surprise announcement at the 2025 shareholders meeting that he would step down as CEO.</div>
+          <div class="why">↳ Berkshire shares hit new all-time highs</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.marketwatch.com/story/investors-recent-money-moves-show-a-preference-for-quality-over-momentum-within-the-s-p-500-ed6b5149?mod=mw_rss_topstories" class="title" target="_blank" rel="noopener">Investors’ recent money moves show a preference for lowering risks over boosting rewards</a>
+          <div class="meta">MarketWatch &bull; Investors have been steadily pouring money into the Invesco S&amp;P 500 Quality ETF this year.</div>
+          <div class="why">↳ Investors prefer quality ETFs over risk</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.thehindu.com/news/cities/Visakhapatnam/vizag-tmt-rebars-make-a-market-comeback-as-rinl-resumes-rolling-operations/article71620048.ece" class="title" target="_blank" rel="noopener">Vizag TMT rebars make a market comeback as RINL resumes rolling operations</a>
+          <div class="meta">The Hindu &bull; The revival swiftly addresses supply constraints, restoring the availability of the trusted Vizag TMT brand across commercial channels, says senior RINL official</div>
+          <div class="why">↳ Vizag TMT rebars return as RINL resumes ops</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.marketwatch.com/story/looking-for-ai-stocks-that-are-still-cheap-consider-these-two-under-the-radar-picks-b4ca2b28?mod=mw_rss_topstories" class="title" target="_blank" rel="noopener">Looking for AI stocks that are still cheap? Consider these two under-the-radar picks.</a>
+          <div class="meta">MarketWatch &bull; Simon King of Saturna Capital names two stocks tied to base metals, for investors who want to look beyond the beaten path for AI-related trades.</div>
+          <div class="why">↳ Two under-the-radar AI stock picks</div>
+        </div>
+        
+      </div>
+    </details>
+    
+    <details class="domain">
+      <summary>🌍 GEOPOLITICS & DIPLOMACY <span class="count">(5)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://www.theguardian.com/world/2026/oct/24/blaze-engulfs-hitlers-eagles-nest-mountain-retreat-in-bavaria" class="title" target="_blank" rel="noopener">Suspect arrested over fire at Hitler’s ‘Eagle’s Nest’ retreat in Bavaria</a>
+          <div class="meta">The Guardian, BBC World, Al Jazeera +2 &bull; About 200 firefighters deployed to tackle blaze at former Nazi mountain retreat in remote part of southern Germany Police have arrested a 33-year-old German citizen after a fire ripped through Adolf Hitler’s former…</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.ndtv.com/world-news/north-koreas-kim-jong-un-visits-china-says-south-korea-12230276#publisher=newsstand" class="title" target="_blank" rel="noopener">North Korea&#x27;s Kim Jong Un Is In China, Claims South Korea</a>
+          <div class="meta">NDTV, Firstpost &bull; Kim Jong Un has recently sought to strengthen ties with China.</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.thehindu.com/news/national/defence-secretary-rajesh-kumar-singh-gets-one-year-extension-till-october-2027/article71620562.ece" class="title" target="_blank" rel="noopener">Defence Secretary Rajesh Kumar Singh gets one-year extension till October 2027</a>
+          <div class="meta">The Hindu, Hindustan Times &bull; His current tenure was scheduled to end on October 31, 2026</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.aljazeera.com/news/2026/10/24/jordans-king-abdullah-orders-firm-response-after-deadly-church-attack?traffic_source=rss" class="title" target="_blank" rel="noopener">Jordan’s King Abdullah orders firm response after deadly church attack</a>
+          <div class="meta">Al Jazeera, Reuters &bull; Authorities are still searching for the attackers and say it is too early to determine if they had ties to known groups.</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMieEFVX3lxTE9LQWM4OEVVWUdqUF9JcHpJZXM3a0duXzliY05yLWdPRTZkZVVRbE1ka0JwcVgtRUZzMnZhOXRhT1FibFcyMTBrcVBkeUU4dVhhcEhqMHhRaWc4aVlNa1diNVdlMFBJTFhJTWFJT1E0T0JFdjRhdTJSbQ?oc=5" class="title" target="_blank" rel="noopener">Is China’s foreign policy good enough?</a>
+          <div class="meta">Monthly Review, Facebook</div>
+          
+        </div>
+        
+      </div>
+    </details>
+    
+    <details class="domain">
+      <summary>⚔️ WARS & CONFLICTS <span class="count">(5)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMikgFBVV95cUxON01aUDFyR0hVZ3ZyLTRLNFpxbGJ4SlBTM0ZyMEpfRFRsZU9UOFZlR0l5TnY2WVBwVmd2TTNVT21pc3FBdVlrd04zRndnNmZoWDFKRUJjWFB0RG5qcllhY2U4bEhVakg5ZHNTQWxRVnE2RjlydXFCb3hmMk5VamV1cmpOYXI5elB4el9NV2ZES1FHdw?oc=5" class="title" target="_blank" rel="noopener">Houthi rebels strike Yemen’s government forces, killing at least 53</a>
+          <div class="meta">AP News</div>
+          <div class="why">↳ Houthi rebels kill 53 in Yemen attack</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.npr.org/2026/10/23/nx-s1-6013613/israeli-pm-pledges-massive-military-operation-after-west-bank-checkpoint-attack" class="title" target="_blank" rel="noopener">Israeli PM pledges massive military operation after West Bank checkpoint attack</a>
+          <div class="meta">NPR, Al Jazeera, The Washington Post +1 &bull; Israel&#x27;s Prime Minister is vowing to launch a major military operation in the West Bank in response to an attack by two Palestinian gunmen on an Israeli military checkpoint that killed two soldiers.</div>
+          <div class="why">↳ Israel launches new West Bank operation</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.ndtv.com/world-news/saudi-launches-deadly-strikes-on-yemen-cities-says-houthi-backed-media-12230221#publisher=newsstand" class="title" target="_blank" rel="noopener">Saudi Launches Deadly Strikes On Houthi-Controlled Yemen Cities: Report</a>
+          <div class="meta">NDTV &bull; The war between Saudi and Houthis had been dormant since 2022, but erupted again in July</div>
+          <div class="why">↳ Saudi strikes resume on Houthi Yemen cities</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.ndtv.com/world-news/trump-warns-of-another-little-epic-fury-irans-dont-play-with-fire-reply-us-iran-war-israel-12228279#publisher=newsstand" class="title" target="_blank" rel="noopener">Trump&#x27;s &#x27;Epic Fury&#x27; Warning After US Envoy&#x27;s &#x27;Strike This Weekend&#x27; Remark, Iran Responds</a>
+          <div class="meta">NDTV, Kyiv Post, France 24 &bull; According to Trump, he sees ending the war with Iran &quot;soon&quot;.</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.ndtv.com/world-news/situation-dire-melania-trump-says-she-secured-ceasefire-in-ukrainian-city-12226918#publisher=newsstand" class="title" target="_blank" rel="noopener">&quot;Situation Dire&quot;: Melania Trump Secures Ceasefire In Ukrainian City</a>
+          <div class="meta">NDTV, AP News, Reuters &bull; Melania Trump said she had worked with the Russian and Ukrainian leaderships.</div>
+          
+        </div>
+        
+      </div>
+    </details>
+    
+    <details class="domain">
+      <summary>📊 COMMODITIES & PRICES <span class="count">(5)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://www.ndtv.com/world-news/first-tanker-carrying-russian-diesel-sets-sail-for-us-under-donald-trump-vladimir-putin-deal-12228241#publisher=newsstand" class="title" target="_blank" rel="noopener">First Tanker Carrying Russian Diesel Sets Sail For US Under Trump-Putin Deal</a>
+          <div class="meta">NDTV, AP News &bull; The diesel deal was seen as an attempt by Trump to address high fuel prices</div>
+          <div class="why">↳ Russian diesel tanker sails to US under Trump-Putin deal</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMieEFVX3lxTE81NThxeHlReWFTaEFxX1l1RjhOQUUzeExHczBnVGljMXktcndsOGJ4bjh3NkFGdDNvbHpKdFoxNzlxdDRWRUowNlVfUU9jaGdVSGNTYTZVemRWeW4tOEtFaXY1RE53X0Jyd1ZPWS00UlllVGNxTE9jLQ?oc=5" class="title" target="_blank" rel="noopener">Wall Street loses ground under pressure from rising oil prices</a>
+          <div class="meta">Hartford Courant, Chicago Tribune</div>
+          <div class="why">↳ Wall Street falls under rising oil pressure</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMi0wFBVV95cUxQY0lTMmdMVkdXTUREZzVmTzRiT1E4WXlySlVMMFVUUmhtLXZuY2VNbDRaN0ZoRWRMU3R1b3hGQTlYdkR5SHYzSnlJN1N4S29pdS1zVDlnVkRVVUpiSFJwTEY3VzJGWDhvc25Wb2F5bFQ1bzBKUC1VMkRQcnhqdHAzRkZxUTFBOXNzX3cwUGN5ZVB0WGZxSC11RmZmX0dQNnQ0U1NkOXdpY2Uwc1lOMDZWQmRSZXVXVXpLMjhsck5pcVJfbzhYLXg2Rks2OU5XaGF0RENz?oc=5" class="title" target="_blank" rel="noopener">Global oil prices jump as Middle East conflict grows</a>
+          <div class="meta">WKYC</div>
+          <div class="why">↳ Global oil prices jump on Middle East conflict</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMiowFBVV95cUxQTkVVc1VUZ1QtMGx1TjJyUnktY25CWmZJdkh4MmQ3Zl8xLW91RUdHN09NQlB6Y18wOXZuRU5ZeDVmMXRaVGQzTnNwSDRtRGVpcFFCUDk0OHpXbVlJZ2g2NUJNVkZHSEctcXF2Rm9lYUtTcXJwbHJrcnpod21oNFNINnlxUzdrSkptaU5rYnBfMmp0NTFtSlJCYTVORjdWRFFya29r0gG3AUFVX3lxTE01dVpsWXo5azJrdFA1RW5mWVZLNXR6NnlmUDRNXzhSc2RnUmZ3QV9DQVRTRENNbWlJSEdPX2MzWldoZ1JYdnZ1SEN3WWM0LW5PeFVwc0ZXYk1jb0pWSlJuWXhCWEp1em9JM045Zm5UakducnE2TTQtaDhoby1uOXFqVUdCSzZkTEtzbDJaRG40ZzRPb0huVzZkNjI1MVc5b3FDaU9fajZxX1liOFFaT1prQUpXWDJUZw?oc=5" class="title" target="_blank" rel="noopener">Gas prices for 10/24/26: National average sitting at $4.29 per gallon</a>
+          <div class="meta">AL.com</div>
+          <div class="why">↳ US gas prices average $4.29 per gallon</div>
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.aljazeera.com/economy/2026/10/24/sudans-soaring-fuel-prices-makes-getting-by-harder-for-workers?traffic_source=rss" class="title" target="_blank" rel="noopener">Sudan’s soaring fuel prices make getting by harder for workers</a>
+          <div class="meta">Al Jazeera &bull; Sudan is suffering from a cost-of-living crisis affecting millions across the country.</div>
+          <div class="why">↳ Sudan fuel prices soar amid cost crisis</div>
+        </div>
+        
+      </div>
+    </details>
+    
+      </div>
+      <div class="market-snapshot">
+        <h3>📉 Market Snapshot</h3>
+        <div class="ticks">
+        <div class="tick">
+          <div class="tick-label">S&amp;P 500</div>
+          <div class="tick-price">7,623.68</div>
+          <div class="tick-change down">▼ -0.52%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">Nasdaq</div>
+          <div class="tick-price">25,955.34</div>
+          <div class="tick-change down">▼ -0.21%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">Nifty 50</div>
+          <div class="tick-price">22,600.00</div>
+          <div class="tick-change down">▼ -0.39%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">TSX</div>
+          <div class="tick-price">35,788.18</div>
+          <div class="tick-change down">▼ -0.52%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">USD/INR</div>
+          <div class="tick-price">94.940</div>
+          <div class="tick-change up">▲ +0.24%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">USD/CAD</div>
+          <div class="tick-price">1.4004</div>
+          <div class="tick-change up">▲ +0.01%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">Gold</div>
+          <div class="tick-price">4,007.90</div>
+          <div class="tick-change down">▼ -1.29%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">WTI Crude</div>
+          <div class="tick-price">103.27</div>
+          <div class="tick-change up">▲ +3.82%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">BTC</div>
+          <div class="tick-price">80,194</div>
+          <div class="tick-change down">▼ -1.85%</div>
+        </div></div>
+      </div>
+      
+    </section>
+    
+    <section class="digest-card">
+      <div class="card-header">
+        <h2>06:42 PM ET — Oct 23, 2026</h2>
+      </div>
+      
+        <div class="breaking">
+          <div class="breaking-label">🔴 Breaking</div>
+          
+        <div class="item breaking-item">
+          <a href="https://www.aljazeera.com/news/2026/10/23/former-fbi-officials-charged-in-connection-with-hunter-biden-laptop-probe?traffic_source=rss" class="title" target="_blank" rel="noopener">Former FBI officials charged in connection with Hunter Biden laptop probe</a>
+          <div class="meta">Al Jazeera, CNBC, NPR +1 &bull; Lawyers for two accused officials say Department of Justice seeking to revive scandal in the run-up to midterm vote.</div>
+          
+        </div>
+        
+        <div class="item breaking-item">
+          <a href="https://www.bbc.co.uk/news/articles/c60qk573yzz8o?at_medium=RSS&amp;at_campaign=rss" class="title" target="_blank" rel="noopener">White House lifts tariffs on some Canadian goods as midterm elections loom</a>
+          <div class="meta">BBC Business, BBC, CTV News &bull; From 30 October, tariffs will be eased on some products, including certain machinery, and placed on others, such as carpets.</div>
+          
+        </div>
+        
+        <div class="item breaking-item">
+          <a href="https://news.google.com/rss/articles/CBMihAFBVV95cUxPZ1d2cnRJSjZhOTRNcjUtOFBqRjFNc2QyTHhXRExrUlVPbV9PT2k1SlpFMmQxbURqWTYxb3JLSWlRU1VrVXF2NmQyckkwRG9yb2I4azNlSVNwNnJnZUJDUVl0Yl80OHlNdEFfRXNWbWY3YXRoX0otbGpvUUs5MVJJNWJBOWw?oc=5" class="title" target="_blank" rel="noopener">Trump removing some 50% tariffs on Canadian products, adding others</a>
+          <div class="meta">Global News, Reuters, Radio-Canada</div>
+          
+        </div>
+        
+        <div class="item breaking-item">
+          <a href="https://news.google.com/rss/articles/CBMingFBVV95cUxQS3JfX2hwZ2FRU3N6aXdpX2hMdm03MzhSdU9wcTN6NTFibklfcEtjemxEeGpIUGxFUld5cmx1U29SWGlRbFNGMTBZSDJmdktYd3d2UHdDZFlkSGRveDZVNVR2bjlwNDBZN2ZNTnpNMHUtb0hGVFd1c3FzSjZ1UlJqZTdPenloVjRaWGRTbnRBODViQkR6a19iU0xBV0pEdw?oc=5" class="title" target="_blank" rel="noopener">Trump warns of possible new military operation against Iran</a>
+          <div class="meta">Anadolu Ajansı, Reuters, Middle East Eye</div>
+          
+        </div>
+        
+        <div class="item breaking-item">
+          <a href="https://news.google.com/rss/articles/CBMiwwFBVV95cUxNSmJyQXhhU1ZfQUJvRVp4cENkNzhMZFl3ajF2UjByeFJGMzdmY2VUdEI1ekRFV1EzZE5KNERXOVFYSTFzckZXYUN4QXc5ZC1CUFl5cGEzOTZ3WnpGa2tLV3NKYW9lZkFGMkFzUl9tekZnM213ZXJOdnJwaTBLMlhlRU5wZEFvYWN6OG9fSDRZMzM0dEw5SFZZX0oza0poNDlCNzhuTlBXSE96UlEyWWtpNkRGZjcySWV6VGx0NndLWkM0c0E?oc=5" class="title" target="_blank" rel="noopener">Netanyahu vows West Bank military operation after attack kills two Israeli soldiers</a>
+          <div class="meta">The Washington Post, NPR, CBS News</div>
+          
+        </div>
+        
+        </div>
+        
+      <div class="domains">
+        
+    <details class="domain">
+      <summary>🤖 AI & ML <span class="count">(5)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://www.aljazeera.com/video/inside-story/2026/10/23/why-is-the-uk-at-the-forefront-of-ai-driven-job-cuts?traffic_source=rss" class="title" target="_blank" rel="noopener">Why is the UK at the forefront of AI-driven job cuts?</a>
+          <div class="meta">Al Jazeera &bull; AI-linked job losses in the UK are running at twice the rate of US and Germany.</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.npr.org/2026/10/23/nx-s1-6012296/ai-department-of-defense-war" class="title" target="_blank" rel="noopener">The Pentagon&#x27;s guidelines for &quot;responsible AI&quot; aren&#x27;t always followed, report shows</a>
+          <div class="meta">NPR &bull; The Pentagon is building weapons and projects with AI capabilities that officials say don&#x27;t always closely adhere to the agency&#x27;s own guidelines for AI, according to a congressional watchdog report published in October.</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.theverge.com/ai-artificial-intelligence/1018021/openai-training-top-ai-models-no-internet" class="title" target="_blank" rel="noopener">OpenAI now trains its frontier AI models with no internet access</a>
+          <div class="meta">The Verge &bull; OpenAI is now training its most advanced AI models without internet access following a string of rogue hacking incidents. In a blog post on Friday, OpenAI says it built an offline testing environment where AI models can…</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.ndtv.com/offbeat/ashamed-to-work-google-deepmind-employees-resign-over-pentagon-ai-contracts-12226550#publisher=newsstand" class="title" target="_blank" rel="noopener">&#x27;Ashamed To Work&#x27;: Google DeepMind Employees Resign Over Pentagon AI Contracts</a>
+          <div class="meta">NDTV &bull; Google AI researchers resign due to fears about military deployment and lack of oversight.</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMiiwFBVV95cUxQUGp1VEJkTWJXaGlnc00xUW9tdjBBQWcyT0N0STVuazEwRWFMeG1RMDFqM0NIVllta3RoTThZdkdkV0pXcTFQMUlDTFJpWDFHdi12djFXWjBUZF9LMlhRRFBvOG1rc3owMEl1eVdSeEJYYmRxOWJ0UmVnZmdGcUxSMGtvRFd5OXJYc1N3?oc=5" class="title" target="_blank" rel="noopener">How an OpenAI model exposed a flaw in 70% of the internet’s websites</a>
+          <div class="meta">Fortune</div>
+          
+        </div>
+        
+      </div>
+    </details>
+    
+    <details class="domain">
+      <summary>💻 TECHNOLOGY & SEMICONDUCTORS <span class="count">(5)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://economictimes.indiatimes.com/markets/us-stocks/wall-street-guide/data-centre-spending-seen-more-than-doubling-to-2-1-trillion-by-2028/articleshow/135153616.cms" class="title" target="_blank" rel="noopener">US data centre spending seen more than doubling to $2.1 trillion by 2028, estimates BoFA</a>
+          <div class="meta">Economic Times Markets, Reuters &bull; Global data centre spending is expected to reach $1 trillion in 2026 and more than double to $2.1 trillion by 2028, driven by rising demand for AI services, BofA Global Research estimates. The data centre market could…</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMitwFBVV95cUxNOWpYZWs5b0ZUaHpWaTQ3NDloSHRpXy1KVFMzUFVtUENVd29FeDljcWdzb1FpWmJoWFJROUwtWjBFUEZpamdObTF4b2JKTGJpV0JTX1FDczRaTlg3QXFUMXlqQU13WEVHOEhLLS0tU1pydWt6NU9jaFNxMXIzMlRpdjNYaS1WZ3F5c3pTSlI2QTAwQkpmMHNyMWhXUGFtcEhNRWlIQS1MenpJRC0wRTYyampvNndTXzQ?oc=5" class="title" target="_blank" rel="noopener">Senator says planned Meta commercial terms update could harm US businesses</a>
+          <div class="meta">Reuters</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://techcrunch.com/2026/10/23/hottest-toy-for-christmas-nvidia-ceo-plays-with-adorable-microduck-robots-20000-sell/" class="title" target="_blank" rel="noopener">Hottest toy for Christmas? Nvidia CEO plays with adorable Microduck robots, 20,000 sell</a>
+          <div class="meta">TechCrunch &bull; The robots, stomping their little feet and making tiny R2-D2 noises, sat, fell down dead for a &quot;nap,&quot; and summersaulted on voice command.</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://economictimes.indiatimes.com/markets/us-stocks/news/iphone-duo-internal-display-break-are-iphone-duo-displays-too-fragile-users-report-alarming-cracks-near-hinge/articleshow/135155585.cms" class="title" target="_blank" rel="noopener">iPhone Duo internal display break: Are iPhone Duo displays too fragile? Users report alarming cracks near hinge</a>
+          <div class="meta">Economic Times Markets &bull; Users have begun reporting instances of broken inner displays in the new iPhone Duo model. Cracks are appearing near the hinge, causing concern about the device&#x27;s durability. Some owners experienced damage after minimal…</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.cnbc.com/2026/10/23/apple-iphone-duo-china-launch.html" class="title" target="_blank" rel="noopener">Scalpers offer Apple iPhone Duo buyers hundreds extra outside Beijing launch</a>
+          <div class="meta">CNBC &bull; Apple&#x27;s global launch of the foldable iPhone Duo brought scalpers to the Beijing flagship store looking to pay big for the already pricey devices.</div>
+          
+        </div>
+        
+      </div>
+    </details>
+    
+    <details class="domain">
+      <summary>💰 FINANCE & BANKING <span class="count">(5)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMi4wFBVV95cUxNQkczNHZldDdxazMwSVota0l0cXl2OWthSXlPaG5PYkpWR0xLWGFHcTNzYTk1Um5XODBZZG5fSEM1dm1vdW9WY2FSMGJUSld4NjBJelZRdkIxWkJsOGo1aXFjODRzdnpZMkRUaGF2aV9TTl8xSUpibDFMbGg0dUhQc3o4eVh2UXhzNlplQkJOMHRqXzFJUjc5UGJjbW5QSUlLLW41TjNoVXJhZ2pVWnB0dmtzc2gxVE5zbGtIdXZRa0pMejJsZmNSODJWUlk4SXJ5QUVUcy16YjVNSTRkNC0zcERpOA?oc=5" class="title" target="_blank" rel="noopener">Bank of Canada to raise rates to 2.50% on October 28 and once again by end-March</a>
+          <div class="meta">TradingView, Investing.com</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMiwAFBVV95cUxNNzYxNm10dFg3eU1FXzR3S2d4dkRTRXdSR0ItTmcydXluQXRXRGQ2SHphYmpSNGhSZVZNU2NrVDNubXA3c0hOTzFwakI5WGY4Y0hwWXFIT0RKQ1dhMV9vRTF3NktRMi14eDdWRkktVDNXMEdrc2cyaWVMbEpLZDk5OFdJaGMtSkM5X3gtclVEMDZIR2U1amtxMFppUjNKNWJEVXB6MVdDQ2lKOHdTMGJRLXhocGN6TjQ2N0lUem5NYXU?oc=5" class="title" target="_blank" rel="noopener">Bank of Canada makes a gradual return to neutral – TD Securities</a>
+          <div class="meta">www.tmgm.com, FXStreet</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.nbcnews.com/world/middle-east/israel-orders-west-bank-lockdown-hebron-shooting-attack-rcna605176" class="title" target="_blank" rel="noopener">Israel orders West Bank lockdown after Hebron shooting attack</a>
+          <div class="meta">NBC News, Foreign Policy &bull; Israeli Prime Minister Benjamin Netanyahu ordered a “full lockdown” of the occupied West Bank on Friday after Israel’s military said it killed two Palestinians accused of launching a shooting attack that injured five…</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.thehindu.com/business/dr-reddys-q2-net-dips-32-to-913-cr-on-lower-revenue/article71617256.ece" class="title" target="_blank" rel="noopener">Dr. Reddy’s Q2 net dips 32% to ₹913 cr on lower revenue</a>
+          <div class="meta">The Hindu Business, Economic Times Markets &bull; Revenue from operations for the Hyderabad-based multinational stood at ₹8,697.8 crore, down from ₹8,828.3 crore a year earlier</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.theguardian.com/us-news/2026/oct/23/susan-collins-maine-trump-tariffs-canada" class="title" target="_blank" rel="noopener">Trump drops some Canada tariffs in bid to boost embattled Susan Collins in Maine</a>
+          <div class="meta">The Guardian &bull; Republican senator faces critical re-election battle in state where president’s trade war has outraged voters Donald Trump dropped some of the US’s tariffs on Canada on Friday to “better serve the public interest” the…</div>
+          
+        </div>
+        
+      </div>
+    </details>
+    
+    <details class="domain">
+      <summary>📈 STOCK MARKETS & TRADING <span class="count">(5)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMi2AFBVV95cUxNUTYxYll4MmtjMWtlZ3ZTMzdvTUdWcFN4amxzTE14bDBZX0RMQUV3eDk0MEt3WWpLSXYzNk9oZTFvcHlhZkgybzJyZGFQOXpvdDdVNGFZMUhKXy1meVppYlJ6Y2NiMmg1dmhiaVVZNHdiU3F2VjhGLVZkcElrQmQ5VmNtRmpJbms1dkg5dm5zV2ZYUDl3SjhPbDNUdEV1aENZV01XRFJ4U05LeTNEQTBmcklheEpfaUJOclMteFV5Q0tGLW5ydXNfUExpQWZIVDFaeUZRSFhYdUo?oc=5" class="title" target="_blank" rel="noopener">Why is Stock Market Falling Today? Sensex Down 405 Pts, Nifty Below 24,000 Mark | Key Reasons Explained</a>
+          <div class="meta">Goodreturns, NDTV Profit, News18</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMihAFBVV95cUxQaXR6aVAzc3Y3UHctRW9HeXpBdDF4QWItU1lEbU1JWGVlRFpnazlLeDZxX2hDTmJMaXNJSUo3Z1FxQzhNZzF6MjQ5ZFRZakVMckRYM1Nwb2t3R1c4VldfTUNoRlMyUjNiVGFMVV9HNmNiZmVBbU02enhuVUM2TkhvNEdiTHg?oc=5" class="title" target="_blank" rel="noopener">Wall Street loses ground under pressure from rising oil prices, more swings for Big Tech stocks</a>
+          <div class="meta">Chicago Tribune, Toledo Blade</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://economictimes.indiatimes.com/markets/ipos/fpos/jio-ipo-becomes-first-public-issue-globally-to-cross-1-crore-applications-record-puts-spotlight-on-depth-of-indias-retail-investor-base/articleshow/135144742.cms" class="title" target="_blank" rel="noopener">Jio IPO becomes first public issue globally to cross 1 crore applications; record puts spotlight on depth of India’s retail investor base</a>
+          <div class="meta">Economic Times Markets, The Hindu Business &bull; Jio Platforms has achieved a remarkable milestone, garnering over one crore applications for its upcoming initial public offering. This surge signifies a burgeoning interest from India&#x27;s retail investors in technology…</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.thehindu.com/business/infosys-q2-net-jumps-6to-7823-crore-to-pay-interim-dividend-of-26share/article71616998.ece" class="title" target="_blank" rel="noopener">Infosys Q2 net jumps 6%to ₹7,823 crore, to pay interim dividend of ₹26/share</a>
+          <div class="meta">The Hindu Business, Economic Times Markets &bull; The tech firm cuts FY27 revenue guidance to 1%-2% amid demand uncertainty triggered by subdued volumes, rising pricing pressure, higher productivity expectations from clients and weakness in discretionary spends across…</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.cnbc.com/2026/10/23/trump-mortgage-executive-order-costs.html" class="title" target="_blank" rel="noopener">Trump&#x27;s executive order targets mortgage insurance, refinance costs. What it means for borrowers</a>
+          <div class="meta">CNBC &bull; Trump&#x27;s executive order on housing aims to lower mortgage costs. Here&#x27;s what it means for homeowners and buyers.</div>
+          
+        </div>
+        
+      </div>
+    </details>
+    
+    <details class="domain">
+      <summary>🌍 GEOPOLITICS & DIPLOMACY <span class="count">(5)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://www.thehindu.com/news/international/us-energy-department-designates-helium-as-critical-material/article71617792.ece" class="title" target="_blank" rel="noopener">U.S. Energy Department designates helium as critical material</a>
+          <div class="meta">The Hindu, AP News &bull; The designation advances ‌the Trump administration’s push to ‌reduce ⁠U.S. reliance on ⁠foreign critical minerals, bolster domestic manufacturing and secure key materials for economic ​and national security, ‌says U.S.…</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.ndtv.com/world-news/us-could-absolutely-strike-iran-this-weekend-says-envoy-12227693#publisher=newsstand" class="title" target="_blank" rel="noopener">US Could &quot;Absolutely&quot; Strike Iran This Weekend, Says Envoy</a>
+          <div class="meta">NDTV, Israel National News &bull; &quot;Could there be a strike this weekend? Absolutely,&quot; said Tom Barrack.</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.ndtv.com/world-news/american-express-cutting-5-of-global-workforce-12227754#publisher=newsstand" class="title" target="_blank" rel="noopener">American Express Cutting 5% Of Global Workforce</a>
+          <div class="meta">NDTV, CNBC &bull; American Express announced Friday it is cutting 5 percent of its global workforce, or around 3,800 jobs.</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMijAFBVV95cUxOb1J2Zjh6ejd6YUtYQXM2VU1zZGRhQXhJM2FZX2VobnRmNHF0NHZTZkdNNkRnbk1GSEswR3VyYU9XUHdBemJkWXJydkRILVNtaThlZFhGN0lLWGlBSFA3U192SnFyUWNjUE9rbm9yOXhnTm1OaGMyMTVxcDdLelI3MzRJOWI5QTQ5UUkxRQ?oc=5" class="title" target="_blank" rel="noopener">China’s fifth plenum, from the ground up</a>
+          <div class="meta">South China Morning Post, Reuters</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.theglobeandmail.com/politics/article-carney-in-turkey/" class="title" target="_blank" rel="noopener">Carney in Turkey says ‘no merit’ to claims of Canada meddling in U.S. midterms</a>
+          <div class="meta">The Globe and Mail, CBC &bull; Prime Minister says he is disappointed the U.S. envoy keeps making false allegations about Canadian politicians</div>
+          
+        </div>
+        
+      </div>
+    </details>
+    
+    <details class="domain">
+      <summary>⚔️ WARS & CONFLICTS <span class="count">(5)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMiYkFVX3lxTFBlRlQ4RC05UmV2WVRmdnowTF9pcjNIXzNmRFFsOXZCRldFdm5lMTdDbFBsa0lTOFEwYlFNTzNsWHdqU3U3WUgtTmxCQXF1LUVTbFlyUzczb3ZGenRJOE9vcm53?oc=5" class="title" target="_blank" rel="noopener">Trump Signals Possible New Iran Strike While Debating War’s End, Senators Warn of Rising Fuel Costs</a>
+          <div class="meta">Forth.News, Center for American Progress</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.ndtv.com/world-news/7-killed-34-injured-as-gunmen-open-fire-in-jordan-church-during-funeral-12226991#publisher=newsstand" class="title" target="_blank" rel="noopener">7 Killed, 34 Injured As Gunmen Open Fire In Jordan Church During Funeral</a>
+          <div class="meta">NDTV, AP News &bull; The shooting took place at a Greek Orthodox church in Karak, about 180 kilometres south of Amman.</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.theguardian.com/world/2026/oct/23/macron-condemns-racism-after-one-killed-in-terrorist-shooting-near-paris" class="title" target="_blank" rel="noopener">Macron condemns racism after one killed in ‘terrorist’ shooting near Paris</a>
+          <div class="meta">The Guardian, BBC World &bull; Gunman opens fire from car in Trappes and Verrière, killing one and injuring five others, including a 12-year-old girl Emmanuel Macron has condemned racism in French society after a gunman opened fire from a car west of…</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.aljazeera.com/video/newsfeed/2026/10/23/aje-onl-nf_masked-gunmen-kill-seven-in-attack-on-church-jordan-231026?traffic_source=rss" class="title" target="_blank" rel="noopener">Masked gunmen kill seven in attack on church funeral in Jordan</a>
+          <div class="meta">Al Jazeera, BBC World &bull; At least seven people were killed and 34 wounded after two masked gunmen opened fire at a church in Karak, Jordan.</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://nypost.com/2026/10/23/world-news/deadly-fire-at-canada-military-base-was-caused-by-live-grenade-exercise-army-says/" class="title" target="_blank" rel="noopener">Deadly fire at Canada military base was caused by live grenade exercise, army says</a>
+          <div class="meta">New York Post, Al Jazeera &bull; A fast-moving grass fire that killed at least ​four soldiers at a western Canadian ‌military base on Saturday was sparked by an exercise using live ​grenades, a senior defense ​official said on Thursday.</div>
+          
+        </div>
+        
+      </div>
+    </details>
+    
+    <details class="domain">
+      <summary>📊 COMMODITIES & PRICES <span class="count">(5)</span></summary>
+      <div class="domain-content">
+        
+        <div class="item ">
+          <a href="https://www.thehindu.com/sport/mona-and-nishad-to-be-indias-flag-bearers-at-closing-ceremony-of-asian-para-games/article71617943.ece" class="title" target="_blank" rel="noopener">Mona and Nishad to be India&#x27;s flag-bearers at closing ceremony of Asian Para Games</a>
+          <div class="meta">The Hindu &bull; Both Agarwal and Kumar won two gold medals each at the Games.</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMidkFVX3lxTE50c2p4Sm04Ujh0VVphWm85ZnVWM1hqMGNIeDRibm1ESW8wNTBXcTVxV29rQTZtcnJ1QTkyV2dCTjUwX0w1SGxtTDA2ZnU0M3Ewdi03QXVtTjhMaWdRbnc0OHRBeDBYLTVkTUNSOEVLMU1faTNtQ0E?oc=5" class="title" target="_blank" rel="noopener">Oil Prices Rise as Fears of U.S. Strike on Iran Grow</a>
+          <div class="meta">Barron&#x27;s</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMiYkFVX3lxTE9IMmJpUFU1RkdsMG9rN3dhRVp4QkQwbml4Rk42dFVjb1pTVkxLa0NaZ1pGdWN5RFRrUndqRWdNdWFmMG9OU1dqWnJVbmk0aWdpdTZHcEQ4ZGRld2EzenZHdVpR?oc=5" class="title" target="_blank" rel="noopener">Current price of oil as of Oct. 23, 2026</a>
+          <div class="meta">Fortune, Yahoo Finance</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://www.marketwatch.com/story/oil-markets-are-on-edge-ahead-of-the-weekend-as-midterm-elections-near-and-fresh-u-s-strikes-on-iran-are-predicted-8c27e634?mod=mw_rss_topstories" class="title" target="_blank" rel="noopener">Oil markets are on edge ahead of the weekend, as midterm elections near and fresh U.S. strikes on Iran are predicted</a>
+          <div class="meta">MarketWatch &bull; Oil has climbed back to an Iran-war high and may soon go higher, if the U.S. and Israel strike Iran after their respective voters go to the polls in the coming days.</div>
+          
+        </div>
+        
+        <div class="item ">
+          <a href="https://news.google.com/rss/articles/CBMihAFBVV95cUxNdnAxZDQyZDNDMlh4aTdCaUFFbnlNb0xEbkVoV09HVFZMaV9zM3hjWDEyM3dXYlNfZHk4WERpSnhMenN2eEpnNVZWMEpzbWtYZ2dIUTBIcEE1SDE2NjVkcjhUenJFS2tfU0NBaXlOMXVqdjFfR3RGZ1o3aXpjN0luQmtuY1g?oc=5" class="title" target="_blank" rel="noopener">Wildfires Break Out in Canada’s Oil Sands Region - Energy News, Top Headlines, Commentaries, Features &amp; Events</a>
+          <div class="meta">EnergyNow.com</div>
+          
+        </div>
+        
+      </div>
+    </details>
+    
+      </div>
+      <div class="market-snapshot">
+        <h3>📉 Market Snapshot</h3>
+        <div class="ticks">
+        <div class="tick">
+          <div class="tick-label">S&amp;P 500</div>
+          <div class="tick-price">7,623.68</div>
+          <div class="tick-change down">▼ -0.52%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">Nasdaq</div>
+          <div class="tick-price">25,955.34</div>
+          <div class="tick-change down">▼ -0.21%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">Nifty 50</div>
+          <div class="tick-price">22,600.00</div>
+          <div class="tick-change down">▼ -0.93%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">TSX</div>
+          <div class="tick-price">35,788.18</div>
+          <div class="tick-change down">▼ -0.52%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">USD/INR</div>
+          <div class="tick-price">94.930</div>
+          <div class="tick-change up">▲ +0.23%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">USD/CAD</div>
+          <div class="tick-price">1.4002</div>
+          <div class="tick-change down">▼ -0.00%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">Gold</div>
+          <div class="tick-price">4,010.00</div>
+          <div class="tick-change down">▼ -1.24%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">WTI Crude</div>
+          <div class="tick-price">103.44</div>
+          <div class="tick-change up">▲ +3.99%</div>
+        </div>
+        <div class="tick">
+          <div class="tick-label">BTC</div>
+          <div class="tick-price">81,059</div>
+          <div class="tick-change down">▼ -0.28%</div>
+        </div></div>
+      </div>
+      <div class="intel"><h3>🔗 Intelligence Brief</h3><p class="bottom-line">Tonight&#x27;s defining tension is the collision of a potential US-Iran conflict driving oil to six-month highs with midterm-driven tariff theater that offers Canada only tactical relief. Meanwhile, India&#x27;s record IPO frenzy masks a brutal secondary market selloff, and the AI capex boom is fracturing into haves (Nvidia, data center builders) and have-nots (software monetization laggards).</p><h4>Causal chains</h4><div class="intel-item"><b>US-Iran Escalation Drives Oil &amp; Market Risk-Off</b><br>Trump signals possible new military operation against Iran → Oil prices surge to six-month high above $116/barrel → Equity markets sell off on inflation and rate-hike fears</div><div class="intel-item"><b>Midterm Pressure Forces Targeted Tariff Relief for Canada</b><br>Close US midterm races pressure White House → Trump lifts 50% tariffs on select Canadian goods to aid Senator Collins in Maine → New tariffs imposed on replacement products, keeping trade uncertainty alive</div><div class="intel-item"><b>AI Capex Boom vs. Valuation Doubts Split Tech</b><br>BoFA projects US data centre spending to double to $2.1T by 2028 → Nvidia and semiconductor ETFs see record inflows then sharp reversals → Big Tech stocks swing wildly as investors question AI monetization timeline</div><div class="intel-item"><b>India Retail Depth Shines Amid Market Rout</b><br>Jio IPO attracts record 1 crore applications, highlighting retail investor base → Sensex and Nifty hit 1-year lows, wiping out Rs 4.75 lakh crore → Strong IPO demand contrasts with secondary market selloff driven by global risk-off</div><h4>Second-order effects</h4><div class="intel-item">US designates helium as critical material ⇒ <b>Accelerates strategic stockpiling and domestic production incentives, benefiting US industrial gas suppliers and semiconductor fabs reliant on helium for cooling</b></div><div class="intel-item">Bank of Canada projected to raise rates to 2.50% by Oct 28 and again by March ⇒ <b>Tightens Canadian mortgage and corporate borrowing costs just as US tariff relief provides marginal export relief, creating divergent policy pressure on CAD</b></div><div class="intel-item">OpenAI shifts frontier model training offline after cyber incidents ⇒ <b>Signals new security paradigm for AI labs, likely increasing compute costs and slowing iteration cycles for frontier models across the industry</b></div><div class="intel-item">IndiGo extends Saudi flight cancellations till Oct 27 amid Houthi attacks ⇒ <b>Disrupts India-Gulf travel and remittance corridors, pressures Indian aviation yields, and signals persistent Red Sea risk premium for shipping and insurance</b></div><div class="intel-item">American Express cutting 5% of global workforce to &#x27;prepare for AI&#x27; ⇒ <b>Early signal of white-collar displacement in financial services, likely to accelerate across banking, insurance, and payments sectors</b></div><h4>If-then scenarios (1-2 weeks)</h4><div class="intel-item"><b>If</b> US launches military strike on Iran before US midterms (Nov 3) <b>then</b> Oil spikes above $130, global equities correct 5-10%, Fed forced to choose between inflation fight and growth support, Canada energy sector benefits but trade disrupted <span class="badge">medium</span><br><span class="muted">Watch: US carrier group movements in Gulf, Iran missile tests, UNSC emergency session</span></div><div class="intel-item"><b>If</b> Bank of Canada hikes 25bps on Oct 28 as projected <b>then</b> CAD strengthens modestly vs USD, Canadian mortgage delinquencies rise in Q1 2027, housing markets in Toronto/Vancouver see further price softening <span class="badge">high</span><br><span class="muted">Watch: BoC policy statement language on &#x27;gradual return to neutral&#x27;, CPI data Oct 27</span></div><div class="intel-item"><b>If</b> Jio IPO listing pops &gt;20% on debut <b>then</b> Validates India retail depth narrative, triggers wave of mega-IPO filings (Flipkart, Swiggy, Byju&#x27;s), but secondary market remains vulnerable to FII outflows <span class="badge">medium</span><br><span class="muted">Watch: Grey market premium trends, anchor investor allocation, FII flows in week of listing</span></div><div class="intel-item"><b>If</b> Meta delays new commercial terms for publishers/advertisers beyond Q4 <b>then</b> Digital ad market uncertainty persists, hurting mid-cap ad-tech and publisher stocks, while Meta conserves cash amid AI capex ramp <span class="badge">high</span><br><span class="muted">Watch: Meta Q3 earnings call commentary, publisher coalition responses, FTC/DOJ antitrust signals</span></div><h4>Contrarian signals</h4><div class="intel-item">Record 1 crore applications for Jio IPO while Nifty hits 1-year low<br><span class="muted">Consensus: India market rout signals broad-based risk aversion and weakening fundamentals</span></div><div class="intel-item">Trump lifts tariffs on some Canadian goods but adds others, net protectionism unchanged<br><span class="muted">Consensus: Tariff relief signals de-escalation and Canada-US trade normalization</span></div><div class="intel-item">Nvidia CEO encourages Europe&#x27;s &#x27;lagging&#x27; AI sector and unveils shipping-container AI factory<br><span class="muted">Consensus: Nvidia dominance is unassailable, AI capex boom benefits all semiconductor names equally</span></div><p class="muted small">AI-generated analysis from headlines; not investment advice.</p></div>
+    </section>
+    
+
+    <footer>
+      Auto-generated by News Digest Bot &bull; <a href="https://github.com/manangoesagain/news-pipeline" style="color: var(--accent); text-decoration: none;">GitHub</a>
+    </footer>
+  </div>
+</body>
+</html>

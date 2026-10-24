@@ -1,0 +1,636 @@
+{
+  "timestamp": "20261024_1553",
+  "datetime": "2026-10-24T15:53:44.914870-04:00",
+  "ranked_by": "nvidia/nemotron-3-ultra-550b-a55b",
+  "breaking": [
+    {
+      "title": "Live - US warships ready for potential strikes on Iran, WSJ reports",
+      "summary": "",
+      "link": "https://news.google.com/rss/articles/CBMiXkFVX3lxTFBiblkxNnVtVlJKZk9CWDVFRTZvY2F6bWZORmVtSkR4NVY4VzZQa3dPZy1KNE5EbUpvMWF3TDk0VEY5QnAzTmFWS3FjenBLRHdpU2UtMjVKZlphZl9tRkE?oc=5",
+      "source": "Iran International",
+      "sources": [
+        "Iran International"
+      ],
+      "published": "2026-10-24T13:13:11-04:00",
+      "domain": "Wars & Conflicts",
+      "region": "Global",
+      "score": 9.8,
+      "why": "US warships ready for potential strikes on Iran"
+    },
+    {
+      "title": "Iran vows ‘apocalyptic war’ if U.S. strikes again",
+      "summary": "Iranian officials have warned in recent days that they would retaliate by targeting Persian Gulf countries in the event of renewed U.S. attacks; in the first and second phases of the war, Iran had retaliated by striking…",
+      "link": "https://www.thehindu.com/news/international/iran-warns-of-apocalyptic-war-if-attacked-again/article71620849.ece",
+      "source": "The Hindu",
+      "sources": [
+        "The Hindu"
+      ],
+      "published": "2026-10-24T15:02:40-04:00",
+      "domain": "Wars & Conflicts",
+      "region": "Global",
+      "score": 8.8,
+      "why": "Iran vows apocalyptic war if US strikes again"
+    },
+    {
+      "title": "Hundreds of thousands march in France as protests take place across Europe – Europe live",
+      "summary": "French police have made 1,000 arrests and Italian officers have raided homes in Milan, with protests also taking place in Spain and Albania Jesse, 40, a charity worker from the north of Paris, had turned out for the…",
+      "link": "https://www.theguardian.com/world/live/2026/oct/24/france-demonstrations-police-macron-italy-albania-belgium-spain-ukraine-russia-europe-latest-news",
+      "source": "The Guardian",
+      "sources": [
+        "The Guardian"
+      ],
+      "published": "2026-10-24T15:37:59-04:00",
+      "domain": "Geopolitics & Diplomacy",
+      "region": "Other",
+      "score": 7.3,
+      "why": "Hundreds of thousands protest across Europe"
+    }
+  ],
+  "domains": {
+    "AI & ML": [
+      {
+        "title": "OpenAI Resumes Training AI Models Without Internet After Cyber Incidents",
+        "summary": "Concerns are mounting over the ability of AI agents to exploit software flaws",
+        "link": "https://www.ndtv.com/world-news/openai-resumes-training-ai-models-without-internet-after-cyber-incidents-12228398#publisher=newsstand",
+        "source": "NDTV",
+        "sources": [
+          "NDTV",
+          "TechCrunch",
+          "The Verge",
+          "The New Indian Express",
+          "Українські Національні Новини (УНН)",
+          "Bloomberg.com"
+        ],
+        "published": "2026-10-24T09:33:27-04:00",
+        "domain": "AI & ML",
+        "region": "Global",
+        "score": 9.0,
+        "why": "OpenAI resumes training after cyber incidents"
+      },
+      {
+        "title": "Pennsylvania will require labels on AI-generated ads",
+        "summary": "On Thursday, Pennsylvania Governor Josh Shapiro signed the Artificial Intelligence Deceptive Advertising Act into law, requiring disclosures on AI-generated ads. The law requires any ad - whether it's a still image,…",
+        "link": "https://www.theverge.com/ai-artificial-intelligence/1018187/pennsylvania-ai-deceptive-advertising-act",
+        "source": "The Verge",
+        "sources": [
+          "The Verge"
+        ],
+        "published": "2026-10-24T14:32:21-04:00",
+        "domain": "AI & ML",
+        "region": "US",
+        "score": 8.6,
+        "why": "Pennsylvania requires labels on AI-generated ads"
+      },
+      {
+        "title": "Instacart reportedly discussed selling itself with DoorDash and Uber",
+        "summary": "Instacart might sell itself to a larger competitor.",
+        "link": "https://techcrunch.com/2026/10/24/instacart-reportedly-discussed-selling-itself-with-doordash-and-uber/",
+        "source": "TechCrunch",
+        "sources": [
+          "TechCrunch"
+        ],
+        "published": "2026-10-24T12:30:00-04:00",
+        "domain": "AI & ML",
+        "region": "US",
+        "score": 8.6,
+        "why": "Instacart discusses sale to DoorDash or Uber"
+      },
+      {
+        "title": "Block’s new voice model sounds eerily human",
+        "summary": "Block said that the voice model can run locally on a MacBook M4 Max",
+        "link": "https://techcrunch.com/2026/10/24/blocks-new-voice-model-sounds-eerily-human/",
+        "source": "TechCrunch",
+        "sources": [
+          "TechCrunch",
+          "The Economic Times"
+        ],
+        "published": "2026-10-24T12:00:00-04:00",
+        "domain": "AI & ML",
+        "region": "US",
+        "score": 7.9,
+        "why": "Block's voice model runs locally on MacBook"
+      },
+      {
+        "title": "Think young Canadians don’t read newspapers? Think again.",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMitAFBVV95cUxOUFQtRVl6RlNLamoyU0lPMnBjSExMWG84UmFwa0FnaEh3RUJrWk5URFd4R0dYZkxLZlFvQmxSR1o1NGYteGQyUlJBUUJKeFo2a3NTeXFvWDNucGEtc3dGaFNCYU5MeUF1ekczUjN2bHRiUklrRmRJWjAtWnU0WHVSUEl2UEY1MS1xQzJGUzZhWmJsR1lXZTVGSXpjU1VfV05qWWE0LWdmWnBMa2FKZ0dyZ19lVDI?oc=5",
+        "source": "St. Albert Gazette",
+        "sources": [
+          "St. Albert Gazette"
+        ],
+        "published": "2026-10-24T14:42:00-04:00",
+        "domain": "AI & ML",
+        "region": "India",
+        "score": 7.8,
+        "why": "Anthropic admits Indian subsidiary in court"
+      }
+    ],
+    "Technology & Semiconductors": [
+      {
+        "title": "Centre backs A.P.’s semiconductor push, approves rail links for nine ports",
+        "summary": "Ashwini Vaishnaw assures support for chip-sector research, skilling and AI; agrees to a Vande Bharat sleeper train between Visakhapatnam and Bengaluru via Tirupati as Chandrababu Naidu seeks approval for key railway…",
+        "link": "https://www.thehindu.com/news/national/andhra-pradesh/centre-backs-aps-semiconductor-push-approves-rail-links-for-nine-ports/article71621247.ece",
+        "source": "The Hindu",
+        "sources": [
+          "The Hindu"
+        ],
+        "published": "2026-10-24T14:16:21-04:00",
+        "domain": "Technology & Semiconductors",
+        "region": "India",
+        "score": 9.8,
+        "why": "Centre backs Andhra semiconductor push with rail links"
+      },
+      {
+        "title": "Apple Joins Nvidia in the $5 Trillion Club. Here's Which Stock I Think Can Get to $10 Trillion First.",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMifkFVX3lxTFBiNjZOalgwaTZNLVlEOXN0M2drOWxvOFRGQmcya1d4bE5mc2tWOTcxNnlTN3VNQUFFQTJrMG90Y3dzT25FUVR3aWFKeVk4ZzdwNzNvMjQ2TFVIWTNjT3lCNXVzbHFOR292RGY1REdkVGRJOGw0ZXk1aWNQY3pTZw?oc=5",
+        "source": "AOL.com",
+        "sources": [
+          "AOL.com"
+        ],
+        "published": "2026-10-24T13:37:00-04:00",
+        "domain": "Technology & Semiconductors",
+        "region": "US",
+        "score": 7.6,
+        "why": "Apple joins Nvidia in $5 trillion market cap club"
+      },
+      {
+        "title": "Healthcare challenges require collaborative, technology-ledsolutions, says Health Secretary",
+        "summary": "He was speaking at the Confederation of Indian Industry’s TN MedClave, 2026",
+        "link": "https://www.thehindu.com/news/cities/chennai/healthcare-challenges-require-collaborative-technology-ledsolutions-says-health-secretary/article71619284.ece",
+        "source": "The Hindu",
+        "sources": [
+          "The Hindu"
+        ],
+        "published": "2026-10-24T15:30:42-04:00",
+        "domain": "Technology & Semiconductors",
+        "region": "India",
+        "score": 6.8,
+        "why": "Health Secretary urges tech-led healthcare solutions"
+      },
+      {
+        "title": "Mercedes-Benz And Nvidia Are Taking Their Self-Driving Partnership To Level 4",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMioAFBVV95cUxQSjdFbE5UNFJNYUluMnhDd0xoZm9WSWNZVXpZdHRPYzRYOXhicjdyZDBIUXZ4dWtoNVAxS1N4Y1V1akR1c2I3dVJ4SVBuLVRiM3BiMGFxNnRETW9UR2VyWklpWjFxUGNzejE0blhFYU44U1NVcmlHODRLbUVYUm9DNHZiS19jbkg0TVFRMzlBcEJMNENwOUE0RzJTcE5PTWtj?oc=5",
+        "source": "Yahoo Autos",
+        "sources": [
+          "Yahoo Autos"
+        ],
+        "published": "2026-10-24T15:00:55-04:00",
+        "domain": "Technology & Semiconductors",
+        "region": "Global",
+        "score": 6.8,
+        "why": "Mercedes-Benz and Nvidia advance self-driving partnership"
+      },
+      {
+        "title": "Eight KLE tech varsity researchers feature in global top 2% list of scientists",
+        "summary": "Eight researchers from KLE Technological University, Hubballi, have been featured in the 2026 single-year rankings of the world’s top 2% scientists, while five have been recognised for their career-long scientific impact",
+        "link": "https://www.thehindu.com/news/national/karnataka/eight-kle-tech-varsity-researchers-feature-in-global-top-2-list-of-scientists/article71619939.ece",
+        "source": "The Hindu",
+        "sources": [
+          "The Hindu"
+        ],
+        "published": "2026-10-24T14:53:08-04:00",
+        "domain": "Technology & Semiconductors",
+        "region": "India",
+        "score": 5.8,
+        "why": "KLE Tech researchers in global top 2% list"
+      }
+    ],
+    "Finance & Banking": [
+      {
+        "title": "Kotak Mahindra Bank Q2 results: Consolidated PAT rises 26% YoY to Rs 5,645 crore; NII up 16%",
+        "summary": "Kotak Mahindra Bank has announced an impressive 26% year-on-year increase in consolidated profit after tax for the second quarter, highlighting strong financial performance. Their standalone profit after tax surged by…",
+        "link": "https://economictimes.indiatimes.com/markets/stocks/earnings/kotak-mahindra-bank-q2-results-consolidated-pat-rises-26-yoy-to-rs-5645-crore-lenders-nii-up-16/articleshow/135165924.cms",
+        "source": "Economic Times Markets",
+        "sources": [
+          "Economic Times Markets",
+          "Moneycontrol"
+        ],
+        "published": "2026-10-24T04:24:37-04:00",
+        "domain": "Finance & Banking",
+        "region": "India",
+        "score": 9.1,
+        "why": "Kotak Mahindra Bank Q2 PAT rises 26% YoY"
+      },
+      {
+        "title": "AU Small Finance Bank Q2 profit jumps 53% to 858 crore",
+        "summary": "“Total income rose to ₹6,382 crore in the quarter under review from ₹5,224 crore in the same period a year ago,” AU Small Finance Bank said in a regulatory filing",
+        "link": "https://www.thehindu.com/business/Industry/au-small-finance-bank-q2-profit-jumps-53-to-858-crore/article71621133.ece",
+        "source": "The Hindu Business",
+        "sources": [
+          "The Hindu Business",
+          "Economic Times Markets"
+        ],
+        "published": "2026-10-24T12:53:44-04:00",
+        "domain": "Finance & Banking",
+        "region": "India",
+        "score": 8.1,
+        "why": "AU Small Finance Bank Q2 profit jumps 53%"
+      },
+      {
+        "title": "Kotak Mahindra Bank's Q2 net profit jumps 27% to Rs 5,634 crore",
+        "summary": "The company had reported a net profit of Rs 5,487.06 crore in the June quarter of the current financial year.",
+        "link": "https://www.moneycontrol.com/news/business/earnings/kotak-mahindra-bank-s-q2-net-profit-jumps-27-to-rs-5-634-crore-14058928.html",
+        "source": "Moneycontrol",
+        "sources": [
+          "Moneycontrol",
+          "Google News"
+        ],
+        "published": "2026-10-24T03:53:35-04:00",
+        "domain": "Finance & Banking",
+        "region": "India",
+        "score": 8.1,
+        "why": "Kotak Mahindra Bank Q2 net profit jumps 27%"
+      },
+      {
+        "title": "IRDAI extends distribution reforms feedback timeline to Oct 31",
+        "summary": "The consultation process has received an encouraging response, with over 650 comments received thus far.",
+        "link": "https://www.thehindu.com/business/Industry/irdai-extends-distribution-reforms-feedback-timeline-to-oct-31/article71620935.ece",
+        "source": "The Hindu Business",
+        "sources": [
+          "The Hindu Business"
+        ],
+        "published": "2026-10-24T12:20:13-04:00",
+        "domain": "Finance & Banking",
+        "region": "India",
+        "score": 6.8,
+        "why": "IRDAI extends distribution reforms feedback timeline"
+      },
+      {
+        "title": "Toronto police seeking mother, 22, for allegedly abducting her 3 children",
+        "summary": "Toronto police are seeking the public’s help in locating three missing children, allegedly abducted by their mother from the Midland Avenue and Eglinton Avenue East area.",
+        "link": "https://www.cbc.ca/news/canada/toronto/mother-abduction-three-children-toronto-police-9.7394791?cmp=rss",
+        "source": "CBC News",
+        "sources": [
+          "CBC News"
+        ],
+        "published": "2026-10-24T14:48:25-04:00",
+        "domain": "Finance & Banking",
+        "region": "Canada",
+        "score": 5.5,
+        "why": "Toronto police seek mother for child abduction"
+      }
+    ],
+    "Stock Markets & Trading": [
+      {
+        "title": "Big action! Who is Avadhut Sathe? Why SEBI ordered Avadhut Sathe Trading Academy to refund ₹546 cr - What he did?",
+        "summary": "SEBI ordered Avadhut Sathe and his trading academy to refund ₹546.17 crore, plus ₹67.87 crore in interest, for providing unregistered investment advice and research services. The regulator also imposed ₹11.5 crore in…",
+        "link": "https://www.livemint.com/market/stock-market-news/big-action-who-is-avadhut-sathe-why-sebi-ordered-avadhut-sathe-trading-academy-to-refund-rs-546-cr-what-he-did-11792848745624.html",
+        "source": "Mint Markets",
+        "sources": [
+          "Mint Markets",
+          "Economic Times Markets"
+        ],
+        "published": "2026-10-24T10:41:07-04:00",
+        "domain": "Stock Markets & Trading",
+        "region": "India",
+        "score": 9.1,
+        "why": "SEBI orders Avadhut Sathe Academy to refund ₹546 cr"
+      },
+      {
+        "title": "American embassies tighten security as Iran threat warnings intensify ahead of U.S. midterm elections",
+        "summary": "A memo from DNI director Jay Clayton said Iran is in the \"advanced stages\" of planning attacks against Americans.",
+        "link": "https://www.cnbc.com/2026/10/24/iran-threats-us-embassies-middle-east.html",
+        "source": "CNBC",
+        "sources": [
+          "CNBC"
+        ],
+        "published": "2026-10-24T13:22:21-04:00",
+        "domain": "Stock Markets & Trading",
+        "region": "US",
+        "score": 8.6,
+        "why": "US embassies tighten security on Iran threat warnings"
+      },
+      {
+        "title": "AI funding fears rattle Wall Street. Here's how we're adjusting our portfolio",
+        "summary": "The rotation out of AI stocks benefited several defensive Club stocks.",
+        "link": "https://www.cnbc.com/investingclub/2026/10/24/ai-funding-fears-rattle-wall-street-heres-how-were-adjusting-our-portfolio.html",
+        "source": "CNBC",
+        "sources": [
+          "CNBC"
+        ],
+        "published": "2026-10-24T12:14:00-04:00",
+        "domain": "Stock Markets & Trading",
+        "region": "US",
+        "score": 8.6,
+        "why": "AI funding fears rattle Wall Street portfolios"
+      },
+      {
+        "title": "Trump says he ordered DOJ suit to block Alaska Senate race certification if Republican loses",
+        "summary": "There are two Dan Sullivans on the ballot in the Senate race in Alaska. The DOJ says that fact could help Democratic nominee Mary Peltola defeat both of them.",
+        "link": "https://www.cnbc.com/2026/10/23/alaska-senate-election-doj-lawsuit-sullivan.html",
+        "source": "CNBC",
+        "sources": [
+          "CNBC",
+          "AP News"
+        ],
+        "published": "2026-10-23T22:44:00-04:00",
+        "domain": "Stock Markets & Trading",
+        "region": "US",
+        "score": 7.9,
+        "why": "Trump orders DOJ suit on Alaska Senate race"
+      },
+      {
+        "title": "Wall Street loses ground under pressure from rising oil prices, more swings for Big Tech stocks",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMihAFBVV95cUxQaXR6aVAzc3Y3UHctRW9HeXpBdDF4QWItU1lEbU1JWGVlRFpnazlLeDZxX2hDTmJMaXNJSUo3Z1FxQzhNZzF6MjQ5ZFRZakVMckRYM1Nwb2t3R1c4VldfTUNoRlMyUjNiVGFMVV9HNmNiZmVBbU02enhuVUM2TkhvNEdiTHg?oc=5",
+        "source": "Chicago Tribune",
+        "sources": [
+          "Chicago Tribune",
+          "AP News"
+        ],
+        "published": "2026-10-23T17:42:15-04:00",
+        "domain": "Stock Markets & Trading",
+        "region": "US",
+        "score": 7.9,
+        "why": "Wall Street falls on rising oil prices"
+      }
+    ],
+    "Geopolitics & Diplomacy": [
+      {
+        "title": "Kim Jong Un crosses new bridge linking North Korea and China",
+        "summary": "Kim Jong Un crosses new bridge linking North Korea and China",
+        "link": "https://www.aljazeera.com/video/newsfeed/2026/10/24/kim-jong-un-crosses-new-bridge-linking-north-korea-and-china?traffic_source=rss",
+        "source": "Al Jazeera",
+        "sources": [
+          "Al Jazeera",
+          "NDTV",
+          "The Guardian",
+          "AP News",
+          "Firstpost",
+          "Reuters"
+        ],
+        "published": "2026-10-24T14:00:20-04:00",
+        "domain": "Geopolitics & Diplomacy",
+        "region": "China",
+        "score": 9.2,
+        "why": "Kim Jong Un crosses new bridge linking North Korea and China"
+      },
+      {
+        "title": "Industry Minister Mélanie Joly wants to build an aluminum rolling mill in Canada",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMivgFBVV95cUxPSUNBemN1dGZEdUhsOE9hUklJdk44TXFSWTNBOFZMSWxwcmRDeWUwcmZkRDE5Ny1lcUdjamoyU05XcHdXeXdIVXQ0NnVjRlFSeWkxOHVEbVhCbXdVUFB1alZqTHJwYThweHB4VHVwaV9GcE4wcXc1eUtka0d2TUNTWk91aVlFdnZfdFFGUUJGSWlmZlFMYjVDbkFXZnRjZWJ0NFJKV3loYW1QdWVhTHN1SEJ1MVR6ZkcyY09zRmJ3?oc=5",
+        "source": "CTV News",
+        "sources": [
+          "CTV News"
+        ],
+        "published": "2026-10-24T13:38:41-04:00",
+        "domain": "Geopolitics & Diplomacy",
+        "region": "Canada",
+        "score": 8.5,
+        "why": "Minister Joly wants aluminum rolling mill in Canada"
+      },
+      {
+        "title": "J&K gets IAS officer Sajjan Singh Yadav as new Chief Secretary, will face files with CM-LG on different pages",
+        "summary": "Sajjan Singh Yadav will be succeeding Atal Dulloo who is due to retire on October 31, 2026",
+        "link": "https://www.thehindu.com/news/national/jammu-and-kashmir/ias-officer-sajjan-singh-yadav-to-be-new-jk-chief-secretary/article71619495.ece",
+        "source": "The Hindu",
+        "sources": [
+          "The Hindu",
+          "NDTV",
+          "Greater Kashmir"
+        ],
+        "published": "2026-10-24T13:44:38-04:00",
+        "domain": "Geopolitics & Diplomacy",
+        "region": "India",
+        "score": 8.4,
+        "why": "J&K gets new Chief Secretary Sajjan Singh Yadav"
+      },
+      {
+        "title": "US Asked Musk For Years To Alter Starlink Service In Ukraine, Middle East: Report",
+        "summary": "A Ukrainian serviceman of 47th brigade prepares a Starlink satellite internet systems",
+        "link": "https://www.ndtv.com/world-news/us-asked-elon-musk-for-years-to-alter-starlink-service-in-ukraine-middle-east-report-12228449#publisher=newsstand",
+        "source": "NDTV",
+        "sources": [
+          "NDTV",
+          "Reuters"
+        ],
+        "published": "2026-10-24T00:18:16-04:00",
+        "domain": "Geopolitics & Diplomacy",
+        "region": "Global",
+        "score": 8.1,
+        "why": "US asked Musk to alter Starlink in Ukraine, Middle East"
+      },
+      {
+        "title": "T.N. awaits Centre’s response to letters regarding Chennai’s existing and proposed airports",
+        "summary": "The State government’s letter in August asked the Centre to replace the AAI as the airport’s operator; in September, it sent a letter asking for a pre-feasibility study on two sites — Gummidipoondi and Cheyyur —…",
+        "link": "https://www.thehindu.com/news/cities/chennai/tn-awaits-centres-response-to-letters-regarding-chennais-existing-and-proposed-airports/article71620279.ece",
+        "source": "The Hindu",
+        "sources": [
+          "The Hindu"
+        ],
+        "published": "2026-10-24T14:31:38-04:00",
+        "domain": "Geopolitics & Diplomacy",
+        "region": "India",
+        "score": 7.8,
+        "why": "TN awaits Centre response on Chennai airports"
+      }
+    ],
+    "Wars & Conflicts": [
+      {
+        "title": "Trump's 'Epic Fury' Warning After US Envoy's 'Strike This Weekend' Remark, Iran Responds",
+        "summary": "According to Trump, he sees ending the war with Iran \"soon\".",
+        "link": "https://www.ndtv.com/world-news/trump-warns-of-another-little-epic-fury-irans-dont-play-with-fire-reply-us-iran-war-israel-12228279#publisher=newsstand",
+        "source": "NDTV",
+        "sources": [
+          "NDTV",
+          "Kyiv Post"
+        ],
+        "published": "2026-10-24T05:11:19-04:00",
+        "domain": "Wars & Conflicts",
+        "region": "Global",
+        "score": 9.1,
+        "why": "Trump warns of Iran strike, sees ending war soon"
+      },
+      {
+        "title": "Trump Warns of Possible New US Military Operation Against Iran",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMiowFBVV95cUxOMldnTDh6RTlnd0w5Zm1ObjZVcU1pN196X3ZWQUNkbDg1M21abDFmUTU5MGpyRk1fcWVtS2hyOXRHaFFyOGUtMU5VX0FWbHNFMVBGdzdIZkNSVHN3eGdJRzMtWHlwM2NUYWVMSU5vNEtQc2E5YnczS2xEMDdDd2psY3Y4bDJWX3QyZ2lQMWQ3V0RpTEJad05oQm9vT0NkcENMVVFR?oc=5",
+        "source": "Modern Diplomacy",
+        "sources": [
+          "Modern Diplomacy",
+          "Reuters"
+        ],
+        "published": "2026-10-24T04:58:44-04:00",
+        "domain": "Wars & Conflicts",
+        "region": "Global",
+        "score": 9.1,
+        "why": "Trump warns of possible US military operation vs Iran"
+      },
+      {
+        "title": "Middle East latest: Trump warns of 'another little Epic Fury' amid fears of renewed conflict",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMijwFBVV95cUxNTngtWlZKb2lHN2huS0pfMUtPZi1SYm0tOHRhMVpRV3ZpbW5ydGZfUVJ2SGtLTGZTR2ZQS1RpZEtzeDhQcUYwOVdyUGZoc1dlQVpUbTdJbGp1UTU4aFplZkJFX0pGMm1JSmVaOVpTN3BVbHZURkpUXzN1b3IyQ05TZ1VkYlp5dlJYTE9aRGZETQ?oc=5",
+        "source": "The National",
+        "sources": [
+          "The National"
+        ],
+        "published": "2026-10-24T13:30:11-04:00",
+        "domain": "Wars & Conflicts",
+        "region": "Global",
+        "score": 8.8,
+        "why": "Trump warns of 'Epic Fury' amid renewed conflict fears"
+      },
+      {
+        "title": "Israeli PM pledges massive military operation after West Bank checkpoint attack",
+        "summary": "Israel's Prime Minister is vowing to launch a major military operation in the West Bank in response to an attack by two Palestinian gunmen on an Israeli military checkpoint that killed two soldiers.",
+        "link": "https://www.npr.org/2026/10/23/nx-s1-6013613/israeli-pm-pledges-massive-military-operation-after-west-bank-checkpoint-attack",
+        "source": "NPR",
+        "sources": [
+          "NPR",
+          "The Washington Post"
+        ],
+        "published": "2026-10-23T19:14:53-04:00",
+        "domain": "Wars & Conflicts",
+        "region": "Other",
+        "score": 8.6,
+        "why": "Israeli PM pledges massive West Bank operation"
+      },
+      {
+        "title": "Nine killed and 40 injured after gunmen open fire at church funeral in Jordan",
+        "summary": "Footage broadcast on state TV shows three attackers approaching Greek Orthodox church and firing shots Nine people have been killed after gunmen opened fire at a funeral at a church in Jordan in a rare attack ⁠on the…",
+        "link": "https://www.theguardian.com/world/2026/oct/24/seven-killed-and-40-injured-after-gunmen-open-fire-at-church-funeral-in-jordan",
+        "source": "The Guardian",
+        "sources": [
+          "The Guardian",
+          "NPR"
+        ],
+        "published": "2026-10-24T10:24:15-04:00",
+        "domain": "Wars & Conflicts",
+        "region": "Other",
+        "score": 7.6,
+        "why": "Nine killed in Jordan church funeral shooting"
+      }
+    ],
+    "Commodities & Prices": [
+      {
+        "title": "Gold Falls to Three-Month Low, Oil Prices Fuel Fed Rate Concerns",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMisgFBVV95cUxOMHpfQWhCN2haOVlaTXBiMVo2ZGNmMURKdG54TVM1MGQwc2pSb29tZFNUYjJBM1V3VEthdl9OMGlwbHRlb1BXM2hzWUtZU3FWZnhEb1NfNlMwRGw2OWoyeGpoZ2EwRUhleWtENXUzWU1qMEpjamJQNTBoT2NZZGdCU1FQMEV0RjlyNktjX0pfbUpCX1dtTG41anpZcVdSMy1POVlnYnNPTEpnSkJPOEJ6cENR?oc=5",
+        "source": "Morocco World News",
+        "sources": [
+          "Morocco World News"
+        ],
+        "published": "2026-10-24T14:48:09-04:00",
+        "domain": "Commodities & Prices",
+        "region": "Global",
+        "score": 7.8,
+        "why": "Gold falls to three-month low, oil fuels rate concerns"
+      },
+      {
+        "title": "Voters angry about high prices may get little relief from the next Congress",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMiugFBVV95cUxQRmlodXU2TGlMWm1VZ0NYV3o5Qng3OVBxRDBKRGZJUjAxUVYwMnlOLUdyb1VQdFJYY21VMi1BZF9iZ3JFUm9lTVlZS2ZuNE5VNktvRllkc3E5eFplMzVwb182SFplZ1FJQ3doM1lkSnl3amd5OGw0UVpieGVEMU5fdExIdGY1d1Ezb0pYZV82RnAxbmhNNE9JWDJqNW52WnNRSWlEUXljRURDNExOM1BlVlp0Y0FWRHhJQ0E?oc=5",
+        "source": "The Washington Post",
+        "sources": [
+          "The Washington Post"
+        ],
+        "published": "2026-10-24T13:00:00-04:00",
+        "domain": "Commodities & Prices",
+        "region": "US",
+        "score": 7.6,
+        "why": "Voters angry about high prices may get little relief"
+      },
+      {
+        "title": "Houthis Claim They Targeted Riyadh, 2 Other Airports, Oil Facilities In Saudi",
+        "summary": "The targets included a pipeline. (File Photo)",
+        "link": "https://www.ndtv.com/world-news/yemen-houthis-say-targeted-3-saudi-airports-in-riyadh-dammam-najran-oil-facilities-in-last-24-hours-12231046#publisher=newsstand",
+        "source": "NDTV",
+        "sources": [
+          "NDTV"
+        ],
+        "published": "2026-10-24T12:52:27-04:00",
+        "domain": "Commodities & Prices",
+        "region": "Other",
+        "score": 7.3,
+        "why": "Houthis claim targeting Riyadh, airports, oil facilities"
+      },
+      {
+        "title": "LA, Orange County Gas Prices Drop Another 3 Cents Per Gallon",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxQblB0dUxILXJhU2VFME93LVcyV0lzcUhwR0hLUjZ2RFluMEFyTVM3SS1UVXVNLWE5VUpfWkR1UngtOW85YzNSNEJNNXFRTG9SajlMcTNsTFNKdXRiWTliM2NDRVYwQkR4VXZHMUNyS1VwNzhXdlRjbnN6RkVpZ1ppMXJKbENDbW1RbnZrdEFhaHVDMU1WaFpRLWF5LUtiUlJrNEhpT210REJ0QQ?oc=5",
+        "source": "MyNewsLA.com",
+        "sources": [
+          "MyNewsLA.com"
+        ],
+        "published": "2026-10-24T13:42:06-04:00",
+        "domain": "Commodities & Prices",
+        "region": "US",
+        "score": 4.6,
+        "why": "LA, Orange County gas prices drop 3 cents"
+      },
+      {
+        "title": "Riverside County Gas Prices Drop For 22nd Straight Day",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMioAFBVV95cUxQYXJQWFZ2cW1yTG5WbUR4anhuUHBoWDhMUmZ4QjQ0QkRNLTYtWngwNGtZUU5fbjZoUTF5clJlZXVHUjRvanJNVjhpakFXcTQtbThUSi0yZmVrTGRDNmZ6M3J1UXV5NGc3RjJ6QlpiSTY0dGJzRTUwN2dOdDY2RkhfWUpsa24zbzVfRGhJZWx6cGQ3VHY0NTF5UThMZXAxRDBj?oc=5",
+        "source": "MyNewsLA.com",
+        "sources": [
+          "MyNewsLA.com"
+        ],
+        "published": "2026-10-24T12:42:35-04:00",
+        "domain": "Commodities & Prices",
+        "region": "US",
+        "score": 4.6,
+        "why": "Riverside County gas prices drop for 22nd day"
+      }
+    ]
+  },
+  "market": [
+    {
+      "label": "S&P 500",
+      "price": 7623.68,
+      "change_pct": -0.5186995231831334,
+      "decimals": 2
+    },
+    {
+      "label": "Nasdaq",
+      "price": 25955.342,
+      "change_pct": -0.20576594393616868,
+      "decimals": 2
+    },
+    {
+      "label": "Nifty 50",
+      "price": 22600.0,
+      "change_pct": -0.38633524898293975,
+      "decimals": 2
+    },
+    {
+      "label": "TSX",
+      "price": 35788.18,
+      "change_pct": -0.5151569905624965,
+      "decimals": 2
+    },
+    {
+      "label": "USD/INR",
+      "price": 94.94,
+      "change_pct": 0.24146673111003467,
+      "decimals": 3
+    },
+    {
+      "label": "USD/CAD",
+      "price": 1.4004,
+      "change_pct": 0.01000017026737381,
+      "decimals": 4
+    },
+    {
+      "label": "Gold",
+      "price": 4007.9,
+      "change_pct": -1.292973687479547,
+      "decimals": 2
+    },
+    {
+      "label": "WTI Crude",
+      "price": 103.27,
+      "change_pct": 3.820246036657292,
+      "decimals": 2
+    },
+    {
+      "label": "BTC",
+      "price": 80446.0,
+      "change_pct": -0.9612751022345952,
+      "decimals": 0
+    }
+  ],
+  "intelligence": null
+}

@@ -1,0 +1,625 @@
+{
+  "timestamp": "20261024_1344",
+  "datetime": "2026-10-24T13:44:43.621733-04:00",
+  "ranked_by": "nvidia/nemotron-3-ultra-550b-a55b",
+  "breaking": [
+    {
+      "title": "American embassies tighten security as Iran threat warnings intensify ahead of U.S. midterm elections",
+      "summary": "A memo from DNI director Jay Clayton said Iran is in the \"advanced stages\" of planning attacks against Americans.",
+      "link": "https://www.cnbc.com/2026/10/24/iran-threats-us-embassies-middle-east.html",
+      "source": "CNBC",
+      "sources": [
+        "CNBC"
+      ],
+      "published": "2026-10-24T13:22:21-04:00",
+      "domain": "Geopolitics & Diplomacy",
+      "region": "US",
+      "score": 9.6,
+      "why": "Iran threat to US embassies intensifies"
+    },
+    {
+      "title": "PHP-ocalypse: How two critical web bugs almost broke the internet",
+      "summary": "Two critical bugs in the PHP web programming language, used by the majority of the internet, threatened to upend the internet — and it's unlikely to be the last major software scare.",
+      "link": "https://techcrunch.com/2026/10/24/php-ocalypse-how-two-critical-web-bugs-almost-broke-the-internet/",
+      "source": "TechCrunch",
+      "sources": [
+        "TechCrunch"
+      ],
+      "published": "2026-10-24T11:30:00-04:00",
+      "domain": "Technology & Semiconductors",
+      "region": "Global",
+      "score": 8.8,
+      "why": "Critical PHP bugs threatened internet"
+    },
+    {
+      "title": "Houthis Claim They Targeted Riyadh, 2 Other Airports, Oil Facilities In Saudi",
+      "summary": "The targets included a pipeline. (File Photo)",
+      "link": "https://www.ndtv.com/world-news/yemen-houthis-say-targeted-3-saudi-airports-in-riyadh-dammam-najran-oil-facilities-in-last-24-hours-12231046#publisher=newsstand",
+      "source": "NDTV",
+      "sources": [
+        "NDTV"
+      ],
+      "published": "2026-10-24T12:52:27-04:00",
+      "domain": "Commodities & Prices",
+      "region": "Global",
+      "score": 7.8,
+      "why": "Houthis target Saudi oil facilities"
+    }
+  ],
+  "domains": {
+    "AI & ML": [
+      {
+        "title": "OpenAI Resumes Training AI Models Without Internet After Cyber Incidents",
+        "summary": "Concerns are mounting over the ability of AI agents to exploit software flaws",
+        "link": "https://www.ndtv.com/world-news/openai-resumes-training-ai-models-without-internet-after-cyber-incidents-12228398#publisher=newsstand",
+        "source": "NDTV",
+        "sources": [
+          "NDTV",
+          "TechCrunch",
+          "The Verge",
+          "The Times of India",
+          "The New Indian Express",
+          "Українські Національні Новини (УНН)",
+          "Bloomberg.com"
+        ],
+        "published": "2026-10-24T12:14:00-04:00",
+        "domain": "AI & ML",
+        "region": "Global",
+        "score": 9.0,
+        "why": "Major AI labs changing training methods"
+      },
+      {
+        "title": "Block’s new voice model sounds eerily human",
+        "summary": "Block said that the voice model can run locally on a MacBook M4 Max",
+        "link": "https://techcrunch.com/2026/10/24/blocks-new-voice-model-sounds-eerily-human/",
+        "source": "TechCrunch",
+        "sources": [
+          "TechCrunch",
+          "The Economic Times",
+          "The Indian Express"
+        ],
+        "published": "2026-10-24T12:00:00-04:00",
+        "domain": "AI & ML",
+        "region": "US",
+        "score": 8.2,
+        "why": "Block's voice model runs locally"
+      },
+      {
+        "title": "Instacart reportedly discussed selling itself with DoorDash and Uber",
+        "summary": "Instacart might sell itself to a larger competitor.",
+        "link": "https://techcrunch.com/2026/10/24/instacart-reportedly-discussed-selling-itself-with-doordash-and-uber/",
+        "source": "TechCrunch",
+        "sources": [
+          "TechCrunch"
+        ],
+        "published": "2026-10-24T12:30:00-04:00",
+        "domain": "AI & ML",
+        "region": "US",
+        "score": 6.6,
+        "why": "Instacart exploring sale to rivals"
+      },
+      {
+        "title": "Forced to pick, Grok’s AI model chooses Republicans. OpenAI’s picks Democrats.",
+        "summary": "A new study found Grok's AI overwhelmingly recommends Republican candidates while OpenAI's GPT favors Democrats, with the two AI models disagreeing in more than 90% of nearly 500 election races.",
+        "link": "https://techcrunch.com/2026/10/24/forced-to-pick-groks-ai-model-chooses-republicans-openais-picks-democrats/",
+        "source": "TechCrunch",
+        "sources": [
+          "TechCrunch"
+        ],
+        "published": "2026-10-24T11:00:00-04:00",
+        "domain": "AI & ML",
+        "region": "US",
+        "score": 6.6,
+        "why": "AI models show political bias"
+      }
+    ],
+    "Technology & Semiconductors": [
+      {
+        "title": "AI bear slams Nvidia's GPU pitch: 'There's not scarcity other than that which is created by Jensen Huang'",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMi8gFBVV95cUxOQ296eGZsT0J4ZXhoWnJrcmlOaC0wUEx5QlNQN2R6b3luMklwSTkxOHpsZ3d6aEtPbTVOaWFpSjZPUlRMOW5YOEQ5d04zU0VtQ1JiWUtSM1ZHV0dfUGpsUGlLQmFQVmtDRk5URkpRcmd3ZG5YcUZGOFV1SkJLd1RST1VjTkt2YkRNaDdPcjJMZ2hGT0tPaVYwSG1XdC1Nc0JEQjdJSzVsendNZ1dtdHlXQWRzQm5kaF83TFNsUFYtY2RTaE1qd2dJVTBkNkI0ZEYxUG5wX3VtdjNMREJpR05WcjhvYnhJeFp4b1lwR2FUbFJtUQ?oc=5",
+        "source": "Yahoo Finance",
+        "sources": [
+          "Yahoo Finance"
+        ],
+        "published": "2026-10-24T13:15:07-04:00",
+        "domain": "Technology & Semiconductors",
+        "region": "US",
+        "score": 8.6,
+        "why": ""
+      },
+      {
+        "title": "Road Ministry seeks forensic audit of its portals after vehicle data leak",
+        "summary": "A senior Ministry official says they have sought the intervention of the Ministry of Electronics and Information Technology to review its data-sharing policy and suggest ways to strengthen it",
+        "link": "https://www.thehindu.com/news/national/road-ministry-seeks-forensic-audit-of-its-portals-after-vehicle-data-leak/article71620455.ece",
+        "source": "The Hindu",
+        "sources": [
+          "The Hindu"
+        ],
+        "published": "2026-10-24T13:36:22-04:00",
+        "domain": "Technology & Semiconductors",
+        "region": "India",
+        "score": 7.8,
+        "why": "Govt portals audited after data leak"
+      },
+      {
+        "title": "Can Amazon Take Market Share From Nvidia in the AI Chip Race?",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMifkFVX3lxTE8zT2RqQmdqVklPdHFaT0FwRkV1MmlVc1haeVc0Z2NWWWh1UFVNNlR1blFjNHA0VVNDYzJGRG5BVVBGTVJCNU0wZkxXaUstaEx4TzlhQ3JpSzJHRVVxbnpRblA3TUpMRjJOb0cyZW5NdDNjS0x3NFc3VzdjN3Y1UQ?oc=5",
+        "source": "AOL.com",
+        "sources": [
+          "AOL.com"
+        ],
+        "published": "2026-10-24T11:35:00-04:00",
+        "domain": "Technology & Semiconductors",
+        "region": "US",
+        "score": 7.6,
+        "why": "Amazon challenging Nvidia in AI chips"
+      },
+      {
+        "title": "Google Might Use Your Gmail And Photos Data For Targeted Ads",
+        "summary": "Google updates policy allowing use of Gmail and Photos data for personalised ads via connected apps.",
+        "link": "https://www.ndtv.com/feature/google-might-use-your-gmail-and-photos-data-for-targeted-ads-12230403#publisher=newsstand",
+        "source": "NDTV",
+        "sources": [
+          "NDTV",
+          "The Times Of India",
+          "Google News"
+        ],
+        "published": "2026-10-24T10:36:38-04:00",
+        "domain": "Technology & Semiconductors",
+        "region": "Global",
+        "score": 6.4,
+        "why": "Google using Gmail data for ads"
+      },
+      {
+        "title": "Apple Joins Nvidia in the $5 Trillion Club. Here's Which Stock I Think Can Get to $10 Trillion First.",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMijwFBVV95cUxNQnZzVWVvN1ZJT19fTTlZQ1o3M1ZuNmZDcHZ0NGpRR3ZGUjBvNXJESjdFMXQ0OFNkZzdTd0Y4UGlocTdjNmU5VHZUbTBNa0JJa3VZVUZsOXVhMUt4LU1XWjlZUGE3bVM2MVpYMDJyTktvVHcyQmxVRE9KSWR4UGJaTGhBbUt4TEcwc2JzY2JJSQ?oc=5",
+        "source": "The Motley Fool",
+        "sources": [
+          "The Motley Fool"
+        ],
+        "published": "2026-10-24T13:26:16-04:00",
+        "domain": "Technology & Semiconductors",
+        "region": "Global",
+        "score": 0.55,
+        "why": ""
+      }
+    ],
+    "Finance & Banking": [
+      {
+        "title": "11 crore farmers get unique digital ID",
+        "summary": "Farmer IDs are expected to enable ‘transparent, efficient and timely’ access for farmers to government schemes, bank credit, crop insurance, and disaster relief",
+        "link": "https://www.thehindu.com/news/national/11-crore-farmers-get-unique-digital-id/article71620704.ece",
+        "source": "The Hindu",
+        "sources": [
+          "The Hindu"
+        ],
+        "published": "2026-10-24T12:33:33-04:00",
+        "domain": "Finance & Banking",
+        "region": "India",
+        "score": 8.8,
+        "why": "11 crore farmers get digital IDs"
+      },
+      {
+        "title": "IDFC First Bank Q2 PAT rises 197% to ₹1,045 crore on lower provisions",
+        "summary": "The bank mobilised ₹34,390 crore in FCNR(B) deposits despite having no branch, subsidiary or representative office outside India.",
+        "link": "https://www.thehindu.com/business/idfc-first-bank-q2-pat-rises-197-to-1045-crore-on-lower-provisions/article71620674.ece",
+        "source": "The Hindu Business",
+        "sources": [
+          "The Hindu Business"
+        ],
+        "published": "2026-10-24T11:04:38-04:00",
+        "domain": "Finance & Banking",
+        "region": "India",
+        "score": 8.8,
+        "why": "IDFC First Bank profit doubles"
+      },
+      {
+        "title": "AU Small Finance Bank Q2 profit jumps 53% to 858 crore",
+        "summary": "“Total income rose to ₹6,382 crore in the quarter under review from ₹5,224 crore in the same period a year ago,” AU Small Finance Bank said in a regulatory filing",
+        "link": "https://www.thehindu.com/business/Industry/au-small-finance-bank-q2-profit-jumps-53-to-858-crore/article71621133.ece",
+        "source": "The Hindu",
+        "sources": [
+          "The Hindu",
+          "Economic Times Markets"
+        ],
+        "published": "2026-10-24T12:53:44-04:00",
+        "domain": "Finance & Banking",
+        "region": "India",
+        "score": 8.1,
+        "why": "AU Small Finance Bank profit up 53%"
+      },
+      {
+        "title": "Canadian dollar hits five-week high as data supports rate hike bets",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMirgFBVV95cUxNRHNLSXpMVmtYQ3JMZDE5UW81bFo4cG5VT04zWFBSUm1XeWhnWURVZlpMdmZ2b0F3RWo4RUxZekt2ZUFMbkwwN1E5R1M3TXhaeU5SdXltUlJEYk5oY21TU1lUMWota1BFZ19yVVNFSWt6WUxsa00zVXpmTDB1Sm83X2E3VkhOVFVnY1ZDRVZhTU9jY3EtbzR0MG5RZTNBZmtrVWdmamluektNOGFFdlE?oc=5",
+        "source": "Reuters",
+        "sources": [
+          "Reuters",
+          "Finimize"
+        ],
+        "published": "2026-10-23T15:17:47-04:00",
+        "domain": "Finance & Banking",
+        "region": "Canada",
+        "score": 7.8,
+        "why": "Canadian dollar hits 5-week high"
+      },
+      {
+        "title": "I want to pay off $4,500 in credit-card debt in 2 months. Is this possible?",
+        "summary": "“I’m 32 years old and feel like I should know how to do this stuff by now.”",
+        "link": "https://www.marketwatch.com/story/i-want-to-pay-off-4-500-in-credit-card-debt-in-2-months-is-this-possible-059d9a21?mod=mw_rss_topstories",
+        "source": "MarketWatch",
+        "sources": [
+          "MarketWatch"
+        ],
+        "published": "2026-10-24T13:39:00-04:00",
+        "domain": "Finance & Banking",
+        "region": "Global",
+        "score": 0.55,
+        "why": ""
+      }
+    ],
+    "Stock Markets & Trading": [
+      {
+        "title": "Reliance Jio IPO listing on Oct 28: Will Mukesh Ambani's firm be in top 5 m-cap? RIL to hold top spot",
+        "summary": "Jio Platforms’ IPO was subscribed 22.19 times, with allotment expected on October 26. Based on its upper price band and post-issue share count, the company is estimated to have a market capitalisation of ₹10.30 lakh…",
+        "link": "https://www.livemint.com/market/stock-market-news/reliance-jio-ipo-listing-on-oct-28-will-mukesh-ambanis-firm-be-in-top-5-m-cap-ril-to-hold-top-spot-11792854254054.html",
+        "source": "Mint Markets",
+        "sources": [
+          "Mint Markets"
+        ],
+        "published": "2026-10-24T11:49:15-04:00",
+        "domain": "Stock Markets & Trading",
+        "region": "India",
+        "score": 9.8,
+        "why": "Reliance Jio IPO listing imminent"
+      },
+      {
+        "title": "Big action! Who is Avadhut Sathe? Why SEBI ordered Avadhut Sathe Trading Academy to refund ₹546 cr - What he did?",
+        "summary": "SEBI ordered Avadhut Sathe and his trading academy to refund ₹546.17 crore, plus ₹67.87 crore in interest, for providing unregistered investment advice and research services. The regulator also imposed ₹11.5 crore in…",
+        "link": "https://www.livemint.com/market/stock-market-news/big-action-who-is-avadhut-sathe-why-sebi-ordered-avadhut-sathe-trading-academy-to-refund-rs-546-cr-what-he-did-11792848745624.html",
+        "source": "Mint Markets",
+        "sources": [
+          "Mint Markets",
+          "Economic Times Markets"
+        ],
+        "published": "2026-10-24T10:41:07-04:00",
+        "domain": "Stock Markets & Trading",
+        "region": "India",
+        "score": 9.1,
+        "why": "SEBI orders ₹546 cr refund"
+      },
+      {
+        "title": "AI funding fears rattle Wall Street. Here's how we're adjusting our portfolio",
+        "summary": "The rotation out of AI stocks benefited several defensive Club stocks.",
+        "link": "https://www.cnbc.com/investingclub/2026/10/24/ai-funding-fears-rattle-wall-street-heres-how-were-adjusting-our-portfolio.html",
+        "source": "CNBC",
+        "sources": [
+          "CNBC"
+        ],
+        "published": "2026-10-24T12:14:00-04:00",
+        "domain": "Stock Markets & Trading",
+        "region": "US",
+        "score": 7.6,
+        "why": "AI funding fears rattle Wall St"
+      },
+      {
+        "title": "Ardent Health, Inc. (NYSE:ARDT) Stock Has Consensus Price Target of $12.79",
+        "summary": "Shares of Ardent Health, Inc. (NYSE:ARDT – Get Free Report) have been assigned an average rating of “Hold” from the fifteen brokerages that are presently covering the stock, MarketBeat reports. Two equities research…",
+        "link": "https://www.tickerreport.com/banking-finance/13634701/ardent-health-inc-nyseardt-stock-has-consensus-price-target-of-12-79.html",
+        "source": "Ticker Report",
+        "sources": [
+          "Ticker Report",
+          "Watch List News",
+          "The Lincolnian Online"
+        ],
+        "published": "2026-10-24T01:44:51-04:00",
+        "domain": "Stock Markets & Trading",
+        "region": "Global",
+        "score": 0.8,
+        "why": ""
+      },
+      {
+        "title": "High dividend, low price: 4 stocks under ₹200 with high yield - IOCL, PTC India, Central Bank, PTL Enterprises",
+        "summary": "Indian Oil Corporation, PTC India, Central Bank of India, and PTL Enterprises are highlighted as stocks priced below ₹200 with dividend yields of 5.5%, 19%, 2.53%, and 6.25%, respectively. Dividend yield estimates…",
+        "link": "https://www.livemint.com/market/stock-market-news/high-dividend-low-price-4-stocks-under-rs-200-with-high-yield-iocl-ptc-india-central-bank-ptl-enterprises-11792860259451.html",
+        "source": "Mint Markets",
+        "sources": [
+          "Mint Markets"
+        ],
+        "published": "2026-10-24T12:49:50-04:00",
+        "domain": "Stock Markets & Trading",
+        "region": "India",
+        "score": 0.64,
+        "why": ""
+      }
+    ],
+    "Geopolitics & Diplomacy": [
+      {
+        "title": "Iran Speaker to skip BRICS meet, as Iran seeks bilateral air route for ‘humanitarian aid’ from India",
+        "summary": "Iran Air not allowed to fly medicines directly from India to Tehran, due to fear of U.S. sanctions; India says medicines can be taken through a third country; Tehran says humanitarian aid is exempted from sanctions",
+        "link": "https://www.thehindu.com/news/national/irans-ghalibaf-will-not-attend-brics-parliamentary-forum-in-delhi-embassy/article71619999.ece",
+        "source": "The Hindu",
+        "sources": [
+          "The Hindu"
+        ],
+        "published": "2026-10-24T13:09:33-04:00",
+        "domain": "Geopolitics & Diplomacy",
+        "region": "India",
+        "score": 9.8,
+        "why": "Iran seeks India air route for aid"
+      },
+      {
+        "title": "Pakistan “protecting” Kashmiris: Farooq Abdullah’s remarks on Pakistan and Kashmir spark row",
+        "summary": "Former Jammu and Kashmir chief minister Farooq Abdullah sparked a political controversy during a rally in Baramulla by suggesting that a “neighbour” is protecting Kashmir and urging residents to confront Delhi,…",
+        "link": "https://www.thehindu.com/videos/shorts/pakistan-protecting-kashmiris-farooq-abdullahs-remarks-on-pakistan-and-kashmir-spark-row/article71621022.ece",
+        "source": "The Hindu",
+        "sources": [
+          "The Hindu",
+          "NDTV"
+        ],
+        "published": "2026-10-24T12:07:07-04:00",
+        "domain": "Geopolitics & Diplomacy",
+        "region": "India",
+        "score": 9.1,
+        "why": "Farooq Abdullah Kashmir remarks spark row"
+      },
+      {
+        "title": "North Korea's Kim Jong Un Is In China, Claims South Korea",
+        "summary": "Kim Jong Un has recently sought to strengthen ties with China.",
+        "link": "https://www.ndtv.com/world-news/north-koreas-kim-jong-un-visits-china-says-south-korea-12230276#publisher=newsstand",
+        "source": "NDTV",
+        "sources": [
+          "NDTV",
+          "The Guardian",
+          "Firstpost",
+          "Reuters"
+        ],
+        "published": "2026-10-24T10:10:52-04:00",
+        "domain": "Geopolitics & Diplomacy",
+        "region": "China",
+        "score": 8.9,
+        "why": "Kim Jong Un visits China"
+      },
+      {
+        "title": "Infosys Cuts Sales Forecast After Companies Curb IT Spending",
+        "summary": "Infosys is India's second-largest IT outsourcer. (Representational Photo)",
+        "link": "https://www.ndtv.com/business-news/infosys-cuts-sales-forecast-after-companies-curb-it-spending-12230824#publisher=newsstand",
+        "source": "NDTV",
+        "sources": [
+          "NDTV"
+        ],
+        "published": "2026-10-24T12:09:28-04:00",
+        "domain": "Geopolitics & Diplomacy",
+        "region": "India",
+        "score": 8.8,
+        "why": "Infosys cuts forecast on IT spending"
+      },
+      {
+        "title": "US Asked Musk For Years To Alter Starlink Service In Ukraine, Middle East: Report",
+        "summary": "A Ukrainian serviceman of 47th brigade prepares a Starlink satellite internet systems",
+        "link": "https://www.ndtv.com/world-news/us-asked-elon-musk-for-years-to-alter-starlink-service-in-ukraine-middle-east-report-12228449#publisher=newsstand",
+        "source": "NDTV",
+        "sources": [
+          "NDTV",
+          "Reuters"
+        ],
+        "published": "2026-10-24T00:18:16-04:00",
+        "domain": "Geopolitics & Diplomacy",
+        "region": "Global",
+        "score": 8.1,
+        "why": "US asked Musk to alter Starlink"
+      }
+    ],
+    "Wars & Conflicts": [
+      {
+        "title": "Trump's 'Epic Fury' Warning After US Envoy's 'Strike This Weekend' Remark, Iran Responds",
+        "summary": "According to Trump, he sees ending the war with Iran \"soon\".",
+        "link": "https://www.ndtv.com/world-news/trump-warns-of-another-little-epic-fury-irans-dont-play-with-fire-reply-us-iran-war-israel-12228279#publisher=newsstand",
+        "source": "NDTV",
+        "sources": [
+          "NDTV",
+          "Kyiv Post",
+          "Modern Diplomacy",
+          "France 24",
+          "Reuters"
+        ],
+        "published": "2026-10-24T05:11:19-04:00",
+        "domain": "Wars & Conflicts",
+        "region": "Global",
+        "score": 11.0,
+        "why": "Trump warns of Iran military action"
+      },
+      {
+        "title": "Around 1,200 Palestinians are displaced in Hebron as Israel begins military operation",
+        "summary": "The operation \"is expected to continue for several days,\" a statement, released late on Friday (October 23, 2026), said",
+        "link": "https://www.thehindu.com/news/international/israel-launches-major-west-bank-operation-after-soldiers-killed/article71619178.ece",
+        "source": "The Hindu",
+        "sources": [
+          "The Hindu",
+          "Al Jazeera"
+        ],
+        "published": "2026-10-24T12:09:24-04:00",
+        "domain": "Wars & Conflicts",
+        "region": "Global",
+        "score": 9.1,
+        "why": "Israel launches West Bank operation"
+      },
+      {
+        "title": "Iran president says many struggling for food as war bites",
+        "summary": "Masoud Pezeshkian called for an end to what he described as a \"state of neither war nor peace\"",
+        "link": "https://www.thehindu.com/news/international/iran-president-says-many-struggling-for-food-as-war-bites/article71620956.ece",
+        "source": "The Hindu",
+        "sources": [
+          "The Hindu"
+        ],
+        "published": "2026-10-24T11:59:24-04:00",
+        "domain": "Wars & Conflicts",
+        "region": "Global",
+        "score": 7.8,
+        "why": "Iran president: war hurting civilians"
+      },
+      {
+        "title": "Ukraine’s military says Starlink satellite connection stable after recent restrictions",
+        "summary": "Volodymyr Zelenskyy offers thanks to US allies for restoring system key to air defence and ‘frontline logistics’ Ukraine’s military has a “stable connection to Starlink”, the Ukrainian government has said, 10 days after…",
+        "link": "https://www.theguardian.com/world/2026/oct/24/ukraine-zelenskyy-military-starlink-satellite-connection-stable-after-restrictions",
+        "source": "The Guardian",
+        "sources": [
+          "The Guardian"
+        ],
+        "published": "2026-10-24T11:47:20-04:00",
+        "domain": "Wars & Conflicts",
+        "region": "Global",
+        "score": 7.8,
+        "why": "Ukraine Starlink restored after limits"
+      },
+      {
+        "title": "Iran warns of response ‘several times greater’ to any military action",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMisgFBVV95cUxQV2Rvbm1TRkJrZXNvVWdvSzJGSVV4Q1NxaUJNQnd1RUNpeWwteTlNZ29rSEZZcWo4ZFduQm1LMlc4VzJ4a2wzeGV5S3hQT01JR041Vy1paGp4aDVHaXVLMTZWRmtadXdQVGFhZk1sVndkaExWZ09CLXJVd3hUSnNDdFlqam9RMnFmVDMtZk1fREJBWlQ0bHFpXzQwU0p6MktFeEpUT0lCRGhMeUhvakJuODJB?oc=5",
+        "source": "Anadolu Ajansı",
+        "sources": [
+          "Anadolu Ajansı"
+        ],
+        "published": "2026-10-24T11:08:17-04:00",
+        "domain": "Wars & Conflicts",
+        "region": "Global",
+        "score": 7.8,
+        "why": "Iran warns of massive retaliation"
+      }
+    ],
+    "Commodities & Prices": [
+      {
+        "title": "Global oil prices jump as Middle East conflict grows",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMi0wFBVV95cUxQY0lTMmdMVkdXTUREZzVmTzRiT1E4WXlySlVMMFVUUmhtLXZuY2VNbDRaN0ZoRWRMU3R1b3hGQTlYdkR5SHYzSnlJN1N4S29pdS1zVDlnVkRVVUpiSFJwTEY3VzJGWDhvc25Wb2F5bFQ1bzBKUC1VMkRQcnhqdHAzRkZxUTFBOXNzX3cwUGN5ZVB0WGZxSC11RmZmX0dQNnQ0U1NkOXdpY2Uwc1lOMDZWQmRSZXVXVXpLMjhsck5pcVJfbzhYLXg2Rks2OU5XaGF0RENz?oc=5",
+        "source": "WKYC",
+        "sources": [
+          "WKYC",
+          "WSJ"
+        ],
+        "published": "2026-10-24T09:15:00-04:00",
+        "domain": "Commodities & Prices",
+        "region": "Global",
+        "score": 9.1,
+        "why": "Oil prices jump on Mideast conflict"
+      },
+      {
+        "title": "First Tanker Carrying Russian Diesel Sets Sail For US Under Trump-Putin Deal",
+        "summary": "The diesel deal was seen as an attempt by Trump to address high fuel prices",
+        "link": "https://www.ndtv.com/world-news/first-tanker-carrying-russian-diesel-sets-sail-for-us-under-donald-trump-vladimir-putin-deal-12228241#publisher=newsstand",
+        "source": "NDTV",
+        "sources": [
+          "NDTV",
+          "AP News"
+        ],
+        "published": "2026-10-23T22:41:05-04:00",
+        "domain": "Commodities & Prices",
+        "region": "Global",
+        "score": 8.1,
+        "why": "Russian diesel to US under Trump deal"
+      },
+      {
+        "title": "Voters angry about high prices may get little relief from the next Congress",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMiugFBVV95cUxQRmlodXU2TGlMWm1VZ0NYV3o5Qng3OVBxRDBKRGZJUjAxUVYwMnlOLUdyb1VQdFJYY21VMi1BZF9iZ3JFUm9lTVlZS2ZuNE5VNktvRllkc3E5eFplMzVwb182SFplZ1FJQ3doM1lkSnl3amd5OGw0UVpieGVEMU5fdExIdGY1d1Ezb0pYZV82RnAxbmhNNE9JWDJqNW52WnNRSWlEUXljRURDNExOM1BlVlp0Y0FWRHhJQ0E?oc=5",
+        "source": "The Washington Post",
+        "sources": [
+          "The Washington Post"
+        ],
+        "published": "2026-10-24T13:00:00-04:00",
+        "domain": "Commodities & Prices",
+        "region": "US",
+        "score": 0.62,
+        "why": ""
+      },
+      {
+        "title": "About 25,000 rally in Madrid in support of Spain’s state pension scheme",
+        "summary": "Demonstrators want pensions to remain indexed to inflation and the gender pension gap to be eliminated.",
+        "link": "https://www.aljazeera.com/news/2026/10/24/about-25000-rally-in-madrid-in-support-of-spains-state-pension-scheme?traffic_source=rss",
+        "source": "Al Jazeera",
+        "sources": [
+          "Al Jazeera"
+        ],
+        "published": "2026-10-24T12:48:36-04:00",
+        "domain": "Commodities & Prices",
+        "region": "Global",
+        "score": 0.54,
+        "why": ""
+      },
+      {
+        "title": "Riverside County Gas Prices Drop For 22nd Straight Day",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMioAFBVV95cUxQYXJQWFZ2cW1yTG5WbUR4anhuUHBoWDhMUmZ4QjQ0QkRNLTYtWngwNGtZUU5fbjZoUTF5clJlZXVHUjRvanJNVjhpakFXcTQtbThUSi0yZmVrTGRDNmZ6M3J1UXV5NGc3RjJ6QlpiSTY0dGJzRTUwN2dOdDY2RkhfWUpsa24zbzVfRGhJZWx6cGQ3VHY0NTF5UThMZXAxRDBj?oc=5",
+        "source": "MyNewsLA.com",
+        "sources": [
+          "MyNewsLA.com"
+        ],
+        "published": "2026-10-24T12:42:35-04:00",
+        "domain": "Commodities & Prices",
+        "region": "Global",
+        "score": 0.54,
+        "why": ""
+      }
+    ]
+  },
+  "market": [
+    {
+      "label": "S&P 500",
+      "price": 7623.68,
+      "change_pct": -0.5186995231831334,
+      "decimals": 2
+    },
+    {
+      "label": "Nasdaq",
+      "price": 25955.342,
+      "change_pct": -0.20576594393616868,
+      "decimals": 2
+    },
+    {
+      "label": "Nifty 50",
+      "price": 22600.0,
+      "change_pct": -0.38633524898293975,
+      "decimals": 2
+    },
+    {
+      "label": "TSX",
+      "price": 35788.18,
+      "change_pct": -0.5151569905624965,
+      "decimals": 2
+    },
+    {
+      "label": "USD/INR",
+      "price": 94.94,
+      "change_pct": 0.24146673111003467,
+      "decimals": 3
+    },
+    {
+      "label": "USD/CAD",
+      "price": 1.4004,
+      "change_pct": 0.01000017026737381,
+      "decimals": 4
+    },
+    {
+      "label": "Gold",
+      "price": 4007.9,
+      "change_pct": -1.292973687479547,
+      "decimals": 2
+    },
+    {
+      "label": "WTI Crude",
+      "price": 103.27,
+      "change_pct": 3.820246036657292,
+      "decimals": 2
+    },
+    {
+      "label": "BTC",
+      "price": 80122.0,
+      "change_pct": -1.7013764985985884,
+      "decimals": 0
+    }
+  ],
+  "intelligence": null
+}

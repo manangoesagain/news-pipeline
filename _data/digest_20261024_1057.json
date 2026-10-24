@@ -1,0 +1,659 @@
+{
+  "timestamp": "20261024_1057",
+  "datetime": "2026-10-24T10:57:01.625981-04:00",
+  "ranked_by": "nvidia/nemotron-3-ultra-550b-a55b",
+  "breaking": [
+    {
+      "title": "Iran says won’t allow US warships to get close as Trump ponders new attacks",
+      "summary": "Iranian officials, media and analysts sense war is closer, but signal there will be no backing down.",
+      "link": "https://www.aljazeera.com/news/2026/10/24/iran-says-wont-allow-us-warships-to-get-close-as-trump-ponders-new-attacks?traffic_source=rss",
+      "source": "Al Jazeera",
+      "sources": [
+        "Al Jazeera",
+        "NDTV",
+        "Iran International",
+        "Modern Diplomacy",
+        "Reuters"
+      ],
+      "published": "2026-10-24T10:18:35-04:00",
+      "domain": "Wars & Conflicts",
+      "region": "Global",
+      "score": 11.0,
+      "why": ""
+    },
+    {
+      "title": "Kim Jong-un crosses newly opened bridge into China",
+      "summary": "North Korean leader travels over New Yalu River Bridge to meet senior Communist party member Kim Jong-un has visited China, inaugurating a bridge that connects the two countries and saying he hopes to expand cooperation…",
+      "link": "https://www.theguardian.com/world/2026/oct/24/kim-jong-un-crosses-newly-opened-bridge-into-china",
+      "source": "The Guardian",
+      "sources": [
+        "The Guardian",
+        "The Boston Globe",
+        "Reuters"
+      ],
+      "published": "2026-10-24T09:34:56-04:00",
+      "domain": "Geopolitics & Diplomacy",
+      "region": "China",
+      "score": 9.6,
+      "why": "Kim Jong Un visits China, opens new bridge"
+    },
+    {
+      "title": "Big action! Who is Avadhut Sathe? Why SEBI ordered Avadhut Sathe Trading Academy to refund ₹546 cr - What he did?",
+      "summary": "SEBI ordered Avadhut Sathe and his trading academy to refund ₹546.17 crore, plus ₹67.87 crore in interest, for providing unregistered investment advice and research services. The regulator also imposed ₹11.5 crore in…",
+      "link": "https://www.livemint.com/market/stock-market-news/big-action-who-is-avadhut-sathe-why-sebi-ordered-avadhut-sathe-trading-academy-to-refund-rs-546-cr-what-he-did-11792848745624.html",
+      "source": "Mint Markets",
+      "sources": [
+        "Mint Markets",
+        "Economic Times Markets",
+        "NDTV Profit"
+      ],
+      "published": "2026-10-24T10:41:07-04:00",
+      "domain": "Stock Markets & Trading",
+      "region": "India",
+      "score": 9.4,
+      "why": "SEBI orders ₹546 cr refund from trading academy"
+    },
+    {
+      "title": "OpenAI says it will no longer train its AI models on the live internet, citing “significant risks”",
+      "summary": "OpenAI will cut frontier models off from the internet weeks after one of its engineers said that solution wouldn't work.",
+      "link": "https://techcrunch.com/2026/10/23/openai-says-it-will-no-longer-train-its-ai-models-on-the-live-internet-citing-significant-risks/",
+      "source": "TechCrunch",
+      "sources": [
+        "TechCrunch",
+        "Українські Національні Новини (УНН)"
+      ],
+      "published": "2026-10-24T05:57:43-04:00",
+      "domain": "AI & ML",
+      "region": "US",
+      "score": 8.9,
+      "why": "OpenAI stops training models on live internet"
+    },
+    {
+      "title": "Israeli Forces Displace Families In West Bank's Hebron After Deadly Attack",
+      "summary": "Around one-third of Hebron has been targeted, Hebron Governor Khaled Dudin said.",
+      "link": "https://www.ndtv.com/world-news/israeli-forces-displace-families-in-west-banks-hebron-after-deadly-attack-12230249#publisher=newsstand",
+      "source": "NDTV",
+      "sources": [
+        "NDTV",
+        "The Guardian"
+      ],
+      "published": "2026-10-24T10:08:36-04:00",
+      "domain": "Wars & Conflicts",
+      "region": "Other",
+      "score": 8.6,
+      "why": "Israeli forces raze Hebron, displace families"
+    }
+  ],
+  "domains": {
+    "AI & ML": [
+      {
+        "title": "OpenAI Resumes Training AI Models Without Internet After Cyber Incidents",
+        "summary": "Concerns are mounting over the ability of AI agents to exploit software flaws",
+        "link": "https://www.ndtv.com/world-news/openai-resumes-training-ai-models-without-internet-after-cyber-incidents-12228398#publisher=newsstand",
+        "source": "NDTV",
+        "sources": [
+          "NDTV",
+          "صحيفة مال"
+        ],
+        "published": "2026-10-24T04:25:00-04:00",
+        "domain": "AI & ML",
+        "region": "US",
+        "score": 7.9,
+        "why": "OpenAI resumes offline training after cyber issues"
+      },
+      {
+        "title": "Here are the top AI agents that can live in your text messages",
+        "summary": "We created a list of the most notable AI agents that can live in your text messages, from general assistants to agents designed for families, travel, and work.",
+        "link": "https://techcrunch.com/2026/10/24/all-the-ai-agents-that-can-live-in-your-text-messages/",
+        "source": "TechCrunch",
+        "sources": [
+          "TechCrunch"
+        ],
+        "published": "2026-10-24T10:00:00-04:00",
+        "domain": "AI & ML",
+        "region": "US",
+        "score": 6.6,
+        "why": "Top AI agents for text messaging listed"
+      },
+      {
+        "title": "Anthropic’s AI Hid a Secret Message in the Stars. OpenAI’s Bot Found It.",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMinwFBVV95cUxPZTVmY3RjbFEzeDNnb2xOa0FDUm9Ga2VRMXM4ODZlOEd5YkdWMUhoRU4xTnJaTWF0MzRjZ0E3SWpCRGV2NXdaeDhKTTRlNEszMmk5cVdPR2RqdWl4YWlkd0Z6cE9sQWNkMVdOTHBVYlJhbkVhRW1LOE5VMUpBdUdKbm9JYWlwdEk4ZWQ4c2FZZ0lJTVlaTzRZZEE4MmVLc2s?oc=5",
+        "source": "Gizmodo",
+        "sources": [
+          "Gizmodo"
+        ],
+        "published": "2026-10-24T09:31:26-04:00",
+        "domain": "AI & ML",
+        "region": "US",
+        "score": 6.6,
+        "why": "Anthropic AI hides message, OpenAI finds it"
+      },
+      {
+        "title": "Is the best mathematician in the world an AI model?",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxNREtLaXlJXzg5TzFHRktTNUlBU0dUeUVCVTlQMVY2YnlFS1pjY28wRHlKbHpFenB3dE9xN1pDUnFXLXRmcFYydHdRb3h5RkJGRDFOd3FWYXZwU3JMd29qSjlMOTJtVElOVVpyN0dSR2pabURROWtNT1BEVWVlUzFGemg4SXg0czJpZS00?oc=5",
+        "source": "mronline.org",
+        "sources": [
+          "mronline.org"
+        ],
+        "published": "2026-10-24T09:02:22-04:00",
+        "domain": "AI & ML",
+        "region": "Global",
+        "score": 0.53,
+        "why": ""
+      }
+    ],
+    "Technology & Semiconductors": [
+      {
+        "title": "US data centre spending seen more than doubling to $2.1 trillion by 2028, estimates BoFA",
+        "summary": "Global data centre spending is expected to reach $1 trillion in 2026 and more than double to $2.1 trillion by 2028, driven by rising demand for AI services, BofA Global Research estimates. The data centre market could…",
+        "link": "https://economictimes.indiatimes.com/markets/us-stocks/wall-street-guide/data-centre-spending-seen-more-than-doubling-to-2-1-trillion-by-2028/articleshow/135153616.cms",
+        "source": "Economic Times Markets",
+        "sources": [
+          "Economic Times Markets",
+          "Reuters"
+        ],
+        "published": "2026-10-23T14:30:36-04:00",
+        "domain": "Technology & Semiconductors",
+        "region": "US",
+        "score": 9.9,
+        "why": "US data centre spending to hit $2.1T by 2028"
+      },
+      {
+        "title": "AI, Smartphones And Mobility: Global Tech Leaders Discuss India's Next Growth Phase At NDTV World Summit",
+        "summary": "At the NDTV World Summit 2026, technology leaders discussed India's potential in AI adoption, research and development, smartphone innovation and affordable mobility.",
+        "link": "https://www.ndtv.com/world-news/ndtv-world-summit-2026-indias-next-tech-push-from-smartphone-manufacturing-to-ai-and-homegrown-innovation-12225118#publisher=newsstand",
+        "source": "NDTV",
+        "sources": [
+          "NDTV"
+        ],
+        "published": "2026-10-24T09:53:58-04:00",
+        "domain": "Technology & Semiconductors",
+        "region": "India",
+        "score": 8.8,
+        "why": "Global tech leaders discuss India's AI growth"
+      },
+      {
+        "title": "Georgia's Silk Cloud deploys Nvidia Blackwell Ultra GPUs",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMioAFBVV95cUxNREdBbUlzTjJwaVZxY2oyTF9BM05GbTZ3U0dUOFZOMkxoME00ZTRoMmZzdTZYODdLWnk3MU0tb0hoWTZGdmZiR3RKNkVuZnNFXzBPT0xVcTNFSEhTcDlXeUJzRFQ1Vkd4YkxJQzE1VVg3WUlRc2JzOFJoZ0VOdWZNaFE5c2Zpa05BbDB4WGZYVTk2Z0JaYXlySWQ3aUFzM1FQ?oc=5",
+        "source": "Data Center Dynamics",
+        "sources": [
+          "Data Center Dynamics"
+        ],
+        "published": "2026-10-24T09:04:23-04:00",
+        "domain": "Technology & Semiconductors",
+        "region": "US",
+        "score": 8.6,
+        "why": "Georgia deploys Nvidia Blackwell Ultra GPUs"
+      },
+      {
+        "title": "Google Might Use Your Gmail And Photos Data For Targeted Ads",
+        "summary": "Google updates policy allowing use of Gmail and Photos data for personalised ads via connected apps.",
+        "link": "https://www.ndtv.com/feature/google-might-use-your-gmail-and-photos-data-for-targeted-ads-12230403#publisher=newsstand",
+        "source": "NDTV",
+        "sources": [
+          "NDTV"
+        ],
+        "published": "2026-10-24T10:36:38-04:00",
+        "domain": "Technology & Semiconductors",
+        "region": "US",
+        "score": 7.6,
+        "why": "Google may use Gmail/Photos for targeted ads"
+      },
+      {
+        "title": "What to expect from Apple’s ‘Pro and tell’ event",
+        "summary": "It feels like Apple's Welcome Home event just happened. And the iPhone Duo announcement isn't all that far in our rearview mirror, either. Yet, the company is back with another launch, focused on the MacBook Pro, it…",
+        "link": "https://www.theverge.com/tech/1018169/what-to-expect-apple-pro-and-tell-event-touchscreen-macbook-pro",
+        "source": "The Verge",
+        "sources": [
+          "The Verge"
+        ],
+        "published": "2026-10-24T10:15:00-04:00",
+        "domain": "Technology & Semiconductors",
+        "region": "US",
+        "score": 6.6,
+        "why": "Apple 'Pro and tell' event expectations"
+      }
+    ],
+    "Finance & Banking": [
+      {
+        "title": "White House lifts tariffs on some Canadian goods as midterm elections loom",
+        "summary": "From 30 October, tariffs will be eased on some products, including certain machinery, and placed on others, such as carpets.",
+        "link": "https://www.bbc.co.uk/news/articles/c60qk573yzz8o?at_medium=RSS&at_campaign=rss",
+        "source": "BBC World",
+        "sources": [
+          "BBC World",
+          "NDTV",
+          "Global News",
+          "Reuters"
+        ],
+        "published": "2026-10-23T20:36:47-04:00",
+        "domain": "Finance & Banking",
+        "region": "Canada",
+        "score": 10.4,
+        "why": ""
+      },
+      {
+        "title": "Bank of Canada to raise rates to 2.50% on October 28 and once again by end-March",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMi4wFBVV95cUxNQkczNHZldDdxazMwSVota0l0cXl2OWthSXlPaG5PYkpWR0xLWGFHcTNzYTk1Um5XODBZZG5fSEM1dm1vdW9WY2FSMGJUSld4NjBJelZRdkIxWkJsOGo1aXFjODRzdnpZMkRUaGF2aV9TTl8xSUpibDFMbGg0dUhQc3o4eVh2UXhzNlplQkJOMHRqXzFJUjc5UGJjbW5QSUlLLW41TjNoVXJhZ2pVWnB0dmtzc2gxVE5zbGtIdXZRa0pMejJsZmNSODJWUlk4SXJ5QUVUcy16YjVNSTRkNC0zcERpOA?oc=5",
+        "source": "TradingView",
+        "sources": [
+          "TradingView",
+          "The Daily News | Texas' Oldest Newspaper"
+        ],
+        "published": "2026-10-23T13:00:07-04:00",
+        "domain": "Finance & Banking",
+        "region": "Canada",
+        "score": 8.8,
+        "why": "Bank of Canada to raise rates to 2.50%"
+      },
+      {
+        "title": "Ethanol tender sparks feedstock concerns as rice gains ground over maize",
+        "summary": "The competing concerns highlight the challenge facing the ethanol procurement framework: balancing the availability and cost of different feedstocks.",
+        "link": "https://www.thehindu.com/business/Industry/ethanol-tender-sparks-feedstock-concerns-as-rice-gains-ground-over-maize/article71620019.ece",
+        "source": "The Hindu Business",
+        "sources": [
+          "The Hindu Business"
+        ],
+        "published": "2026-10-24T09:12:59-04:00",
+        "domain": "Finance & Banking",
+        "region": "India",
+        "score": 7.8,
+        "why": "Ethanol tender sparks feedstock concerns"
+      },
+      {
+        "title": "Full lockdown of occupied West Bank begins",
+        "summary": "The Israeli army begins its lockdown and military operations across the West Bank.",
+        "link": "https://www.aljazeera.com/video/newsfeed/2026/10/24/full-lockdown-of-occupied-west-bank-begins-2?traffic_source=rss",
+        "source": "Al Jazeera",
+        "sources": [
+          "Al Jazeera"
+        ],
+        "published": "2026-10-24T10:24:19-04:00",
+        "domain": "Finance & Banking",
+        "region": "Other",
+        "score": 6.3,
+        "why": "Full lockdown of occupied West Bank begins"
+      },
+      {
+        "title": "Everyone’s talking about Roth conversions, but here’s how few people really do them — and why you shouldn’t have FOMO about it",
+        "summary": "You have to do the math to figure out your best tax strategy in retirement, and converting might not be for you.",
+        "link": "https://www.marketwatch.com/story/everyones-talking-about-roth-conversions-but-heres-how-few-people-really-do-them-and-why-you-shouldnt-have-fomo-about-it-1b50db07?mod=mw_rss_topstories",
+        "source": "MarketWatch",
+        "sources": [
+          "MarketWatch"
+        ],
+        "published": "2026-10-24T10:24:00-04:00",
+        "domain": "Finance & Banking",
+        "region": "Global",
+        "score": 0.54,
+        "why": ""
+      }
+    ],
+    "Stock Markets & Trading": [
+      {
+        "title": "Reliance Jio Platforms IPO GMP, listing date and time, share price prediction for NSE, BSE debut - Details",
+        "summary": "Reliance Jio Platforms’ IPO was subscribed 22.19 times, led by 70.55-times demand from qualified institutional buyers. Its grey market premium was reported at ₹248, suggesting an estimated listing price of ₹1,367, or a…",
+        "link": "https://www.livemint.com/market/ipo/reliance-jio-platforms-ipo-gmp-listing-date-and-time-share-price-prediction-for-nse-bse-debut-details-11792848439962.html",
+        "source": "Mint Markets",
+        "sources": [
+          "Mint Markets"
+        ],
+        "published": "2026-10-24T09:31:25-04:00",
+        "domain": "Stock Markets & Trading",
+        "region": "India",
+        "score": 8.8,
+        "why": "Reliance Jio Platforms IPO subscribed 22x"
+      },
+      {
+        "title": "Berkshire shares shake the Buffett blues with new all-time highs",
+        "summary": "After almost 18 months, Berkshire Hathaway shares have entirely erased all the ground they lost in the wake of Warren Buffett's surprise announcement at the 2025 shareholders meeting that he would step down as CEO.",
+        "link": "https://www.cnbc.com/2026/10/24/berkshire-record-high-without-buffett.html",
+        "source": "CNBC",
+        "sources": [
+          "CNBC"
+        ],
+        "published": "2026-10-24T08:48:32-04:00",
+        "domain": "Stock Markets & Trading",
+        "region": "US",
+        "score": 8.6,
+        "why": "Berkshire shares hit new all-time highs"
+      },
+      {
+        "title": "Investors’ recent money moves show a preference for lowering risks over boosting rewards",
+        "summary": "Investors have been steadily pouring money into the Invesco S&P 500 Quality ETF this year.",
+        "link": "https://www.marketwatch.com/story/investors-recent-money-moves-show-a-preference-for-quality-over-momentum-within-the-s-p-500-ed6b5149?mod=mw_rss_topstories",
+        "source": "MarketWatch",
+        "sources": [
+          "MarketWatch"
+        ],
+        "published": "2026-10-24T09:37:00-04:00",
+        "domain": "Stock Markets & Trading",
+        "region": "US",
+        "score": 7.6,
+        "why": "Investors prefer quality ETFs over risk"
+      },
+      {
+        "title": "Vizag TMT rebars make a market comeback as RINL resumes rolling operations",
+        "summary": "The revival swiftly addresses supply constraints, restoring the availability of the trusted Vizag TMT brand across commercial channels, says senior RINL official",
+        "link": "https://www.thehindu.com/news/cities/Visakhapatnam/vizag-tmt-rebars-make-a-market-comeback-as-rinl-resumes-rolling-operations/article71620048.ece",
+        "source": "The Hindu",
+        "sources": [
+          "The Hindu"
+        ],
+        "published": "2026-10-24T10:39:13-04:00",
+        "domain": "Stock Markets & Trading",
+        "region": "India",
+        "score": 6.8,
+        "why": "Vizag TMT rebars return as RINL resumes ops"
+      },
+      {
+        "title": "Looking for AI stocks that are still cheap? Consider these two under-the-radar picks.",
+        "summary": "Simon King of Saturna Capital names two stocks tied to base metals, for investors who want to look beyond the beaten path for AI-related trades.",
+        "link": "https://www.marketwatch.com/story/looking-for-ai-stocks-that-are-still-cheap-consider-these-two-under-the-radar-picks-b4ca2b28?mod=mw_rss_topstories",
+        "source": "MarketWatch",
+        "sources": [
+          "MarketWatch"
+        ],
+        "published": "2026-10-24T10:40:00-04:00",
+        "domain": "Stock Markets & Trading",
+        "region": "US",
+        "score": 6.6,
+        "why": "Two under-the-radar AI stock picks"
+      }
+    ],
+    "Geopolitics & Diplomacy": [
+      {
+        "title": "Suspect arrested over fire at Hitler’s ‘Eagle’s Nest’ retreat in Bavaria",
+        "summary": "About 200 firefighters deployed to tackle blaze at former Nazi mountain retreat in remote part of southern Germany Police have arrested a 33-year-old German citizen after a fire ripped through Adolf Hitler’s former…",
+        "link": "https://www.theguardian.com/world/2026/oct/24/blaze-engulfs-hitlers-eagles-nest-mountain-retreat-in-bavaria",
+        "source": "The Guardian",
+        "sources": [
+          "The Guardian",
+          "BBC World",
+          "Al Jazeera",
+          "NDTV",
+          "AP News"
+        ],
+        "published": "2026-10-24T10:28:15-04:00",
+        "domain": "Geopolitics & Diplomacy",
+        "region": "Global",
+        "score": 1.34,
+        "why": ""
+      },
+      {
+        "title": "North Korea's Kim Jong Un Is In China, Claims South Korea",
+        "summary": "Kim Jong Un has recently sought to strengthen ties with China.",
+        "link": "https://www.ndtv.com/world-news/north-koreas-kim-jong-un-visits-china-says-south-korea-12230276#publisher=newsstand",
+        "source": "NDTV",
+        "sources": [
+          "NDTV",
+          "Firstpost"
+        ],
+        "published": "2026-10-24T10:10:52-04:00",
+        "domain": "Geopolitics & Diplomacy",
+        "region": "China",
+        "score": 0.76,
+        "why": ""
+      },
+      {
+        "title": "Defence Secretary Rajesh Kumar Singh gets one-year extension till October 2027",
+        "summary": "His current tenure was scheduled to end on October 31, 2026",
+        "link": "https://www.thehindu.com/news/national/defence-secretary-rajesh-kumar-singh-gets-one-year-extension-till-october-2027/article71620562.ece",
+        "source": "The Hindu",
+        "sources": [
+          "The Hindu",
+          "Hindustan Times"
+        ],
+        "published": "2026-10-24T10:26:08-04:00",
+        "domain": "Geopolitics & Diplomacy",
+        "region": "Global",
+        "score": 0.74,
+        "why": ""
+      },
+      {
+        "title": "Jordan’s King Abdullah orders firm response after deadly church attack",
+        "summary": "Authorities are still searching for the attackers and say it is too early to determine if they had ties to known groups.",
+        "link": "https://www.aljazeera.com/news/2026/10/24/jordans-king-abdullah-orders-firm-response-after-deadly-church-attack?traffic_source=rss",
+        "source": "Al Jazeera",
+        "sources": [
+          "Al Jazeera",
+          "Reuters"
+        ],
+        "published": "2026-10-24T09:02:51-04:00",
+        "domain": "Geopolitics & Diplomacy",
+        "region": "Global",
+        "score": 0.73,
+        "why": ""
+      },
+      {
+        "title": "Is China’s foreign policy good enough?",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMieEFVX3lxTE9LQWM4OEVVWUdqUF9JcHpJZXM3a0duXzliY05yLWdPRTZkZVVRbE1ka0JwcVgtRUZzMnZhOXRhT1FibFcyMTBrcVBkeUU4dVhhcEhqMHhRaWc4aVlNa1diNVdlMFBJTFhJTWFJT1E0T0JFdjRhdTJSbQ?oc=5",
+        "source": "Monthly Review",
+        "sources": [
+          "Monthly Review",
+          "Facebook"
+        ],
+        "published": "2026-10-24T06:00:52-04:00",
+        "domain": "Geopolitics & Diplomacy",
+        "region": "China",
+        "score": 0.71,
+        "why": ""
+      }
+    ],
+    "Wars & Conflicts": [
+      {
+        "title": "Houthi rebels strike Yemen’s government forces, killing at least 53",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMikgFBVV95cUxON01aUDFyR0hVZ3ZyLTRLNFpxbGJ4SlBTM0ZyMEpfRFRsZU9UOFZlR0l5TnY2WVBwVmd2TTNVT21pc3FBdVlrd04zRndnNmZoWDFKRUJjWFB0RG5qcllhY2U4bEhVakg5ZHNTQWxRVnE2RjlydXFCb3hmMk5VamV1cmpOYXI5elB4el9NV2ZES1FHdw?oc=5",
+        "source": "AP News",
+        "sources": [
+          "AP News"
+        ],
+        "published": "2026-10-24T09:49:37-04:00",
+        "domain": "Wars & Conflicts",
+        "region": "Other",
+        "score": 8.3,
+        "why": "Houthi rebels kill 53 in Yemen attack"
+      },
+      {
+        "title": "Israeli PM pledges massive military operation after West Bank checkpoint attack",
+        "summary": "Israel's Prime Minister is vowing to launch a major military operation in the West Bank in response to an attack by two Palestinian gunmen on an Israeli military checkpoint that killed two soldiers.",
+        "link": "https://www.npr.org/2026/10/23/nx-s1-6013613/israeli-pm-pledges-massive-military-operation-after-west-bank-checkpoint-attack",
+        "source": "NPR",
+        "sources": [
+          "NPR",
+          "Al Jazeera",
+          "The Washington Post",
+          "Foreign Policy"
+        ],
+        "published": "2026-10-24T05:26:09-04:00",
+        "domain": "Wars & Conflicts",
+        "region": "Other",
+        "score": 8.2,
+        "why": "Israel launches new West Bank operation"
+      },
+      {
+        "title": "Saudi Launches Deadly Strikes On Houthi-Controlled Yemen Cities: Report",
+        "summary": "The war between Saudi and Houthis had been dormant since 2022, but erupted again in July",
+        "link": "https://www.ndtv.com/world-news/saudi-launches-deadly-strikes-on-yemen-cities-says-houthi-backed-media-12230221#publisher=newsstand",
+        "source": "NDTV",
+        "sources": [
+          "NDTV"
+        ],
+        "published": "2026-10-24T10:07:21-04:00",
+        "domain": "Wars & Conflicts",
+        "region": "Other",
+        "score": 7.3,
+        "why": "Saudi strikes resume on Houthi Yemen cities"
+      },
+      {
+        "title": "Trump's 'Epic Fury' Warning After US Envoy's 'Strike This Weekend' Remark, Iran Responds",
+        "summary": "According to Trump, he sees ending the war with Iran \"soon\".",
+        "link": "https://www.ndtv.com/world-news/trump-warns-of-another-little-epic-fury-irans-dont-play-with-fire-reply-us-iran-war-israel-12228279#publisher=newsstand",
+        "source": "NDTV",
+        "sources": [
+          "NDTV",
+          "Kyiv Post",
+          "France 24"
+        ],
+        "published": "2026-10-24T05:11:19-04:00",
+        "domain": "Wars & Conflicts",
+        "region": "US",
+        "score": 0.96,
+        "why": ""
+      },
+      {
+        "title": "\"Situation Dire\": Melania Trump Secures Ceasefire In Ukrainian City",
+        "summary": "Melania Trump said she had worked with the Russian and Ukrainian leaderships.",
+        "link": "https://www.ndtv.com/world-news/situation-dire-melania-trump-says-she-secured-ceasefire-in-ukrainian-city-12226918#publisher=newsstand",
+        "source": "NDTV",
+        "sources": [
+          "NDTV",
+          "AP News",
+          "Reuters"
+        ],
+        "published": "2026-10-23T21:27:29-04:00",
+        "domain": "Wars & Conflicts",
+        "region": "US",
+        "score": 0.86,
+        "why": ""
+      }
+    ],
+    "Commodities & Prices": [
+      {
+        "title": "First Tanker Carrying Russian Diesel Sets Sail For US Under Trump-Putin Deal",
+        "summary": "The diesel deal was seen as an attempt by Trump to address high fuel prices",
+        "link": "https://www.ndtv.com/world-news/first-tanker-carrying-russian-diesel-sets-sail-for-us-under-donald-trump-vladimir-putin-deal-12228241#publisher=newsstand",
+        "source": "NDTV",
+        "sources": [
+          "NDTV",
+          "AP News"
+        ],
+        "published": "2026-10-23T22:41:05-04:00",
+        "domain": "Commodities & Prices",
+        "region": "Global",
+        "score": 9.1,
+        "why": "Russian diesel tanker sails to US under Trump-Putin deal"
+      },
+      {
+        "title": "Wall Street loses ground under pressure from rising oil prices",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMieEFVX3lxTE81NThxeHlReWFTaEFxX1l1RjhOQUUzeExHczBnVGljMXktcndsOGJ4bjh3NkFGdDNvbHpKdFoxNzlxdDRWRUowNlVfUU9jaGdVSGNTYTZVemRWeW4tOEtFaXY1RE53X0Jyd1ZPWS00UlllVGNxTE9jLQ?oc=5",
+        "source": "Hartford Courant",
+        "sources": [
+          "Hartford Courant",
+          "Chicago Tribune"
+        ],
+        "published": "2026-10-23T18:58:35-04:00",
+        "domain": "Commodities & Prices",
+        "region": "US",
+        "score": 7.9,
+        "why": "Wall Street falls under rising oil pressure"
+      },
+      {
+        "title": "Global oil prices jump as Middle East conflict grows",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMi0wFBVV95cUxQY0lTMmdMVkdXTUREZzVmTzRiT1E4WXlySlVMMFVUUmhtLXZuY2VNbDRaN0ZoRWRMU3R1b3hGQTlYdkR5SHYzSnlJN1N4S29pdS1zVDlnVkRVVUpiSFJwTEY3VzJGWDhvc25Wb2F5bFQ1bzBKUC1VMkRQcnhqdHAzRkZxUTFBOXNzX3cwUGN5ZVB0WGZxSC11RmZmX0dQNnQ0U1NkOXdpY2Uwc1lOMDZWQmRSZXVXVXpLMjhsck5pcVJfbzhYLXg2Rks2OU5XaGF0RENz?oc=5",
+        "source": "WKYC",
+        "sources": [
+          "WKYC"
+        ],
+        "published": "2026-10-24T09:15:00-04:00",
+        "domain": "Commodities & Prices",
+        "region": "Global",
+        "score": 7.8,
+        "why": "Global oil prices jump on Middle East conflict"
+      },
+      {
+        "title": "Gas prices for 10/24/26: National average sitting at $4.29 per gallon",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMiowFBVV95cUxQTkVVc1VUZ1QtMGx1TjJyUnktY25CWmZJdkh4MmQ3Zl8xLW91RUdHN09NQlB6Y18wOXZuRU5ZeDVmMXRaVGQzTnNwSDRtRGVpcFFCUDk0OHpXbVlJZ2g2NUJNVkZHSEctcXF2Rm9lYUtTcXJwbHJrcnpod21oNFNINnlxUzdrSkptaU5rYnBfMmp0NTFtSlJCYTVORjdWRFFya29r0gG3AUFVX3lxTE01dVpsWXo5azJrdFA1RW5mWVZLNXR6NnlmUDRNXzhSc2RnUmZ3QV9DQVRTRENNbWlJSEdPX2MzWldoZ1JYdnZ1SEN3WWM0LW5PeFVwc0ZXYk1jb0pWSlJuWXhCWEp1em9JM045Zm5UakducnE2TTQtaDhoby1uOXFqVUdCSzZkTEtzbDJaRG40ZzRPb0huVzZkNjI1MVc5b3FDaU9fajZxX1liOFFaT1prQUpXWDJUZw?oc=5",
+        "source": "AL.com",
+        "sources": [
+          "AL.com"
+        ],
+        "published": "2026-10-24T10:32:00-04:00",
+        "domain": "Commodities & Prices",
+        "region": "US",
+        "score": 6.6,
+        "why": "US gas prices average $4.29 per gallon"
+      },
+      {
+        "title": "Sudan’s soaring fuel prices make getting by harder for workers",
+        "summary": "Sudan is suffering from a cost-of-living crisis affecting millions across the country.",
+        "link": "https://www.aljazeera.com/economy/2026/10/24/sudans-soaring-fuel-prices-makes-getting-by-harder-for-workers?traffic_source=rss",
+        "source": "Al Jazeera",
+        "sources": [
+          "Al Jazeera"
+        ],
+        "published": "2026-10-24T09:51:08-04:00",
+        "domain": "Commodities & Prices",
+        "region": "Other",
+        "score": 5.3,
+        "why": "Sudan fuel prices soar amid cost crisis"
+      }
+    ]
+  },
+  "market": [
+    {
+      "label": "S&P 500",
+      "price": 7623.68,
+      "change_pct": -0.5186995231831334,
+      "decimals": 2
+    },
+    {
+      "label": "Nasdaq",
+      "price": 25955.342,
+      "change_pct": -0.20576594393616868,
+      "decimals": 2
+    },
+    {
+      "label": "Nifty 50",
+      "price": 22600.0,
+      "change_pct": -0.38633524898293975,
+      "decimals": 2
+    },
+    {
+      "label": "TSX",
+      "price": 35788.18,
+      "change_pct": -0.5151569905624965,
+      "decimals": 2
+    },
+    {
+      "label": "USD/INR",
+      "price": 94.94,
+      "change_pct": 0.24146673111003467,
+      "decimals": 3
+    },
+    {
+      "label": "USD/CAD",
+      "price": 1.4004,
+      "change_pct": 0.01000017026737381,
+      "decimals": 4
+    },
+    {
+      "label": "Gold",
+      "price": 4007.9,
+      "change_pct": -1.292973687479547,
+      "decimals": 2
+    },
+    {
+      "label": "WTI Crude",
+      "price": 103.27,
+      "change_pct": 3.820246036657292,
+      "decimals": 2
+    },
+    {
+      "label": "BTC",
+      "price": 80194.0,
+      "change_pct": -1.8516423238450237,
+      "decimals": 0
+    }
+  ],
+  "intelligence": null
+}
