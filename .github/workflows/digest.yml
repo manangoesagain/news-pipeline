@@ -50,6 +50,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Backfill archive from saved digests
+        run: python archive.py
+
       - name: Run digest and send to Telegram + Email
         id: digest
         env:
@@ -70,7 +73,7 @@ jobs:
         run: |
           python build_page.py
           mkdir -p site
-          cp index.html site/
+          cp index.html archive.html site/
           cp -r _data site/
 
       - name: Upload preview

@@ -454,6 +454,8 @@ def generate_html(digests):
       <p>Free sources &bull; 4 runs daily (8, 11, 3, 6) &bull; Toronto time (ET)</p>
     </header>
 
+    <p style="text-align:center;margin-bottom:14px"><a href="archive.html" style="color: var(--accent); text-decoration: none;">Archive, search &amp; story threads &rarr;</a></p>
+
     <div class="updated">Last updated: {esc(last_updated) if last_updated else '—'}</div>
 
     {cards}
@@ -473,3 +475,6 @@ if __name__ == "__main__":
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         f.write(html)
     print(f"Generated {OUTPUT_FILE} with {len(digests)} digests")
+    from archive_page import PAGE
+    with open("archive.html", "w", encoding="utf-8") as f:
+        f.write(PAGE)

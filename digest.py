@@ -24,6 +24,7 @@ from zoneinfo import ZoneInfo
 import feedparser
 import requests
 
+import archive
 import llm
 import market
 
@@ -994,6 +995,12 @@ def main():
         email_subject += " + Intelligence Brief"
 
     save_digest(domain_items, breaking, snapshot, intel, ranked_by)
+
+    try:
+        added = archive.update_archive(domain_items, breaking, NOW)
+        archive.update_threads(added, NOW)
+    except Exception as e:  # memory is a bonus; never block a delivery
+        print(f"[ARCHIVE ERROR] {e}")
 
     if DRY_RUN:
         os.makedirs("preview", exist_ok=True)
