@@ -688,10 +688,19 @@ SCRIPT = r"""
       vb.y = Math.min(Math.max(vb.y, -m - vb.h * 0.6), SC.H + m - vb.h * 0.4);
     }
     function fit(top) {
-      var r = box2(), pad = SC.kind === "chain" ? 8 : 12, s = Math.min(r.w / (SC.W + 2 * pad), r.h / (SC.H + 2 * pad));
-      if (SC.kind === "chain") s = Math.min(s, 1.15);
-      vb.w = r.w / s; vb.h = r.h / s; vb.x = SC.W / 2 - vb.w / 2; vb.y = SC.H / 2 - vb.h / 2;
-      if (SC.narrow && SC.kind !== "chain" && vb.h > SC.H + 2 * pad) vb.y = -pad;   /* phone: map hugs the top, free space below keeps the zoom buttons clear */
+      var r = box2(), s;
+      if (SC.kind === "chain") {
+        var pad = 8; s = Math.min(r.w / (SC.W + 2 * pad), r.h / (SC.H + 2 * pad), 1.15);
+        vb.w = r.w / s; vb.h = r.h / s; vb.x = SC.W / 2 - vb.w / 2; vb.y = SC.H / 2 - vb.h / 2;
+        if (SC.narrow && vb.h > SC.H + 2 * pad) vb.y = -pad;
+      } else {
+        /* padding in screen px so counter-scaled hub labels (up to 3 lines below a node, ~half a label either side) are never clipped */
+        var pt = 14, pb = SC.narrow ? 62 : 54, ps = SC.narrow ? 34 : 48;
+        s = Math.min((r.w - 2 * ps) / SC.W, (r.h - pt - pb) / SC.H);
+        vb.w = r.w / s; vb.h = r.h / s; vb.x = SC.W / 2 - vb.w / 2;
+        var extra = Math.max(0, r.h - pt - pb - SC.H * s);
+        vb.y = -(pt + (SC.narrow ? 0 : extra / 2)) / s;   /* phone: map hugs the top, free space below keeps the zoom buttons clear */
+      }
       fitS = s; setVB();
     }
     function zoomAt(k, cx, cy) {
