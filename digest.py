@@ -616,11 +616,188 @@ def build_intelligence(stories, articles_today, snapshot):
             g = enrich_graph(g, snapshot, load_json(archive.THREADS_FILE, {"threads": []}), rows_meta)
         except Exception as e:
             print(f"[INTEL] graph enrichment error: {e}")
+        try:
+            attach_market(g, snapshot)
+            add_focus_cards(g, snapshot)
+            finish_graph(g, snapshot)
+        except Exception as e:
+            print(f"[INTEL] focus cards error: {e}")
         result["graph"] = g
     else:
         result.pop("graph", None)
         print("[INTEL] no valid graph in reply")
     return result
+
+
+
+CARDS_PROMPT = """You are an intelligence analyst writing "focus cards" for the busiest nodes of tonight's news map. Plain English, specific, grounded ONLY in the nodes, links and headlines below plus well-known background; never invent figures that are not given. Readers are in Toronto and care about India, the US and Canada, and about the Indian rupee (INR), Canadian dollar (CAD) and US dollar (USD).
+
+Today is {today}. Market snapshot (price, daily change):
+{market}
+
+Nodes (id | type | domain | label | detail):
+{nodes}
+
+Links (from -> to | mechanism | effect | status):
+{links}
+
+Return JSON only:
+{{
+  "cards": {{
+    "<node id>": {{
+      "headline": "one sentence takeaway, max 140 chars",
+      "points": ["exactly 4 short bullets in this order: (1) what is happening, with numbers and names; (2) why it happens - the first-principles mechanism; (3) what is likely next, as an if-then; (4) what to watch for and what would prove this wrong. Max 120 chars each"],
+      "for_you": {{"India": "max 100 chars", "US": "max 100 chars", "Canada": "max 100 chars"}},
+      "currency": {{"INR": {{"dir": "stronger|weaker|flat", "why": "max 100 chars"}}, "CAD": {{"dir": "stronger|weaker|flat", "why": "..."}}, "USD": {{"dir": "stronger|weaker|flat", "why": "..."}}}},
+      "predictions": [{{"if": "max 90 chars", "then": "max 110 chars", "odds": "low|medium|high", "horizon": "days|weeks", "reasoning": "first principles: because X must lead to Y unless Z, max 170 chars", "watch": "signpost, max 100 chars", "wrong_if": "what would prove it wrong, max 100 chars"}}],
+      "against": ["signal that cuts against the story, max 110 chars"],
+      "pattern": "a historical precedent or recurring pattern, hedged, max 150 chars"
+    }}
+  }},
+  "links": {{
+    "<from id>><to id>": {{"steps": ["2-4 short mechanism steps"], "evidence": "max 140 chars", "weaken": "what could weaken this link, max 120 chars", "next": "where it leads next, max 100 chars", "seen_before": "max 120 chars, hedged"}}
+  }}
+}}
+Write a card for EVERY node id in this list: {hub_ids}. Give 2-3 predictions per card. For currency, think through each of INR, CAD and USD separately (for example an oil spike tends to weaken INR, strengthen CAD, and strengthen USD as a haven). Write "links" entries only for these link keys: {link_keys}.
+"""
+
+FOCUS_HUBS = 15
+FOCUS_LINKS = 30
+
+
+def hub_ids(g, n=FOCUS_HUBS):
+    deg = {}
+    for e in g["edges"]:
+        for k in ("from", "to"):
+            deg[e[k]] = deg.get(e[k], 0) + 1
+    ranked = sorted(g["nodes"], key=lambda x: (-deg.get(x["id"], 0), x["label"]))
+    return [x["id"] for x in ranked[:n]], deg
+
+
+def sanitize_cards(res, g, hubs):
+    """Validate the AI's focus cards and attach them to nodes/edges. Returns how many cards were kept."""
+    if not isinstance(res, dict):
+        return 0
+    cards = res.get("cards") if isinstance(res.get("cards"), dict) else {}
+    links = res.get("links") if isinstance(res.get("links"), dict) else {}
+    by_id = {x["id"]: x for x in g["nodes"]}
+    kept = 0
+
+    def txt(v, n):
+        return _clean(v, n)
+
+    def lst(v, n, size):
+        return [txt(x, size) for x in v[:n] if txt(x, size)] if isinstance(v, list) else []
+
+    for nid, c in cards.items():
+        node = by_id.get(nid)
+        if node is None or not isinstance(c, dict):
+            continue
+        points = lst(c.get("points"), 4, 120)
+        if not points:
+            continue
+        card = {"headline": txt(c.get("headline"), 140), "points": points}
+        fy = c.get("for_you") if isinstance(c.get("for_you"), dict) else {}
+        card["for_you"] = {k: txt(fy.get(k), 100) for k in ("India", "US", "Canada") if txt(fy.get(k), 100)}
+        cur = c.get("currency") if isinstance(c.get("currency"), dict) else {}
+        card["currency"] = {}
+        for k in ("INR", "CAD", "USD"):
+            v = cur.get(k) if isinstance(cur.get(k), dict) else {}
+            d = str(v.get("dir") or "").strip().lower()
+            if d in ("stronger", "weaker", "flat"):
+                card["currency"][k] = {"dir": d, "why": txt(v.get("why"), 100)}
+        preds = []
+        for pr in (c.get("predictions") if isinstance(c.get("predictions"), list) else [])[:3]:
+            if not isinstance(pr, dict) or not txt(pr.get("then"), 110):
+                continue
+            odds = str(pr.get("odds") or "").strip().lower()
+            hz = str(pr.get("horizon") or "").strip().lower()
+            preds.append({"if": txt(pr.get("if"), 90), "then": txt(pr.get("then"), 110),
+                          "odds": odds if odds in ("low", "medium", "high") else "medium",
+                          "horizon": "days" if "day" in hz else "weeks",
+                          "reasoning": txt(pr.get("reasoning"), 170), "watch": txt(pr.get("watch"), 100),
+                          "wrong_if": txt(pr.get("wrong_if"), 100)})
+        card["predictions"] = preds
+        card["against"] = lst(c.get("against"), 2, 110)
+        card["pattern"] = txt(c.get("pattern"), 150)
+        node["card"] = card
+        kept += 1
+    for e in g["edges"]:
+        c = links.get(f"{e['from']}>{e['to']}")
+        if isinstance(c, dict):
+            steps = lst(c.get("steps"), 4, 100)
+            if steps:
+                e["card"] = {"steps": steps, "evidence": txt(c.get("evidence"), 140), "weaken": txt(c.get("weaken"), 120),
+                             "next": txt(c.get("next"), 100), "seen_before": txt(c.get("seen_before"), 120)}
+    return kept
+
+
+def light_cards(g):
+    """No-AI cards for the busiest nodes, derived from node details and link labels."""
+    hubs, deg = hub_ids(g)
+    by_id = {x["id"]: x for x in g["nodes"]}
+    for nid in hubs:
+        node = by_id[nid]
+        if node.get("card"):
+            continue
+        ins = [e for e in g["edges"] if e["to"] == nid][:2]
+        outs = [e for e in g["edges"] if e["from"] == nid][:3]
+        points = []
+        if node.get("detail"):
+            points.append(_clean(node["detail"], 120))
+        if ins:
+            points.append(_clean("Driven by: " + "; ".join(f"{by_id[e['from']]['label']} ({e['label']})" for e in ins), 120))
+        if outs:
+            points.append(_clean("Leads to: " + "; ".join(f"{by_id[e['to']]['label']} ({e['label']})" for e in outs), 120))
+        if points:
+            node["card"] = {"headline": _clean(node.get("why_it_matters") or node.get("detail") or node["label"], 140),
+                            "points": points, "for_you": {}, "currency": {}, "predictions": [], "against": [],
+                            "pattern": "", "light": True}
+
+
+def attach_market(g, snapshot):
+    """Currency tiles need today's numbers: ship the snapshot with the graph."""
+    g["market"] = [{"label": m["label"], "price": market.fmt_price(m), "change": market.fmt_change(m),
+                    "change_pct": m.get("change_pct")} for m in (snapshot or []) if m.get("price") is not None]
+
+
+def add_focus_cards(g, snapshot, themes=""):
+    """Second, separate AI call (own time budget): full cards for the busiest nodes. Never raises."""
+    try:
+        hubs, deg = hub_ids(g)
+        by_id = {x["id"]: x for x in g["nodes"]}
+        hub_set = set(hubs)
+        touching = [e for e in g["edges"] if e["from"] in hub_set or e["to"] in hub_set]
+        touching.sort(key=lambda e: (-e.get("strength", 1), e["from"]))
+        keys = [f"{e['from']}>{e['to']}" for e in touching[:FOCUS_LINKS]]
+        nodes_txt = "\n".join(f"{n['id']} | {n['type']} | {n.get('domain', '')} | {n['label']} | {n.get('detail', '')}"
+                              for n in g["nodes"])
+        links_txt = "\n".join(f"{e['from']} -> {e['to']} | {e.get('label', '')} | {e.get('effect', '')} | {e.get('status', '')}"
+                              for e in g["edges"])
+        mkt = "\n".join(f"{m['label']}: {m['price']} {m['change']}" for m in g.get("market", [])) or "n/a"
+        res = llm.generate_json(CARDS_PROMPT.format(today=NOW.strftime("%A, %B %d, %Y"), market=mkt, nodes=nodes_txt,
+                                                    links=links_txt, hub_ids=", ".join(hubs), link_keys=", ".join(keys)),
+                                label="CARDS", require="cards", temperature=0.3, budget_s=330, per_model_s=170)
+        kept = sanitize_cards(res, g, hubs)
+        print(f"[CARDS] {kept} of {len(hubs)} focus cards kept")
+    except Exception as e:
+        print(f"[CARDS ERROR] {type(e).__name__}: {e}")
+    try:
+        light_cards(g)
+    except Exception as e:
+        print(f"[CARDS LIGHT ERROR] {e}")
+    return g
+
+
+def finish_graph(g, snapshot):
+    """Shared by the AI and backup graphs: market numbers, history stats, light cards."""
+    attach_market(g, snapshot)
+    try:
+        if hasattr(patterns, "enrich_nodes_with_stats"):
+            patterns.enrich_nodes_with_stats(g, NOW)
+    except Exception as e:
+        print(f"[HISTORY ERROR] {e}")
+    return g
 
 
 GRAPH_NODE_TYPES = {"event", "country", "company", "sector", "commodity", "index", "institution", "market"}
@@ -1255,6 +1432,11 @@ def main():
     print(f"[RANK] by {ranked_by}: {sum(len(v) for v in domain_items.values())} stories, {len(breaking)} breaking")
 
     snapshot = market.get_snapshot()
+    try:
+        import market_history
+        market_history.record(snapshot, NOW)
+    except Exception as e:
+        print(f"[MARKET HISTORY] {type(e).__name__}: {e}")
     articles = update_article_store(clusters, stories)
 
     intel = None
@@ -1290,6 +1472,9 @@ def main():
     intel_lite = None
     try:
         intel_lite = build_fallback_graph(stories, load_json(archive.THREADS_FILE, {"threads": []}), snapshot)
+        if intel_lite:
+            finish_graph(intel_lite["graph"], snapshot)
+            light_cards(intel_lite["graph"])
     except Exception as e:
         print(f"[GRAPH LITE ERROR] {e}")
 

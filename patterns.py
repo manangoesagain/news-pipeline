@@ -306,3 +306,148 @@ def accuracy_summary() -> dict:
     except Exception:
         pass
     return out
+
+
+# ----------------------------------------------------------------- per-node history (no LLM)
+
+MIN_HISTORY_DAYS = 3
+NODE_MIN_SHARED = 2          # shared tokens with an archive story title
+NODE_THREAD_SHARED = 3       # shared tokens with a thread's keywords
+NODE_PRED_OVERLAP = 0.3
+NODE_MAX_PREDS = 3
+
+
+def _stats_context(now):
+    """Load archive, threads and predictions once. Never raises."""
+    ctx = {"days": set(), "stories": [], "threads": [], "preds": [], "index": {}}
+    try:
+        arch = _load_archive(now, 36500)
+        ctx["days"] = set(arch)
+        for date, stories in arch.items():
+            for s in stories:
+                toks = _tokens(s["title"])
+                if toks:
+                    for w in toks:
+                        ctx["index"].setdefault(w, []).append(len(ctx["stories"]))
+                    ctx["stories"].append((s.get("link") or s["title"], date, toks))
+    except Exception:
+        pass
+    try:
+        for t in _load(THREADS_FILE, {"threads": []}).get("threads", []):
+            kws = set(t.get("keywords") or [])
+            dates = [(x.get("link") or x.get("title") or "", x.get("date") or "") for x in t.get("stories", [])]
+            dates = [d for d in dates if d[0] and re.fullmatch(r"\d{4}-\d{2}-\d{2}", d[1])]
+            if kws and dates:
+                ctx["threads"].append((kws, dates))
+    except Exception:
+        pass
+    try:
+        seen = set()
+        for path in (PREDICTIONS_FILE, PREDICTIONS_ARCHIVE_FILE):
+            d = _load(path, {"predictions": []})
+            for p in d.get("predictions", []) if isinstance(d, dict) else []:
+                if not isinstance(p, dict) or (p.get("id") and p.get("id") in seen):
+                    continue
+                seen.add(p.get("id"))
+                ctx["preds"].append((p, _ptoks(p)))
+    except Exception:
+        pass
+    return ctx
+
+
+def node_stats(node, now=None, _ctx=None) -> dict:
+    """History for a graph node ({'label', 'detail'?}) from saved data only. Never raises."""
+    now = now or datetime.now()
+    out = {"days_running": None, "stories": 0, "last7": 0, "prev7": 0, "trend": "unknown",
+           "first_seen": None, "past_predictions": [], "hit_rate": None, "note": ""}
+    try:
+        ctx = _ctx or _stats_context(now)
+        label = str((node or {}).get("label") or "")
+        ntoks = _tokens(f"{label} {(node or {}).get('detail') or ''}")
+        ltoks = _tokens(label)
+        today = now.strftime("%Y-%m-%d")
+
+        hits = {}   # story key -> set of dates
+        if len(ntoks) >= NODE_MIN_SHARED:
+            cnt = {}
+            for w in ntoks:
+                for i in ctx["index"].get(w) or ():
+                    cnt[i] = cnt.get(i, 0) + 1
+            for i, c in cnt.items():
+                if c >= NODE_MIN_SHARED:
+                    key, date, _ = ctx["stories"][i]
+                    hits.setdefault(key, set()).add(date)
+            for kws, dates in ctx["threads"]:
+                if len(ntoks & kws) >= NODE_THREAD_SHARED:
+                    for key, date in dates:
+                        if date <= today:
+                            hits.setdefault(key, set()).add(date)
+        out["stories"] = len(hits)
+
+        scored = []
+        for p, ptoks in ctx["preds"]:
+            if not ltoks or not ptoks:
+                continue
+            shared = len(ltoks & ptoks)
+            score = max(shared / len(ltoks | ptoks), shared / len(ltoks))
+            if score >= NODE_PRED_OVERLAP and shared >= min(2, len(ltoks)):
+                scored.append((score, p.get("created") or "", p))
+        scored.sort(key=lambda x: (x[0], x[1]), reverse=True)
+        pts = {"happened": 1.0, "partly": 0.5, "did_not_happen": 0.0}
+        res = [pts[p.get("status")] for _, _, p in scored if p.get("status") in pts]
+        if res:
+            out["hit_rate"] = round(sum(res) / len(res), 3)
+        out["past_predictions"] = [
+            {"if": p.get("if", ""), "then": p.get("then", ""), "status": p.get("status", "open"),
+             "created": p.get("created", ""), "evidence": p.get("evidence", "")}
+            for _, _, p in scored[:NODE_MAX_PREDS]]
+
+        n_days = len(ctx["days"])
+        if n_days < MIN_HISTORY_DAYS:
+            out["note"] = f"History builds up over time: only {n_days} day{'s' if n_days != 1 else ''} saved so far."
+            return out
+        if not hits:
+            out["note"] = "No earlier coverage of this found in the saved history."
+            return out
+
+        first = min(min(ds) for ds in hits.values())
+        out["first_seen"] = first
+        out["days_running"] = (now.date() - datetime.strptime(first, "%Y-%m-%d").date()).days
+        w7, w14 = _day(now, 6), _day(now, 13)
+        last7 = sum(1 for ds in hits.values() if max(ds) >= w7)
+        prev7 = sum(1 for ds in hits.values() if max(ds) < w7 and max(ds) >= w14)
+        out["last7"], out["prev7"] = last7, prev7
+        if out["days_running"] < 7 and prev7 == 0 and last7:
+            out["trend"] = "new"
+        elif last7 - prev7 >= 2 and last7 >= 1.3 * prev7:
+            out["trend"] = "heating"
+        elif prev7 - last7 >= 2 and prev7 >= 1.3 * last7:
+            out["trend"] = "cooling"
+        else:
+            out["trend"] = "steady"
+        d = out["days_running"]
+        span = "first seen today" if d == 0 else f"first seen {d} day{'s' if d != 1 else ''} ago"
+        out["note"] = {
+            "new": f"New: {span}, {last7} stor{'y' if last7 == 1 else 'ies'} so far.",
+            "heating": f"Heating up: {last7} stories in the last week vs {prev7} the week before ({span}).",
+            "cooling": f"Cooling off: {last7} stories in the last week vs {prev7} the week before ({span}).",
+            "steady": f"Steady: {last7} stories in the last week vs {prev7} the week before ({span}).",
+        }[out["trend"]]
+    except Exception as e:
+        print(f"[PATTERNS] node_stats failed: {e}")
+    return out
+
+
+def enrich_nodes_with_stats(graph, now=None):
+    """Set node['history'] = node_stats(node) for every node in graph['nodes']. Never raises."""
+    try:
+        now = now or datetime.now()
+        ctx = _stats_context(now)
+        for node in (graph or {}).get("nodes", []) or []:
+            try:
+                node["history"] = node_stats(node, now, _ctx=ctx)
+            except Exception:
+                pass
+    except Exception as e:
+        print(f"[PATTERNS] enrich failed: {e}")
+    return graph

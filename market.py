@@ -17,6 +17,7 @@ INSTRUMENTS = [
     ("TSX", "^GSPTSE", ".GSPTSE", 2),
     ("USD/INR", "INR=X", "INR=", 3),
     ("USD/CAD", "CAD=X", "CAD=", 4),
+    ("US Dollar Index", "DX-Y.NYB", ".DXY", 2),
     ("Gold", "GC=F", "@GC.1", 2),
     ("WTI Crude", "CL=F", "@CL.1", 2),
 ]
