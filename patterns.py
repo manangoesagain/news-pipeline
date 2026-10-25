@@ -26,7 +26,9 @@ PREDICTION_DUE_DAYS = 14
 REVIEW_AFTER_DAYS = 7
 MAX_REVIEW = 12
 MAX_HEADLINES = 150
-DEDUPE_JACCARD = 0.6
+DEDUPE_JACCARD = 0.5
+RESOLVED_KEEP_DAYS = 90
+PREDICTIONS_ARCHIVE_FILE = os.path.join(SAVE_DIR, "predictions_archive.json")
 
 try:
     from archive import tokens as _tokens
@@ -165,6 +167,27 @@ def _load_preds():
     return d
 
 
+def _prune_resolved(store, now):
+    """Move resolved predictions older than RESOLVED_KEEP_DAYS into an archive file. True if changed."""
+    cut = _day(now, RESOLVED_KEEP_DAYS)
+    keep, old = [], []
+    for p in store["predictions"]:
+        if p.get("status") != "open" and (p.get("resolved") or p.get("created") or "9999") < cut:
+            old.append(p)
+        else:
+            keep.append(p)
+    if not old:
+        return False
+    arch = _load(PREDICTIONS_ARCHIVE_FILE, {"predictions": []})
+    if not isinstance(arch, dict) or not isinstance(arch.get("predictions"), list):
+        arch = {"predictions": []}
+    have = {p.get("id") for p in arch["predictions"]}
+    arch["predictions"].extend(p for p in old if p.get("id") not in have)
+    _save(PREDICTIONS_ARCHIVE_FILE, arch)
+    store["predictions"] = keep
+    return True
+
+
 def record_predictions(scenarios, now=None) -> list:
     """Store intel scenarios as open predictions. Returns the newly added ones."""
     now = now or datetime.now()
@@ -217,10 +240,14 @@ def review_predictions(now=None, llm_module=None, recent_story_titles=None) -> l
         if llm_module is None:
             return []
         store = _load_preds()
+        if _prune_resolved(store, now):
+            _save(PREDICTIONS_FILE, store)
         cutoff = _day(now, REVIEW_AFTER_DAYS)
         due = [p for p in store["predictions"] if p.get("status") == "open" and p.get("created", "9") <= cutoff]
         if not due:
             return []
+        # never-reviewed first, then oldest first
+        due.sort(key=lambda p: (bool(p.get("reviewed")), p.get("created", "")))
         due = due[:MAX_REVIEW]
         heads = [str(t) for t in (recent_story_titles or []) if t][:MAX_HEADLINES]
         if not heads:

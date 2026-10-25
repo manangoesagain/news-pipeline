@@ -119,48 +119,80 @@ def market_html(rows):
     return f'<div class="ticks">{"".join(cells)}</div>'
 
 
-def intel_text_html(intel):
+def _safe(fn, *args):
+    """Run one renderer; malformed LLM output must never take the whole page build down."""
+    try:
+        out = fn(*args)
+        return out if isinstance(out, str) else ""
+    except Exception as e:
+        print(f"[WARN] {getattr(fn, '__name__', 'renderer')} skipped: {type(e).__name__}: {e}")
+        return ""
+
+
+def _dicts(v):
+    return [x for x in v if isinstance(x, dict)] if isinstance(v, list) else []
+
+
+def _intel_text_html(intel):
     """Plain text sections of the brief (shown collapsed under 'Details')."""
     parts = []
-    if intel.get("causal_chains"):
+    chains = _dicts(intel.get("causal_chains"))
+    if chains:
         parts.append("<h4>Causal chains</h4>")
-        for c in intel["causal_chains"]:
-            parts.append(f'<div class="intel-item"><b>{esc(c.get("title"))}</b><br>{esc(" → ".join(c.get("chain", [])))}</div>')
-    if intel.get("second_order"):
+        for c in chains:
+            steps = c.get("chain") if isinstance(c.get("chain"), list) else []
+            parts.append(f'<div class="intel-item"><b>{esc(c.get("title"))}</b><br>{esc(" → ".join(str(x) for x in steps if isinstance(x, (str, int, float))))}</div>')
+    second = _dicts(intel.get("second_order"))
+    if second:
         parts.append("<h4>Second-order effects</h4>")
-        for e in intel["second_order"]:
+        for e in second:
             who = f' <span class="muted">(affects: {esc(e["who_is_affected"])})</span>' if e.get("who_is_affected") else ""
             parts.append(f'<div class="intel-item">{esc(e.get("event"))} ⇒ <b>{esc(e.get("effect"))}</b>{who}</div>')
-    if intel.get("scenarios"):
+    scenarios = _dicts(intel.get("scenarios"))
+    if scenarios:
         parts.append("<h4>If-then scenarios (1-2 weeks)</h4>")
-        for sc in intel["scenarios"]:
+        for sc in scenarios:
             watch = f'<br><span class="muted">Watch: {esc(sc["signpost"])}</span>' if sc.get("signpost") else ""
             parts.append(f'<div class="intel-item"><b>If</b> {esc(sc.get("if"))} <b>then</b> {esc(sc.get("then"))} '
                          f'<span class="badge">{esc(sc.get("likelihood", "?"))}</span>{watch}</div>')
-    if intel.get("contrarian"):
+    contrarian = _dicts(intel.get("contrarian"))
+    if contrarian:
         parts.append("<h4>Contrarian signals</h4>")
-        for c in intel["contrarian"]:
+        for c in contrarian:
             why = f'<br><span class="muted">Why it matters: {esc(c["why_it_matters"])}</span>' if c.get("why_it_matters") else ""
             parts.append(f'<div class="intel-item">{esc(c.get("signal"))}<br><span class="muted">Consensus: '
                          f'{esc(c.get("mainstream_view"))}</span>{why}</div>')
     return "".join(parts)
 
 
+def intel_text_html(intel):
+    return _safe(_intel_text_html, intel if isinstance(intel, dict) else {})
+
+
 def intel_html(intel, intel_lite=None):
-    graph = (intel or {}).get("graph")
+    try:
+        return _intel_html(intel, intel_lite)
+    except Exception as e:
+        print(f"[WARN] intel_html skipped: {type(e).__name__}: {e}")
+        return ""
+
+
+def _intel_html(intel, intel_lite=None):
+    intel = intel if isinstance(intel, dict) else {}
+    intel_lite = intel_lite if isinstance(intel_lite, dict) else {}
+    graph = intel.get("graph") if isinstance(intel.get("graph"), dict) else None
     lite = False
-    if not graph and intel_lite and intel_lite.get("graph"):
+    if not graph and isinstance(intel_lite.get("graph"), dict) and intel_lite["graph"]:
         graph, lite = intel_lite["graph"], True
     if not intel and not graph:
         return ""
-    intel = intel or {}
     parts = ['<div class="intel viz"><h3>🔗 Intelligence Brief</h3>']
     if intel.get("bottom_line"):
         parts.append(f'<p class="bottom-line">{esc(intel["bottom_line"])}</p>')
     note = "Built from story threads, no AI brief this run." if lite else ""
-    parts.append(connection_map(graph, note))
-    parts.append(scenario_tree(intel.get("scenarios")))
-    parts.append(causal_flows(intel.get("causal_chains")))
+    parts.append(_safe(connection_map, graph, note))
+    parts.append(_safe(scenario_tree, intel.get("scenarios")))
+    parts.append(_safe(causal_flows, intel.get("causal_chains")))
     text = intel_text_html(intel)
     if text:
         parts.append(f'<details class="idetails"><summary>Details</summary><div>{text}</div></details>')
@@ -170,27 +202,35 @@ def intel_html(intel, intel_lite=None):
     return "".join(parts)
 
 
-def patterns_html(digest):
-    pat = digest.get("patterns") or {}
-    acc = digest.get("prediction_accuracy") or {}
-    heating = [h for h in pat.get("heating", []) if h.get("thread_id")][:5] or pat.get("heating", [])[:5]
-    cooling = pat.get("cooling", [])[:4]
-    cross = pat.get("cross_domain", [])[:4]
+def _patterns_html(digest):
+    pat = digest.get("patterns") if isinstance(digest.get("patterns"), dict) else {}
+    acc = digest.get("prediction_accuracy") if isinstance(digest.get("prediction_accuracy"), dict) else {}
+    heating_all = _dicts(pat.get("heating"))
+    heating = [h for h in heating_all if h.get("thread_id")][:5] or heating_all[:5]
+    cooling = _dicts(pat.get("cooling"))[:4]
+    cross = _dicts(pat.get("cross_domain"))[:4]
     if not (heating or cooling or cross or acc.get("resolved")):
         return ""
     parts = ['<div class="intel"><h3>Patterns</h3>']
     if heating:
-        parts.append('<div class="intel-item"><b>Heating up:</b> ' + ", ".join(esc(h["term"]) for h in heating) + "</div>")
+        parts.append('<div class="intel-item"><b>Heating up:</b> ' + ", ".join(esc(h.get("term")) for h in heating) + "</div>")
     if cooling:
-        parts.append('<div class="intel-item"><b>Cooling off:</b> ' + ", ".join(esc(h["term"]) for h in cooling) + "</div>")
+        parts.append('<div class="intel-item"><b>Cooling off:</b> ' + ", ".join(esc(h.get("term")) for h in cooling) + "</div>")
     if cross:
+        def _doms(c):
+            d = c.get("domains")
+            return ", ".join(str(x) for x in d) if isinstance(d, list) else ""
         parts.append('<div class="intel-item"><b>Active across several topics:</b><br>' +
-                     "<br>".join(f"{esc(c['title'])} <span class=\"muted\">({esc(', '.join(c['domains']))})</span>" for c in cross) + "</div>")
+                     "<br>".join(f"{esc(c.get('title'))} <span class=\"muted\">({esc(_doms(c))})</span>" for c in cross) + "</div>")
     if acc.get("resolved"):
-        parts.append(f'<div class="intel-item"><b>Prediction track record:</b> {acc["happened"]} happened, '
-                     f'{acc["partly"]} partly, {acc["missed"]} missed of {acc["resolved"]} scored</div>')
+        parts.append(f'<div class="intel-item"><b>Prediction track record:</b> {esc(str(acc.get("happened", 0)))} happened, '
+                     f'{esc(str(acc.get("partly", 0)))} partly, {esc(str(acc.get("missed", 0)))} missed of {esc(str(acc.get("resolved")))} scored</div>')
     parts.append("</div>")
     return "".join(parts)
+
+
+def patterns_html(digest):
+    return _safe(_patterns_html, digest if isinstance(digest, dict) else {})
 
 
 def digest_card(digest):

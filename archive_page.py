@@ -4,6 +4,7 @@ PAGE = r"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>News Archive</title>
 <style>
@@ -46,6 +47,8 @@ PAGE = r"""<!DOCTYPE html>
   table.hm td button.zero { color:var(--muted); }
   .hmkey { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted); margin:8px 0; flex-wrap:wrap; }
   .hmkey .bar { width:90px; height:10px; border-radius:5px; border:1px solid var(--border); }
+  .olderbtn { padding:10px; border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:8px; font-size:15px; cursor:pointer; }
+  .olderbtn:disabled { opacity:.6; cursor:default; }
   h2.day { font-size:15px; margin:18px 0 8px; color:var(--muted); }
 </style>
 </head>
@@ -69,6 +72,7 @@ PAGE = r"""<!DOCTYPE html>
       <select id="day" aria-label="Day"><option value="">All days</option></select>
     </div>
     <div id="results"></div>
+    <div class="row" id="olderrow" hidden><button type="button" id="older" class="olderbtn">Load older days</button></div>
   </section>
 
   <section id="heat" hidden>
@@ -98,21 +102,56 @@ PAGE = r"""<!DOCTYPE html>
 const $ = id => document.getElementById(id);
 const safe = u => /^https?:\/\//i.test(String(u || "")) ? u : "#";
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const INITIAL_DAYS = 30;
 let days = [], stories = [], threads = [];
+const loadedDays = new Set();
 
-async function get(url) { try { const r = await fetch(url); return r.ok ? r.json() : null; } catch { return null; } }
+async function get(url) { try { const r = await fetch(url); return r.ok ? await r.json() : null; } catch { return null; } }
+
+/* fetch day files, ignoring any that are missing or malformed */
+async function loadDays(list) {
+  const todo = list.filter(d => d && typeof d.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d.date) && !loadedDays.has(d.date));
+  const got = await Promise.all(todo.map(d => get(`_data/archive/${d.date}.json`)));
+  got.forEach((d, i) => {
+    loadedDays.add(todo[i].date);
+    if (!d || !Array.isArray(d.stories)) return;
+    d.stories.forEach(s => { if (s && typeof s === "object" && s.title) stories.push({ ...s, day: todo[i].date }); });
+  });
+  stories.sort((a, b) => b.day.localeCompare(a.day));
+}
+
+function refreshFilters() {
+  const keep = $("domain").value;
+  while ($("domain").options.length > 1) $("domain").remove(1);
+  [...new Set(stories.map(s => s.domain).filter(Boolean))].sort().forEach(d => $("domain").add(new Option(d, d)));
+  $("domain").value = keep;
+}
+
+function updateStats() {
+  const nth = threads.filter(t => t && Array.isArray(t.stories) && t.stories.length > 1).length;
+  const more = days.length - loadedDays.size;
+  $("stats").textContent = `${stories.length} stories over ${loadedDays.size} day${loadedDays.size === 1 ? "" : "s"}${more > 0 ? ` (of ${days.length})` : ""} · ${nth} story threads`;
+  $("olderrow").hidden = more <= 0;
+}
 
 async function init() {
   const idx = await get("_data/archive/index.json");
-  days = idx ? idx.days : [];
-  const loaded = await Promise.all(days.map(d => get(`_data/archive/${d.date}.json`)));
-  loaded.forEach(d => d && Array.isArray(d.stories) && d.stories.forEach(s => stories.push({...s, day: d.date})));
+  days = idx && Array.isArray(idx.days) ? idx.days.filter(d => d && typeof d.date === "string") : [];
+  days.sort((a, b) => b.date.localeCompare(a.date));
+  await loadDays(days.slice(0, INITIAL_DAYS));
   const th = await get("_data/threads.json");
-  threads = th ? th.threads : [];
-  $("stats").textContent = `${stories.length} stories over ${days.length} day${days.length === 1 ? "" : "s"} · ${threads.filter(t => t.stories.length > 1).length} story threads`;
-  [...new Set(stories.map(s => s.domain))].sort().forEach(d => $("domain").add(new Option(d, d)));
+  threads = th && Array.isArray(th.threads) ? th.threads.filter(t => t && Array.isArray(t.stories) && Array.isArray(t.domains) && Array.isArray(t.keywords) && typeof t.first_seen === "string" && typeof t.last_seen === "string") : [];
   days.forEach(d => $("day").add(new Option(`${d.date} (${d.count})`, d.date)));
+  refreshFilters(); updateStats();
   renderResults(); renderThreads();
+}
+
+async function loadOlder() {
+  const b = $("older"); b.disabled = true; b.textContent = "Loading…";
+  await loadDays(days);
+  b.disabled = false; b.textContent = "Load older days";
+  refreshFilters(); updateStats(); renderResults();
+  if (!$("heat").hidden) renderHeat();
 }
 
 function storyHtml(s) {
@@ -206,7 +245,13 @@ function tab(which) {
   if (which === "heat") renderHeat();
 }
 $("tab-browse").onclick = () => tab("browse"); $("tab-threads").onclick = () => tab("threads"); $("tab-heat").onclick = () => tab("heat");
-["q", "domain", "day"].forEach(i => $(i).addEventListener("input", renderResults));
+["q", "domain"].forEach(i => $(i).addEventListener("input", renderResults));
+$("day").addEventListener("input", async () => {
+  const d = days.find(x => x.date === $("day").value);
+  if (d && !loadedDays.has(d.date)) { await loadDays([d]); refreshFilters(); updateStats(); }
+  renderResults();
+});
+$("older").onclick = loadOlder;
 ["tq", "tmode"].forEach(i => $(i).addEventListener("input", renderThreads));
 init();
 </script>

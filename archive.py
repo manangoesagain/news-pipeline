@@ -32,6 +32,25 @@ STOP = {"the", "a", "an", "of", "to", "in", "on", "for", "and", "or", "is", "are
         "report", "reports", "news", "live", "update", "updates"}
 
 
+try:
+    from zoneinfo import ZoneInfo
+    TZ = ZoneInfo("America/Toronto")
+except Exception:  # tzdata missing: fall back to UTC rather than fail
+    from datetime import timezone
+    TZ = timezone.utc
+
+
+def norm_time(value) -> str:
+    """Any datetime / ISO string -> America/Toronto ISO string (naive values are taken as Toronto time).
+    Unparseable values are returned unchanged. Idempotent."""
+    try:
+        dt = value if isinstance(value, datetime) else datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        dt = dt.replace(tzinfo=TZ) if dt.tzinfo is None else dt.astimezone(TZ)
+        return dt.isoformat()
+    except Exception:
+        return value if isinstance(value, str) else str(value)
+
+
 def _load(path, default):
     try:
         with open(path, "r", encoding="utf-8") as f:
@@ -59,7 +78,7 @@ def _compact(s, breaking=False):
         "sources": s.get("sources") or [s["source"]],
         "domain": s["domain"],
         "region": s["region"],
-        "published": published.isoformat() if isinstance(published, datetime) else published,
+        "published": norm_time(published),
         "score": s.get("score", 0),
         "why": s.get("why", ""),
         "summary": s.get("summary", ""),
@@ -104,20 +123,21 @@ def update_threads(stories: list, now: datetime) -> dict:
     """Attach stories to the best-matching thread, or start a new one."""
     store = _load(THREADS_FILE, {"threads": []})
     threads = store["threads"]
-    cutoff = (now - timedelta(days=THREAD_IDLE_DAYS)).isoformat()
+    cutoff = norm_time(now - timedelta(days=THREAD_IDLE_DAYS))
     active = [t for t in threads if t["last_seen"] >= cutoff]
     next_id = max([t["id"] for t in threads], default=0) + 1
     touched = set()
+    known = {x["link"] for t in threads for x in t["stories"]}
 
+    stories = [dict(s, published=norm_time(s["published"])) for s in stories]
     for s in sorted(stories, key=lambda x: x["published"]):
+        if s["link"] in known:
+            continue  # already ingested (idempotent)
         toks = tokens(s["title"])
         if len(toks) < 3:
             continue
         best, best_shared = None, 0
         for t in active:
-            if any(x["link"] == s["link"] for x in t["stories"]):
-                best, best_shared = t, 99
-                break
             shared = len(toks & set(t["keywords"]))
             if shared > best_shared:
                 best, best_shared = t, shared
@@ -125,8 +145,6 @@ def update_threads(stories: list, now: datetime) -> dict:
                  "region": s["region"], "date": s["published"][:10]}
         if best is not None and best_shared >= MATCH_MIN_SHARED:
             t = best
-            if best_shared == 99:
-                continue  # already in this thread
         else:
             t = {"id": next_id, "title": s["title"], "keywords": [], "domains": [], "stories": [],
                  "first_seen": s["published"], "last_seen": s["published"], "wc": {}}
@@ -134,6 +152,7 @@ def update_threads(stories: list, now: datetime) -> dict:
             threads.append(t)
             active.append(t)
         t["stories"].append(entry)
+        known.add(s["link"])
         t["stories"] = t["stories"][-THREAD_STORY_CAP:]
         t["last_seen"] = max(t["last_seen"], s["published"])
         t["first_seen"] = min(t["first_seen"], s["published"])
@@ -145,8 +164,8 @@ def update_threads(stories: list, now: datetime) -> dict:
         t["domains"] = sorted({x["domain"] for x in t["stories"]})
         touched.add(t["id"])
 
-    single_cut = (now - timedelta(days=SINGLETON_KEEP_DAYS)).isoformat()
-    keep_cut = (now - timedelta(days=THREAD_KEEP_DAYS)).isoformat()
+    single_cut = norm_time(now - timedelta(days=SINGLETON_KEEP_DAYS))
+    keep_cut = norm_time(now - timedelta(days=THREAD_KEEP_DAYS))
     threads = [t for t in threads if t["last_seen"] >= keep_cut and (len(t["stories"]) > 1 or t["last_seen"] >= single_cut)]
     threads.sort(key=lambda t: t["last_seen"], reverse=True)
     store["threads"] = threads
