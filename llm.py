@@ -41,6 +41,14 @@ def _extract_json(text: str, require: str = None):
     Returns the largest JSON object found (that has `require` as a key, if given)."""
     text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
     text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text)
+    cleaned = re.sub(r",\s*([}\]])", lambda m: m.group(1), text)  # trailing commas
+    if cleaned != text:
+        try:
+            obj = json.loads(cleaned)
+            if isinstance(obj, dict) and (not require or require in obj):
+                return obj
+        except json.JSONDecodeError:
+            pass
     try:
         obj = json.loads(text)
         if isinstance(obj, dict) and (not require or require in obj):
