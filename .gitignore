@@ -4,3 +4,4 @@ preview/
 site/
 index.html
 archive.html
+.playwright-mcp/
