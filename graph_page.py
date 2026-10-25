@@ -90,7 +90,7 @@ CSS = """
 
     .cmapwrap { margin: 0; }
     @media (min-width: 900px) {
-      .cmapwrap { width: min(1320px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+      .cmapwrap { width: min(1480px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
     }
     .cmap { position: relative; border: 1px solid var(--border); border-radius: 10px; background: var(--card); }
     .cmap button, .cmap select, .cmap input { font: inherit; color: var(--text); }
@@ -137,52 +137,43 @@ CSS = """
     .cmap .clink { font-size: 12px; background: none; border: 0; color: var(--accent); cursor: pointer; padding: 3px 4px; text-decoration: underline; }
     .cmap .ccount { font-size: 12px; font-weight: 400; color: var(--muted); margin-left: auto; }
 
-    /* body: chooser rail | map | panel */
+    /* body: chooser rail, then the map (the focus view replaces both when a node is opened) */
     .cbody { display: grid; grid-template-columns: minmax(0, 1fr); }
     .crail { min-width: 0; border-bottom: 1px solid var(--border); }
-    .cpanel { padding: 14px 16px 16px; font-size: 14px; line-height: 1.45; overflow: auto; border-top: 1px solid var(--border); min-height: 120px; }
     .cmain { min-width: 0; }
-    @media (min-width: 900px) {
-      .cbody { grid-template-columns: minmax(0, 1fr) 300px; grid-template-areas: "rail rail" "main panel"; }
-      .crail { grid-area: rail; } .cmain { grid-area: main; }
-      .cpanel { grid-area: panel; border-top: 0; border-left: 1px solid var(--border); max-height: 700px; }
-    }
-    @media (min-width: 1280px) {
-      .cbody { grid-template-columns: 276px minmax(0, 1fr) 316px; grid-template-areas: "rail main panel"; }
-      .crail { border-bottom: 0; border-right: 1px solid var(--border); overflow-y: auto; max-height: 700px; }
-      .cmap[data-view="all"] .cbody { grid-template-columns: minmax(0, 1fr) 316px; grid-template-areas: "main panel"; }
-    }
-    .cmap[data-view="all"] .crail { display: none; }
+    .cmap[data-view="all"] .crail, .cmap[data-view="full"] .crail { display: none; }
+    .cmap.is-focus .cbody, .cmap.is-focus .legend, .cmap.is-focus .cflt, .cmap.is-focus .nos { display: none; }
 
     /* chooser: key chains */
     .rail-in { display: flex; gap: 8px; overflow-x: auto; padding: 10px 12px; scroll-snap-type: x proximity; }
     .rail-in .rh { display: none; }
     .rail-in ul.cl { display: contents; list-style: none; margin: 0; padding: 0; }
     .rail-in ul.cl li { display: flex; flex: none; margin: 0; }
-    @media (min-width: 1280px) { .rail-in ul.cl { display: flex; flex-direction: column; gap: 8px; } .rail-in ul.cl li { display: block; } .rail-in ul.cl .ccard { width: 100%; } }
-    @media (min-width: 1280px) { .rail-in { flex-direction: column; overflow: visible; padding: 12px; } .rail-in .rh { display: block; } }
     .rh { font-size: 13px; font-weight: 600; color: var(--ink2); margin: 0 2px 2px; }
     .ccard { flex: 0 0 min(260px, 78vw); scroll-snap-align: start; display: flex; flex-direction: column; gap: 5px; text-align: left; padding: 10px 12px; border: 1px solid var(--border);
              border-radius: 10px; background: transparent; cursor: pointer; line-height: 1.3; }
     .ccard:hover { background: var(--soft); }
     .ccard[aria-pressed="true"] { border-color: var(--text); background: var(--soft); box-shadow: inset 4px 0 0 var(--focus); padding-left: 14px; }
-    @media (min-width: 1280px) { .ccard { flex: none; } }
     .ccard .ct { font-size: 14px; font-weight: 600; color: var(--text); }
     .ccard .cs { font-size: 12.5px; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .ccard .cm { display: flex; flex-wrap: wrap; gap: 3px 10px; align-items: center; }
     .bdg { font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--ink2); color: var(--text); white-space: nowrap; }
     .bdg.predicted { border-style: dashed; }
     .bdg.mixed { border-style: dashed; color: var(--ink2); }
+    @media (max-width: 479px) {
+      .ctop { min-width: 0; }
+      .seg { display: flex; width: 100%; }
+      .cmap .seg button { flex: 1 1 auto; padding: 8px 4px; font-size: 13px; min-width: 0; }
+    }
     @media (max-width: 899px) {
       .rail-in { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent); padding-right: 32px; }
       .seg button { min-height: 44px; padding: 8px 14px; }
       .cmap .csearch { font-size: 16px; min-height: 44px; }
       .czoom button { width: 44px; height: 44px; }
-      .cpanel .step, .cpanel .pitem { min-height: 44px; display: flex; flex-direction: column; justify-content: center; }
       .cmap[data-view="chains"] .mkey { display: inline; }
       .cmap { display: flex; flex-direction: column; }
       .cbody { display: contents; }
-      .ctop { order: 0; } .cflt, .nos { order: 1; } .crail { order: 2; } .cmain { order: 3; } .legend { order: 4; } .cpanel { order: 5; }
+      .ctop { order: 0; } .cflt, .nos { order: 1; } .crail { order: 2; } .cmain { order: 3; } .fview { order: 4; } .legend { order: 5; }
       .ccard { flex-basis: auto; width: max-content; max-width: 78vw; padding: 8px 12px; }
       .ccard .cs, .ccard .cm .dchip { display: none; }
       .ccard .ct { font-size: 13.5px; }
@@ -199,15 +190,14 @@ CSS = """
     .tbtn .tl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
     .tbtn .tn { margin-left: auto; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
     .tgrp { display: contents; }
-    @media (min-width: 1280px) { .tbtn { border-radius: 8px; width: 100%; } .tgrp { display: flex; flex-direction: column; gap: 4px; } }
 
     /* map header + view */
     .mhead { display: flex; flex-wrap: wrap; gap: 2px 14px; align-items: baseline; padding: 9px 14px 8px; border-bottom: 1px solid var(--border); min-height: 42px; }
     .mhead .mt { font-size: 15px; font-weight: 600; }
     .mhead .mh { font-size: 13px; color: var(--muted); }
     .cview { position: relative; height: min(66vh, 480px); background: var(--card); outline-offset: -2px; overflow: hidden; }
-    @media (max-width: 899px) { .cmap[data-view="all"] .cview, .cmap[data-view="topic"] .cview { height: min(88vh, 720px); } }
-    @media (min-width: 900px) { .cview { height: 600px; } .cmap[data-view="all"] .cview { height: 860px; } }
+    @media (max-width: 899px) { .cmap[data-view="all"] .cview, .cmap[data-view="topic"] .cview, .cmap[data-view="full"] .cview { height: min(88vh, 720px); } }
+    @media (min-width: 900px) { .cview { height: 640px; } .cmap[data-view="all"] .cview, .cmap[data-view="full"] .cview { height: 860px; } }
     .cview svg { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; font-family: inherit; user-select: none; -webkit-user-select: none; }
     .cview.drag svg { cursor: grabbing; }
 
@@ -287,40 +277,149 @@ CSS = """
     .czoom button { width: 34px; height: 34px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); cursor: pointer; font-size: 18px; line-height: 1; padding: 0; opacity: .95; }
     .czoom button.fit { font-size: 12px; }
     .czoom button:hover { background: var(--soft2); }
-    .cbar { position: absolute; left: 8px; right: 8px; top: 8px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); text-align: left; font-size: 14px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.18); }
-    .cbar[hidden] { display: none; }
-    @media (min-width: 900px) { .cbar { display: none !important; } }
-    .chint { position: absolute; left: 10px; bottom: 6px; font-size: 12px; color: var(--muted); pointer-events: none; background: var(--card); padding: 1px 6px; border-radius: 6px; opacity: .92; }
+    .chint { font-size: 12px; color: var(--muted); padding: 4px 2px 0; }
     .ctip { position: absolute; z-index: 5; pointer-events: none; background: var(--text); color: var(--card); font-size: 13px;
             padding: 7px 10px; border-radius: 6px; max-width: 270px; line-height: 1.35; display: none; }
     .ctip b { font-weight: 600; } .ctip .tm { opacity: .85; font-size: 12px; display: block; margin-top: 2px; }
 
-    /* panel */
-    .cpanel h5 { font-size: 16px; line-height: 1.25; margin: 0 0 3px; }
-    .cpanel .pmeta { font-size: 13px; color: var(--muted); margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: center; }
-    .cpanel p { margin: 0 0 8px; }
-    .cpanel .pl { font-weight: 600; color: var(--text); }
-    .cpanel h6 { font-size: 13px; font-weight: 600; margin: 14px 0 4px; color: var(--ink2); }
-    .cpanel ul { list-style: none; margin: 0; padding: 0; }
-    .cpanel li { margin: 0 0 2px; }
-    .cpanel .pitem { display: block; width: 100%; text-align: left; background: none; border: 0; border-radius: 6px; padding: 5px 6px; cursor: pointer; line-height: 1.35; font-size: 14px; }
-    .cpanel .pitem:hover { background: var(--soft); }
-    .cpanel .pitem .mech { color: var(--muted); display: block; font-size: 12.5px; }
-    .cpanel .pitem .fx { display: inline-block; width: 1.1em; text-align: center; font-weight: 700; }
-    .cpanel .fx.up { color: var(--up); } .cpanel .fx.down { color: var(--down); } .cpanel .fx.mixed { color: var(--mix); } .cpanel .fx.con { color: var(--con); }
-    .cpanel .mkt { display: inline-block; background: var(--soft); border-radius: 6px; padding: 2px 8px; font-variant-numeric: tabular-nums; }
-    .cpanel .mkt.up { color: var(--up); } .cpanel .mkt.down { color: var(--down); }
-    .cpanel .thr { color: var(--ink2); }
-    .cpanel .src a { color: var(--accent); word-break: break-word; }
-    .cpanel .empty { color: var(--muted); }
-    .cpanel .clear { float: right; font-size: 13px; background: none; border: 0; color: var(--accent); cursor: pointer; text-decoration: underline; padding: 0; }
-    .cpanel .step { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 7px 6px; border-radius: 6px; cursor: pointer; font-size: 14px; line-height: 1.35; }
-    .cpanel .step:hover { background: var(--soft); }
-    .cpanel .step .sn { font-weight: 600; display: block; }
-    .cpanel .step .how { display: block; color: var(--ink2); font-size: 13px; }
-    .cpanel .step .sm { display: block; color: var(--muted); font-size: 12.5px; }
-    .cpanel .gobtn { margin: 6px 0 2px; font-size: 13px; padding: 5px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); cursor: pointer; }
-    .cpanel .gobtn:hover { background: var(--soft2); }
+    /* map tools: currency lens + predicted ghosts */
+    .mhead { align-items: center; }
+    .mtools { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; margin-left: auto; }
+    .lens { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--ink2); }
+    .lens .lbl { margin-right: 2px; }
+    .cmap .lens button { font-size: 12px; font-weight: 600; padding: 3px 11px; min-height: 28px; border: 1px solid var(--border); border-radius: 999px; background: transparent; cursor: pointer; }
+    .cmap .lens button[aria-checked="true"] { background: var(--text); color: var(--card); border-color: var(--text); }
+    .ptog { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; color: var(--ink2); cursor: pointer; min-height: 28px; }
+    @media (max-width: 899px) { .cmap .lens button, .ptog { min-height: 44px; } .cmap .lens button { padding: 3px 14px; } .ptog input { width: 20px; height: 20px; } .mtools { margin-left: 0; } }
+    .sronly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+    /* map: lens, trace, predicted ghosts, full map */
+    .cmap svg.lens .nd:not(.lit) { filter: opacity(.16); }
+    .cmap svg.lens .ed:not(.lit) { filter: opacity(.08); }
+    .cmap svg.lens .nd.lit .ring { stroke: var(--focus); stroke-dasharray: 2 2; }
+    .cmap svg.tracing .ed:not(.tr) { opacity: .04; }
+    .cmap svg.tracing .nd:not(.tr) { opacity: .2; }
+    .cmap svg.tracing .ed.tr { opacity: 1; }
+    .cmap svg.tracing .ed.tr path.line { stroke-width: var(--sw2, 3px); }
+    .cmap svg.tracing .ed.tr .elabel { display: inline; }
+    .cmap .nd.tr .ring { stroke: var(--focus); }
+    .cmap svg.scn-full.zl .ed .elabel { display: inline; font-size: var(--efs, 12.5px); }
+    .cmap svg.scn-full.focus .ed:not(.hl) .elabel { display: none; }
+    .cmap .lanestory { fill: var(--ink2); pointer-events: none; }
+    .cmap .ft { cursor: pointer; outline: none; }
+    .cmap .ft-ln { fill: none; stroke: var(--ink2); stroke-width: 1.5; stroke-dasharray: 1.5 4.5; stroke-linecap: round; opacity: .75; }
+    .cmap .ft-dot { fill: var(--card); stroke: var(--ink2); stroke-width: 1.5; stroke-dasharray: 2.2 2.2; }
+    .cmap .ftl { font-size: 11.5px; fill: var(--ink2); paint-order: stroke; stroke: var(--halo); stroke-width: 3.5px; stroke-linejoin: round; }
+    .cmap .ftl .fto { font-size: 11px; fill: var(--muted); font-weight: 600; }
+    .cmap .ft:hover .ft-dot, .cmap .ft:focus-visible .ft-dot { stroke-dasharray: none; fill: var(--soft2); }
+
+    /* popover */
+    .pop { position: absolute; z-index: 40; width: min(350px, calc(100% - 12px)); max-height: min(72vh, 440px); overflow: auto; background: var(--card); color: var(--text); border: 1px solid var(--text); border-radius: 10px;
+           box-shadow: 0 10px 30px rgba(0,0,0,.3); padding: 10px 14px 12px; font-size: 13px; line-height: 1.4; }
+    .pop[hidden] { display: none; }
+    .pop .px { position: absolute; top: 2px; right: 2px; width: 36px; height: 36px; border: 0; background: none; cursor: pointer; font-size: 16px; color: var(--ink2); }
+    .pop .ph { padding-right: 30px; } .pop .pt { font-size: 14px; }
+    .pop .pm { margin: 4px 0 6px; font-weight: 600; }
+    .pop .pc { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+    .pop .chp { font-size: 11.5px; border: 1px solid var(--ink2); border-radius: 999px; padding: 0 8px; white-space: nowrap; }
+    .pop .chp.dashed { border-style: dashed; }
+    .pop .psteps { margin: 0 0 6px; padding-left: 20px; } .pop .psteps li { margin: 0 0 2px; }
+    .pop .ps { margin: 0 0 5px; } .pop .ps b { display: block; font-size: 12px; color: var(--ink2); }
+    .pop .pn { margin: 6px 0 0; font-size: 12px; color: var(--muted); }
+    .odds { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; }
+    .odds i { display: inline-flex; gap: 2px; } .odds i b { width: 5px; height: 10px; border: 1px solid var(--ink2); border-radius: 1px; display: inline-block; } .odds i b.on { background: var(--ink2); }
+
+    /* focus view */
+    .sic path { fill: var(--dx); } .sic path.d0 { fill: var(--d0); } .sic path.d1 { fill: var(--d1); } .sic path.d2 { fill: var(--d2); } .sic path.d3 { fill: var(--d3); } .sic path.d4 { fill: var(--d4); } .sic path.d5 { fill: var(--d5); } .sic path.d6 { fill: var(--d6); }
+    .fview { padding: 12px 18px 14px; font-size: 13px; line-height: 1.4; display: flex; flex-direction: column; gap: 8px; position: relative; overflow: hidden; }
+    .fview[hidden] { display: none; }
+    @media (min-width: 900px) { .fview { height: clamp(620px, calc(100vh - 84px), 900px); } }
+    .fv-top { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+    .fv-back { font-size: 14px; font-weight: 600; padding: 7px 14px; min-height: 40px; border: 1px solid var(--text); border-radius: 8px; background: var(--card); cursor: pointer; }
+    .fv-back:hover { background: var(--soft2); }
+    .fv-title { flex: 1 1 260px; min-width: 0; }
+    .fv-title h2 { margin: 0; font-size: 22px; line-height: 1.15; outline: none; }
+    .fv-chips { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; font-size: 12.5px; color: var(--ink2); margin-top: 3px; }
+    .dirb2.up { color: var(--up); font-weight: 700; } .dirb2.down { color: var(--down); font-weight: 700; } .dirb2.flat { font-weight: 700; }
+    .fv-tools .trace { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink2); }
+    .fview select { font: inherit; font-size: 13px; padding: 5px 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); min-height: 36px; max-width: 210px; }
+    .fv-hl { margin: 0; font-size: 15.5px; font-weight: 600; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .fv-note { margin: 0; font-size: 12px; color: var(--ink2); padding: 3px 10px; border: 1px dashed var(--ink2); border-radius: 8px; width: fit-content; max-width: 100%; }
+    .fv-trace { font-size: 12.5px; padding: 6px 10px; border: 1px solid var(--focus); border-radius: 8px; background: var(--soft); display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
+    .fv-trace[hidden] { display: none; }
+    .fv-trace .tsteps { display: inline-flex; flex-wrap: wrap; gap: 3px 4px; align-items: center; }
+    .fv-trace button { font: inherit; font-size: 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); padding: 2px 8px; min-height: 28px; cursor: pointer; color: var(--text); }
+    .fv-trace .tnode { font-weight: 600; } .fv-trace .tl { color: var(--ink2); border-style: dashed; } .fv-trace .tx { margin-left: auto; }
+    .fv-main { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(300px, .95fr) minmax(0, 1.5fr); gap: 16px; }
+    .fv-left { display: flex; flex-direction: column; gap: 10px; min-height: 0; overflow: auto; container-type: inline-size; padding-right: 2px; }
+    .keypts { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
+    .keypts li { padding-left: 10px; border-left: 3px solid var(--border); }
+    .keypts .pk { display: block; font-size: 12px; font-weight: 700; color: var(--ink2); }
+    .keypts .pv { display: block; font-size: 13px; }
+    .cstrip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+    @container (max-width: 440px) { .cstrip { grid-template-columns: minmax(0, 1fr); } .tile { display: grid; grid-template-columns: 7.5em 1fr; gap: 0 10px; } .tile .th { grid-column: 1; grid-row: 1 / 3; flex-direction: column; align-items: flex-start; } .tile .td { margin-left: 0; } .tile .tv { grid-column: 2; margin: 0; } .tile .tw { grid-column: 2; margin: 0; } }
+    .tile { border: 1px solid var(--border); border-left-width: 4px; border-radius: 8px; padding: 6px 9px; background: var(--soft); min-width: 0; }
+    .tile.t-stronger { border-left-color: var(--up); } .tile.t-weaker { border-left-color: var(--down); } .tile.t-flat, .tile.t-none { border-left-color: var(--dx); }
+    .tile.derived { border-style: dashed; border-left-style: solid; }
+    .tile .th { display: flex; flex-wrap: wrap; gap: 0 8px; align-items: baseline; font-size: 12px; }
+    .tile .th b { font-size: 14px; } .tile .tn { color: var(--muted); font-size: 11.5px; }
+    .tile .td { margin-left: auto; font-weight: 700; font-size: 12.5px; }
+    .tile .tv { font-size: 12.5px; font-variant-numeric: tabular-nums; margin-top: 2px; display: flex; gap: 6px; flex-wrap: wrap; }
+    .tile .mc.up { color: var(--up); } .tile .mc.down { color: var(--down); }
+    .tile .tw { font-size: 12px; color: var(--ink2); margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .cwhy { display: none; font-size: 12.5px; color: var(--ink2); padding: 0 2px; }
+    @media (max-width: 699px) {
+      .cstrip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .tile { display: block; cursor: pointer; padding: 6px 7px; min-height: 64px; }
+      .tile .th { display: block; } .tile .tn, .tile .tw { display: none; }
+      .tile .td { margin-left: 0; display: block; } .tile .tv { display: block; margin-top: 3px; } .tile .tv .mv { display: block; } .tile .mc { display: block; }
+      .tile.open { outline: 2px solid var(--text); outline-offset: -2px; }
+      .cwhy { display: block; }
+    }
+    .fy { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 8px; margin: 0; font-size: 12.5px; }
+    .fy dt { font-weight: 700; } .fy dd { margin: 0; color: var(--ink2); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+    .seen h6 { margin: 0 0 3px; font-size: 13px; color: var(--ink2); } .seen h6.sub { margin-top: 5px; }
+    .seen p { margin: 0 0 3px; font-size: 12.5px; color: var(--ink2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; } .seen p.hs { color: var(--text); font-weight: 600; }
+    .seen ul.ag { margin: 0; padding-left: 18px; font-size: 12.5px; color: var(--ink2); } .seen .empty { color: var(--muted); }
+    .fv-right { display: flex; flex-direction: column; min-width: 0; min-height: 0; gap: 6px; }
+    .fv-dg { flex: 1; min-height: 0; position: relative; overflow: hidden; }
+    .fv-leg { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; font-size: 12px; color: var(--ink2); }
+    .fv-leg span { display: inline-flex; align-items: center; gap: 5px; }
+    .fv-leg .lg { fill: none; stroke: var(--ink2); stroke-width: 2.4; } .fv-leg .lg.pred { stroke-dasharray: 6 4; } .fv-leg .lg.con { stroke: var(--con); stroke-dasharray: 1.5 4; stroke-linecap: round; }
+    .fv-src { display: flex; flex-wrap: wrap; gap: 2px 12px; font-size: 12px; align-items: baseline; } .fv-src a { color: var(--accent); }
+    @media (max-width: 899px) {
+      .fview { height: auto; } .fv-main { grid-template-columns: minmax(0, 1fr); } .fv-left { overflow: visible; } .fv-dg { overflow: visible; flex: none; }
+      .fview select, .fv-back { min-height: 44px; } .fv-trace button { min-height: 44px; }
+      .fv-title h2 { font-size: 20px; }
+    }
+    /* diagram */
+    .cmap svg.dg { display: block; font-family: inherit; max-width: 100%; }
+    .dg .dg-title { font-size: 12px; font-weight: 700; fill: var(--ink2); }
+    .dg .dg-box { fill: var(--card); stroke: var(--border); stroke-width: 1.2; }
+    .dg .dg-n { cursor: pointer; outline: none; } .dg .dg-n:hover .dg-box, .dg .dg-n:focus-visible .dg-box { stroke: var(--text); stroke-width: 1.8; }
+    .dg .dg-bar, .dg .dg-ic { fill: var(--dx); }
+    .dg .dg-bar.d0, .dg .dg-ic.d0 { fill: var(--d0); } .dg .dg-bar.d1, .dg .dg-ic.d1 { fill: var(--d1); } .dg .dg-bar.d2, .dg .dg-ic.d2 { fill: var(--d2); } .dg .dg-bar.d3, .dg .dg-ic.d3 { fill: var(--d3); }
+    .dg .dg-bar.d4, .dg .dg-ic.d4 { fill: var(--d4); } .dg .dg-bar.d5, .dg .dg-ic.d5 { fill: var(--d5); } .dg .dg-bar.d6, .dg .dg-ic.d6 { fill: var(--d6); }
+    .dg .dg-nm { font-size: 12px; font-weight: 600; fill: var(--text); }
+    .dg .dg-dir { font-size: 11px; } .dg .dg-dir.up { fill: var(--up); } .dg .dg-dir.down { fill: var(--down); }
+    .dg .dg-pil { fill: var(--soft); stroke: var(--dx); stroke-width: 2.2; }
+    .dg .dg-pillar.d0 .dg-pil { stroke: var(--d0); } .dg .dg-pillar.d1 .dg-pil { stroke: var(--d1); } .dg .dg-pillar.d2 .dg-pil { stroke: var(--d2); } .dg .dg-pillar.d3 .dg-pil { stroke: var(--d3); }
+    .dg .dg-pillar.d4 .dg-pil { stroke: var(--d4); } .dg .dg-pillar.d5 .dg-pil { stroke: var(--d5); } .dg .dg-pillar.d6 .dg-pil { stroke: var(--d6); }
+    .dg .dg-pn { font-size: 13px; font-weight: 700; fill: var(--text); }
+    .dg .dg-pd, .dg .dg-pm { font-size: 12px; fill: var(--ink2); font-weight: 600; } .dg .dg-pd.up, .dg .dg-pm.up { fill: var(--up); } .dg .dg-pd.down, .dg .dg-pm.down { fill: var(--down); }
+    .dg .dg-l { font-size: 11.5px; fill: var(--ink2); paint-order: stroke; stroke: var(--card); stroke-width: 4px; stroke-linejoin: round; }
+    .dg .dg-l.lnk:hover { fill: var(--text); text-decoration: underline; }
+    .cmap .dg .ed path.hit { stroke: transparent; stroke-width: 16; cursor: pointer; fill: none; outline: none; }
+    .cmap .dg .ed:hover path.line { stroke-width: 3.2px; }
+    .dg .dg-empty { font-size: 12px; fill: var(--muted); }
+    .dg .dg-fut-ln { fill: none; stroke: var(--ink2); stroke-width: 1.7; stroke-dasharray: 1.5 4.5; stroke-linecap: round; }
+    .dg .dg-fb { fill: var(--card); stroke: var(--ink2); stroke-width: 1.4; stroke-dasharray: 5 4; }
+    .dg .dg-f { cursor: pointer; outline: none; } .dg .dg-f:hover .dg-fb, .dg .dg-f:focus-visible .dg-fb { stroke: var(--text); stroke-dasharray: none; }
+    .dg .dg-ob { fill: none; stroke: var(--ink2); } .dg .dg-ob.on { fill: var(--ink2); }
+    .dg .dg-o { font-size: 11.5px; font-weight: 700; fill: var(--text); }
+    .dg .dg-ft { font-size: 12px; fill: var(--text); } .dg .dg-if { fill: var(--ink2); }
+    .dg .dg-more { cursor: pointer; outline: none; } .dg .dg-more rect, .dg .dg-more-r { fill: var(--soft); stroke: var(--border); } .dg .dg-more text, .dg .dg-nvt { font-size: 12px; font-weight: 600; fill: var(--text); }
+    .dg .vnav { cursor: pointer; outline: none; } .dg .vhit { cursor: pointer; }
 
     .legend { display: flex; flex-wrap: wrap; gap: 5px 14px; font-size: 13px; color: var(--muted); padding: 8px 14px 10px; border-top: 1px solid var(--border); align-items: center; }
     .legend > span { display: inline-flex; align-items: center; gap: 5px; }
@@ -410,7 +509,7 @@ SCRIPT = r"""
     var data;
     try { data = JSON.parse(box.querySelector("script.cdata").textContent); } catch (x) { return; }
     var view = box.querySelector(".cview"), svg = view.querySelector("svg"), gScene = svg.querySelector(".scene"), tip = box.querySelector(".ctip");
-    var panel = box.querySelector(".cpanel"), rail = box.querySelector(".crail"), mt = box.querySelector(".mt"), mh = box.querySelector(".mh");
+    var fv = box.querySelector(".fview"), rail = box.querySelector(".crail"), mt = box.querySelector(".mt"), mh = box.querySelector(".mh");
     var N = data.nodes || {}, E = data.edges || [], CH = data.chains || [], TOP = data.topics || [], LAY = data.lay || {}, SH = data.shapes, EXT = data.ext, UID = data.uid;
     var ids = Object.keys(N), outE = {}, inE = {}, HUB = {};
     ids.slice().sort(function (a, b) { return (N[b].k || 0) - (N[a].k || 0) || (a < b ? -1 : 1); }).forEach(function (id, i) { HUB[id] = i; });
@@ -421,7 +520,7 @@ SCRIPT = r"""
       if (CH.length) { var d = N[CH[0].n[0]].d; var k = d >= 0 ? "d" + d : "dx"; if (LAY["t:" + k]) return k; }
       return TOP.length ? TOP[0].k : "";
     }
-    var S = { view: CH.length ? "chains" : "all", chain: 0, topic: defaultTopic(), sel: null };
+    var S = { view: CH.length ? "chains" : "all", chain: 0, topic: defaultTopic(), sel: null, focus: false, trace: null, lens: "", showPred: true };
     var F = { hideDom: {}, region: "", conf: 1, order: 3, status: "", q: "" };
     var SC = null, nodeEl = {}, edgeEl = {}, laneEl = {}, tipTimer = null, hoverId = null;
 
@@ -505,27 +604,42 @@ SCRIPT = r"""
       var narrow = view.clientWidth > 0 && view.clientWidth < 600;
       if (narrow && LAY[key + ":m"]) key = key + ":m"; else narrow = narrow && /:m$/.test(key);
       var L = LAY[key]; if (!L) return null;
-      var sc = { kind: kind, W: L.W, H: L.H, nodes: {}, edges: [], lanes: L.lanes || null, narrow: narrow, gut: L.gut || 120 }, gh = {};
-      /* label sizing at the "fit" scale: font in map units, characters per label line from the column pitch */
-      var r0 = box2(), s0 = Math.min(r0.w / (L.W + 24), r0.h / (L.H + 24)), fsU = Math.min(28, Math.max(13, (narrow ? 10.5 : 12.5) / s0));
-      var nc = Math.max(7, Math.floor(((L.cw || 130) - 10) / (fsU * 0.6))), nHub = narrow ? 8 : 12;
+      /* fill the pane: wide panes get wider columns, tall panes taller rows (nodes keep their size) */
+      var r0 = box2(), gut0 = L.gut || 120, kx = 1, ky = 1;
+      if (!narrow && kind !== "full" && view.clientWidth > 300) {
+        var asp = Math.max(200, r0.w - 32) / Math.max(200, r0.h - 46), la = L.W / L.H;
+        if (asp > la) {
+          kx = Math.min(3.2, asp / la);
+          if (L.lanes) for (var it = 0; it < 4; it++) { var gk0 = Math.min(1.7, Math.max(1, kx)); kx = Math.max(1, Math.min(3.2, (asp * L.H - gut0 * gk0) / (L.W - gut0))); }
+        } else ky = Math.min(1.5, la / asp);
+      }
+      var gk = (!narrow && L.lanes) ? Math.min(1.7, Math.max(1, kx)) : 1;   /* wide panes also get a wider topic-label gutter */
+      function fx(x) { return x <= gut0 ? x : gut0 * gk + (x - gut0) * kx; }
+      var W2 = fx(L.W), H2 = L.H * ky;
+      var sc = { kind: kind, W: W2, H: H2, nodes: {}, edges: [], lanes: L.lanes ? L.lanes.map(function (l) { return [l[0], l[1] * ky, l[2] * ky]; }) : null, narrow: narrow, gut: gut0 * gk, kx: kx, ky: ky }, gh = {};
+      var s0 = Math.min(r0.w / (W2 + 24), r0.h / (H2 + 24)), fsU = Math.min(28, Math.max(13, (narrow ? 10.5 : 12.5) / s0));
+      var nc = Math.max(7, Math.floor((((L.cw || 130) * kx) - 10) / (fsU * 0.6))), nHub = narrow ? 8 : 12;
       sc.fsU = fsU; sc.nc = nc;
       (L.g || []).forEach(function (g) { gh[g] = true; });
+      var wide = !narrow && (kind === "all" || kind === "full");
       Object.keys(L.p).forEach(function (id) {
         if (!N[id]) return;
         var q = L.p[id], hub = kind === "all" ? HUB[id] < nHub : (kind === "topic" && !gh[id] && topRank(L, gh, id) < (narrow ? 6 : 8));
-        sc.nodes[id] = { x: q[0], y: q[1], k: gh[id] ? 0.8 : 1, ghost: !!gh[id], lab: "below", w: kind === "all" ? (hub ? Math.min(nc + (narrow ? 2 : 5), 18) : 13) : (narrow ? nc + 1 : Math.min(17, nc + 2)), ln: hub && narrow ? 3 : 2, fs: 0, lo: false, hub: hub, sn: Math.min(13, nc + 2) };
+        sc.nodes[id] = { x: fx(q[0]), y: q[1] * ky, k: gh[id] ? 0.8 : (kind === "all" && !narrow ? 1.2 : 1), ghost: !!gh[id], lab: "below",
+          w: kind === "full" ? 14 : kind === "all" ? (narrow ? (hub ? Math.min(nc + 2, 18) : 13) : 18) : (narrow ? nc + 1 : Math.min(17, nc + 2)),
+          ln: hub && narrow ? 3 : 2, fs: 0, lo: false, hub: hub, sn: Math.min(13, nc + 2), wide: wide };
       });
       Object.keys(L.e || {}).forEach(function (k) {
         var e = E[+k]; if (!e || !sc.nodes[e.f] || !sc.nodes[e.t]) return;
-        var gs = sc.nodes[e.f].ghost || sc.nodes[e.t].ghost;
-        sc.edges.push({ i: +k, pts: L.e[k], ghosted: gs, sw: kind === "all" ? 0.9 + e.s * 0.45 : 1.3 + e.s * 0.6, size: e.s, lab: { x: 0, y: 0, w: 24, ln: 3, anchor: "middle", mid: true } });
+        var gs = sc.nodes[e.f].ghost || sc.nodes[e.t].ghost, pts = L.e[k].map(function (v, i) { return i % 2 ? v * ky : fx(v); });
+        sc.edges.push({ i: +k, pts: pts, ghosted: gs, sw: kind === "all" ? 0.9 + e.s * 0.45 : kind === "full" ? 0.8 + e.s * 0.4 : 1.3 + e.s * 0.6, size: e.s, lab: { x: 0, y: 0, w: kind === "full" ? 26 : 24, ln: kind === "full" ? 1 : 3, anchor: "middle", mid: true } });
       });
       return sc;
     }
     var NARROW_LANE = ["AI", "Tech", "Finance", "Markets", "Politics", "Conflict", "Prices"];
     function buildScene() {
       if (S.view === "chains" && CH.length) return buildChain();
+      if (S.view === "full" && LAY["full"]) return buildLayout("full", "full");
       if (S.view === "topic" && LAY["t:" + S.topic]) return buildLayout("t:" + S.topic, "topic");
       S.view = "all"; return buildLayout("all", "all");
     }
@@ -536,7 +650,7 @@ SCRIPT = r"""
       var g = sv("g", { "class": "nd" + (o.ghost ? " ghost" : "") + (o.lo ? " lo" : ""), tabindex: o.ghost && SC.kind === "chain" ? "-1" : "0", role: "button", "data-id": id, transform: "translate(" + r1(o.x) + " " + r1(o.y) + ")" });
       var meta = (data.typeLabel[n.t] || n.t) + (n.dn ? ", " + n.dn : "") + (n.r ? ", " + n.r : "");
       g.setAttribute("aria-label", n.l + ", " + meta + (o.ghost ? ". Linked node outside this view." : "") + ". Show connections.");
-      var lines = wrap(n.l, o.w, o.ln), fsz = o.fs ? o.fs : 13;
+      var lines = wrap(n.l, o.w, o.ln), fsz = o.fs ? o.fs : 13; g._lines = lines;
       g.appendChild(sv("rect", { "class": "tap", x: -Math.max(hw + 8, 58), y: -hh - 8, width: Math.max(hw + 8, 58) * 2, height: hh * 2 + 16 + (o.lab === "right" ? 0 : lines.length * fsz * 1.2 + 6) }));
       g.appendChild(sv("path", { "class": "shape " + dc, d: SH[n.t], transform: "scale(" + k + ")" }));
       g.appendChild(sv("path", { "class": "ring", d: SH[n.t], transform: "scale(" + r1(k * 1.3) + ")" }));
@@ -564,7 +678,7 @@ SCRIPT = r"""
     function mkEdge(o) {
       var e = E[o.i], eff = e.effect, con = e.kind === "contradicts", p = o.pts;
       var eo = { 3: 0.5, 2: 0.34, 1: 0.2 }[conf(e)];
-      if (SC.kind === "chain") eo = { 3: 1, 2: 0.85, 1: 0.7 }[conf(e)]; else if (SC.kind !== "all") eo = { 3: 0.9, 2: 0.7, 1: 0.5 }[conf(e)];
+      if (SC.kind === "chain") eo = { 3: 1, 2: 0.85, 1: 0.7 }[conf(e)]; else if (SC.kind === "full") eo = { 3: 0.42, 2: 0.3, 1: 0.2 }[conf(e)]; else if (SC.kind !== "all") eo = { 3: 0.9, 2: 0.7, 1: 0.5 }[conf(e)];
       var g = sv("g", { "class": "ed e-" + eff + " k-" + e.kind + " st-" + e.status + (o.perm ? " perm" : "") + (o.ghosted ? " ghosted" : ""), "data-i": o.i });
       var swc = SC.kind === "chain" && conf(e) === 1 ? o.sw * 0.8 : o.sw;
       g.setAttribute("style", "--eo:" + (o.perm ? 1 : eo) + ";--sw:" + r1(swc) + "px;--sw2:" + r1(swc + 1.4) + "px");
@@ -601,10 +715,10 @@ SCRIPT = r"""
           var d = ln[0], top = ln[1], h = ln[2], c = dcls(d), g = sv("g", { "class": "lg", "data-d": d });
           g.appendChild(sv("rect", { "class": "lane " + c, x: 6, y: top, width: SC.W - 12, height: h, rx: 8 }));
           g.appendChild(sv("rect", { "class": "ltag " + c, x: 6, y: top, width: 5, height: h, rx: 2 }));
-          var name = d >= 0 ? data.doms[d] : "Other", t = sv("text", null, "lanelabel"), tc = sv("text", { "class": "lanecount" }), lf = Math.round(SC.fsU * 1.02);
+          var name = d >= 0 ? data.doms[d] : "Other", t = sv("text", null, "lanelabel"), tc = sv("text", { "class": "lanecount" }), lf = Math.round(SC.fsU * 1.02), ts0 = SC.narrow ? null : sv("text", { "class": "lanestory" });
           if (SC.narrow) name = d >= 0 ? NARROW_LANE[d] : "Other";   /* phone: short topic names */
-          g.appendChild(t); g.appendChild(tc);
-          LR[d] = { t: t, tc: tc, name: name, top: top, h: h, x: SC.narrow ? 16 : 22, base: SC.narrow ? lf : 16, cbase: SC.narrow ? Math.round(lf * 0.85) : 14, ctxt: SC.narrow ? String(cnt[d]) : cnt[d] + (cnt[d] === 1 ? " node" : " nodes") };
+          g.appendChild(t); g.appendChild(tc); if (ts0) g.appendChild(ts0);
+          LR[d] = { t: t, tc: tc, ts: ts0, story: (data.ltop && data.ltop[String(d)]) || "", name: name, top: top, h: h, x: SC.narrow ? 16 : 22, base: SC.narrow ? lf : 16, cbase: SC.narrow ? Math.round(lf * 0.85) : 14, ctxt: SC.narrow ? String(cnt[d]) : cnt[d] + (cnt[d] === 1 ? " node" : " nodes") };
           gl.appendChild(g); laneEl[d] = g;
         });
         var ax = sv("g", null, "axisg"), x1 = SC.gut + 48, x2 = SC.W - 20;
@@ -625,14 +739,19 @@ SCRIPT = r"""
     }
 
     /* ---------- viewport ---------- */
-    var vb = { x: 0, y: 0, w: 800, h: 400 }, fitS = 1, LR = {}, AXR = null, lastLK = "";
+    var vb = { x: 0, y: 0, w: 800, h: 400 }, fitS = 1, LR = {}, AXR = null, lastLK = "", futG = null, futS = 1;
     /* Label floor: SVG text scales with the zoom, so every map label is sized in screen pixels. Hubs, lane and axis
        labels are counter-scaled to stay >= MIN px on screen; other node labels keep their natural size and fade out
        while that would be < 11px. Overlaps between visible node labels drop the lower-priority one. */
+    function setLabel(t, lines, above, hh, fs) {
+      t.textContent = "";
+      lines.forEach(function (ln, i) { var ts = sv("tspan", { x: 0, dy: i ? "1.12em" : (above ? "0" : "1em") }); ts.textContent = ln; t.appendChild(ts); });
+      t.setAttribute("y", r1(above ? -(hh + 6 + (lines.length - 1) * 1.12 * fs) : hh + 3));
+    }
     function layoutLabels(s, force) {
       if (!SC || SC.kind === "chain") return;
-      var key = s.toFixed(3) + "|" + SC.kind + "|" + (S.sel || ""); if (!force && key === lastLK) return; lastLK = key;
-      var MIN = 11.5, FLOOR = 11;
+      var key = s.toFixed(3) + "|" + SC.kind + "|" + (S.sel || "") + "|" + (S.lens || ""); if (!force && key === lastLK) return; lastLK = key;
+      var MIN = 11.5, FLOOR = 11, wideAll = !SC.narrow && (SC.kind === "all" || SC.kind === "full");
       Object.keys(LR).forEach(function (d) {
         var q = LR[d], fs = Math.max(q.base, MIN / s), cf = Math.max(q.cbase, MIN / s), avail = SC.gut - q.x - 8;
         var lines, used, longest = q.name.split(/\s+/).reduce(function (m, w) { return Math.max(m, w.length); }, 3);
@@ -647,6 +766,13 @@ SCRIPT = r"""
         lines.forEach(function (ln, i) { var ts = sv("tspan", { x: q.x, y: r1(q.top + 6 + fs + i * fs * 1.12) }); ts.textContent = ln; q.t.appendChild(ts); });
         q.tc.textContent = q.ctxt; q.tc.setAttribute("x", q.x); q.tc.setAttribute("y", r1(q.top + used + cf * 1.3)); q.tc.setAttribute("style", "font-size:" + r1(cf) + "px");
         q.t.classList.toggle("lh", !showL); q.tc.classList.toggle("lh", !(showL && showC));
+        /* one-line top story under the count (phone: hidden) */
+        if (q.ts) {
+          var sfs = Math.max(11.2 / s, cf), top2 = q.top + used + cf * 1.3 + 5, room = Math.floor((q.top + q.h - 5 - top2) / (sfs * 1.14)), sl = (q.story && room >= 1) ? wrap(q.story, Math.max(8, Math.floor(avail / (sfs * 0.52))), Math.min(4, room)) : [];
+          q.ts.textContent = ""; q.ts.setAttribute("style", "font-size:" + r1(sfs) + "px");
+          sl.forEach(function (ln, i) { var ts = sv("tspan", { x: q.x, y: r1(top2 + sfs + i * sfs * 1.14) }); ts.textContent = ln; q.ts.appendChild(ts); });
+          q.ts.classList.toggle("lh", !(showL && showC && room >= 1 && q.story));
+        }
       });
       if (AXR) {
         var fa = Math.max(AXR.base, MIN / s), ok = fa + 4 <= AXR.top, yb = r1(fa * 0.95 + 1), w1 = 6 * fa * 0.58, w2 = 8 * fa * 0.58, xa = AXR.x1 + w1 + 10, xb = AXR.x2 - w2 - 10, h = fa * 0.3;
@@ -654,22 +780,40 @@ SCRIPT = r"""
         AXR.ln.setAttribute("d", xb - xa > 30 ? "M" + r1(xa) + " " + r1(yb - h) + "H" + r1(xb) + "M" + r1(xb - h * 1.4) + " " + r1(yb - h * 2) + "L" + r1(xb) + " " + r1(yb - h) + "L" + r1(xb - h * 1.4) + " " + r1(yb) : "");
         AXR.ln.classList.toggle("lh", !ok);
       }
-      var items = [];
+      var items = [], bodies = [];
       Object.keys(SC.nodes).forEach(function (id) {
-        var g = nodeEl[id], o = SC.nodes[id], t = g && g.querySelector("text.nlabel"); if (!t || g.classList.contains("hid")) return;
-        var m = g.classList.contains("m"), pin = o.hub || id === S.sel || m, fs = pin ? Math.max(13, MIN / s) : 13;
+        var g = nodeEl[id], o = SC.nodes[id], t = g && g.querySelector("text.nlabel:not(.sh)"); if (!t || g.classList.contains("hid")) return;
+        var ex = EXT[N[id].t], hw = ex[0] * o.k, hh = ex[1] * o.k;
+        bodies.push({ id: id, x0: o.x - hw - 2, x1: o.x + hw + 2, y0: o.y - hh - 2, y1: o.y + hh + 2 });
+        var m = g.classList.contains("m"), pin = o.hub || id === S.sel || m, fs = (pin || wideAll) ? Math.max(13, MIN / s) : 13;
         t.style.fontSize = r1(fs) + "px";
         var pr = id === S.sel ? -2 : m ? -1 : o.hub ? (HUB[id] || 0) / 100 : 1 + (HUB[id] || 0) / 1000;
-        items.push({ t: t, o: o, pin: pin, fs: fs, pr: pr, ok: pin || fs * s >= FLOOR });
+        items.push({ id: id, t: t, o: o, g: g, pin: pin, fs: fs, hh: hh, pr: pr, ok: pin || wideAll || fs * s >= FLOOR });
       });
       items.sort(function (a, b) { return a.pr - b.pr; });
       var taken = [], pad = 3 / s;
+      function hits(r, own) {
+        for (var i = 0; i < taken.length; i++) { var c = taken[i]; if (r.x0 < c.x1 && r.x1 > c.x0 && r.y0 < c.y1 && r.y1 > c.y0) return true; }
+        for (var j = 0; j < bodies.length; j++) { var c2 = bodies[j]; if (c2.id !== own && r.x0 < c2.x1 && r.x1 > c2.x0 && r.y0 < c2.y1 && r.y1 > c2.y0) return true; }
+        return false;
+      }
+      function rectOf(it) { var b = it.t.getBBox(); return { x0: it.o.x + b.x - pad, x1: it.o.x + b.x + b.width + pad, y0: it.o.y + b.y - pad, y1: it.o.y + b.y + b.height + pad }; }
       items.forEach(function (it) {
         var vis = it.ok;
+        if (vis && wideAll && it.g._lines) {
+          /* every name stays visible: full 2-line label, else a shortened one, else above the node */
+          var nm = N[it.id].l, v0 = it.g._lines, v1 = wrap(nm, 14, 1), v2 = wrap(nm, 9, 1), v3 = wrap(nm, 12, 3), tries = [[v0, false], [v0, true], [v3, false], [v3, true], [v1, false], [v1, true], [v2, false], [v2, true]], done = false, last = null;
+          for (var k = 0; k < tries.length && !done; k++) {
+            setLabel(it.t, tries[k][0], tries[k][1], it.hh, it.fs); var r = rectOf(it); last = r;
+            if (!hits(r, it.id)) { taken.push(r); done = true; }
+          }
+          if (!done) { setLabel(it.t, v2, false, it.hh, it.fs); taken.push(rectOf(it)); }
+          it.t.classList.remove("lh"); return;
+        }
         if (vis) {
-          var b = it.t.getBBox(), r = { x0: it.o.x + b.x - pad, x1: it.o.x + b.x + b.width + pad, y0: it.o.y + b.y - pad, y1: it.o.y + b.y + b.height + pad };
-          for (var i = 0; i < taken.length; i++) { var c = taken[i]; if (r.x0 < c.x1 && r.x1 > c.x0 && r.y0 < c.y1 && r.y1 > c.y0) { vis = false; break; } }
-          if (vis) taken.push(r);
+          var b = it.t.getBBox(), r2 = { x0: it.o.x + b.x - pad, x1: it.o.x + b.x + b.width + pad, y0: it.o.y + b.y - pad, y1: it.o.y + b.y + b.height + pad };
+          for (var i = 0; i < taken.length; i++) { var c = taken[i]; if (r2.x0 < c.x1 && r2.x1 > c.x0 && r2.y0 < c.y1 && r2.y1 > c.y0) { vis = false; break; } }
+          if (vis) taken.push(r2);
         }
         it.t.classList.toggle("lh", !vis);
       });
@@ -681,6 +825,7 @@ SCRIPT = r"""
       var s = r.w / vb.w;
       svg.classList.toggle("zl", s >= 0.9);
       if (SC && SC.kind !== "chain") { var f = Math.max(13, 11.5 / s); svg.style.setProperty("--efs", f.toFixed(1) + "px"); layoutLabels(s, false); } else { svg.style.removeProperty("--nfs"); svg.style.removeProperty("--efs"); }
+      if (SC && futG) { if (Math.abs(s / futS - 1) > 0.12) placeFutures(s); else futG._items.forEach(function (it) { it.g.setAttribute("transform", "translate(" + it.x + " " + it.y + ") scale(" + (1 / s).toFixed(4) + ")"); }); }
     }
     function clampVB() {
       var m = 90;
@@ -695,11 +840,12 @@ SCRIPT = r"""
         if (SC.narrow && vb.h > SC.H + 2 * pad) vb.y = -pad;
       } else {
         /* padding in screen px so counter-scaled hub labels (up to 3 lines below a node, ~half a label either side) are never clipped */
-        var pt = 14, pb = SC.narrow ? 62 : 54, ps = SC.narrow ? 34 : 48;
+        var pt = SC.narrow ? 14 : 6, pb = SC.narrow ? 62 : 40, ps = SC.narrow ? 34 : 16;
         s = Math.min((r.w - 2 * ps) / SC.W, (r.h - pt - pb) / SC.H);
+        if (SC.kind === "full" && !top) { s = Math.min(1.1, (r.w - 2 * ps) / SC.W); vb.w = r.w / s; vb.h = r.h / s; vb.x = SC.W / 2 - vb.w / 2; vb.y = -(SC.narrow ? 30 : 26) / s; fitS = Math.min(s, (r.h - pt - pb) / SC.H); setVB(); return; }
         vb.w = r.w / s; vb.h = r.h / s; vb.x = SC.W / 2 - vb.w / 2;
         var extra = Math.max(0, r.h - pt - pb - SC.H * s);
-        vb.y = -(pt + (SC.narrow ? 0 : extra / 2)) / s;   /* phone: map hugs the top, free space below keeps the zoom buttons clear */
+        vb.y = -(pt + (SC.narrow ? 0 : extra / 3)) / s;   /* phone: map hugs the top, free space below keeps the zoom buttons clear */
       }
       fitS = s; setVB();
     }
@@ -768,7 +914,7 @@ SCRIPT = r"""
         if (Math.abs(w - lastW) > 8) { lastW = w; var keep = S.sel; SC = buildScene(); sizeView(); render(); applyAll(); fit(); if (keep && nodeEl[keep]) { } }
       } else {
         lastW = w;
-        if (SC && SC.kind !== "chain" && (w < 600) !== !!SC.narrow && LAY[(SC.kind === "all" ? "all" : "t:" + S.topic) + ":m"]) { rebuild(); return; }
+        if (SC && SC.kind !== "chain" && (w < 600) !== !!SC.narrow && LAY[(SC.kind === "all" ? "all" : SC.kind === "full" ? "full" : "t:" + S.topic) + ":m"]) { rebuild(); return; }
         if (SC) setVB();
       }
     }
@@ -797,7 +943,7 @@ SCRIPT = r"""
       var hit = g.querySelector(".hit");
       hit.addEventListener("mousemove", function (ev) { g.classList.add("hv"); showTip(edgeTip(i), ev); });
       hit.addEventListener("mouseleave", function () { g.classList.remove("hv"); hideTip(); });
-      hit.addEventListener("click", function (ev) { ev.stopPropagation(); g.classList.add("hv"); showTip(edgeTip(i), ev); clearTimeout(tipTimer); tipTimer = setTimeout(function () { hideTip(); g.classList.remove("hv"); }, 3500); });
+      hit.addEventListener("click", function (ev) { ev.stopPropagation(); hideTip(); g.classList.remove("hv"); showPop(edgeContent(i), ev); });
     }
     function hover(id) {
       if (hoverId === id) return;
@@ -814,7 +960,7 @@ SCRIPT = r"""
     }
 
     /* ---------- filters (Everything view) ---------- */
-    function filtersOn() { return SC && SC.kind === "all"; }
+    function filtersOn() { return SC && (SC.kind === "all" || SC.kind === "full"); }
     function nodeOk(id) { var n = N[id]; return n && (!filtersOn() || (!F.hideDom[n.d] && (!F.region || n.r === F.region))); }
     function edgeOk(i) {
       var e = E[i]; if (!nodeOk(e.f) || !nodeOk(e.t)) return false;
@@ -841,6 +987,7 @@ SCRIPT = r"""
       return res;
     }
     var chain = null;
+    function litSet(K) { var set = {}; ids.forEach(function (id) { var c = N[id].c; if ((c && c.cur && c.cur[K]) || (MKIDS[K] && MKIDS[K].indexOf(id) >= 0)) set[id] = true; }); return set; }
     function applyAll() {
       var nv = 0, ev2 = 0, total = ids.length;
       Object.keys(nodeEl).forEach(function (id) { var ok = nodeOk(id); nodeEl[id].classList.toggle("hid", !ok); if (ok) nv++; });
@@ -849,10 +996,14 @@ SCRIPT = r"""
       if (S.sel && !nodeOk(S.sel)) S.sel = null;
       chain = S.sel ? chainsOf(S.sel) : null;
       var multi = SC.kind === "chain" ? (S.sel ? (function () { var h = { nodes: {}, edges: {} }; h.nodes[S.sel] = 0; outE[S.sel].concat(inE[S.sel]).forEach(function (i) { h.edges[i] = true; var o = E[i].f === S.sel ? E[i].t : E[i].f; h.nodes[o] = 1; }); return h; })() : null) : chain;
-      svg.classList.toggle("focus", !!multi);
+      var tr = S.trace && S.trace.nodes.length ? S.trace : null, trN = {}, trE = {};
+      if (tr) { tr.nodes.forEach(function (x) { trN[x] = true; }); tr.edges.forEach(function (x) { trE[x] = true; }); }
+      svg.classList.toggle("focus", !!multi && !tr);
+      svg.classList.toggle("tracing", !!tr);
+      var lit = S.lens ? litSet(S.lens) : null; svg.classList.toggle("lens", !!lit);
       var nHl = 0;
-      Object.keys(nodeEl).forEach(function (id) { nodeEl[id].classList.toggle("hl", !!(multi && multi.nodes[id] != null)); nodeEl[id].classList.toggle("sel", id === S.sel); });
-      Object.keys(edgeEl).forEach(function (i) { var on = !!(multi && multi.edges[i]); edgeEl[i].classList.toggle("hl", on); if (on) nHl++; });
+      Object.keys(nodeEl).forEach(function (id) { var n2 = nodeEl[id]; n2.classList.toggle("hl", !!(multi && multi.nodes[id] != null)); n2.classList.toggle("sel", id === S.sel); n2.classList.toggle("tr", !!trN[id]); n2.classList.toggle("lit", !!(lit && lit[id])); });
+      Object.keys(edgeEl).forEach(function (i) { var on = !!(multi && multi.edges[i]), e = E[i]; edgeEl[i].classList.toggle("hl", on); edgeEl[i].classList.toggle("tr", !!trE[i]); edgeEl[i].classList.toggle("lit", !!(lit && lit[e.f] && lit[e.t])); if (on) nHl++; });
       Object.keys(edgeEl).forEach(function (i) { edgeEl[i].classList.toggle("lab", nHl > 0 && nHl <= 5 && edgeEl[i].classList.contains("hl")); });
       var q = F.q.trim().toLowerCase(), any = false;
       Object.keys(nodeEl).forEach(function (id) {
@@ -863,121 +1014,558 @@ SCRIPT = r"""
       if (cnt) cnt.textContent = filtersOn() ? nv + " of " + total + " nodes · " + ev2 + " of " + E.length + " links" : "";
       var act = F.region || F.conf > 1 || F.order < 3 || F.status || Object.keys(F.hideDom).some(function (k) { return F.hideDom[k]; });
       var cl = box.querySelector(".cclear"); if (cl) cl.hidden = !act;
-      renderPanel(); layoutLabels(box2().w / vb.w, true);
-      var bar = box.querySelector(".cbar");
-      if (bar) { bar.hidden = !S.sel; if (S.sel) bar.textContent = N[S.sel].l + " — details below ▾"; }
+      if (!S.focus) { layoutLabels(box2().w / vb.w, true); placeFutures(box2().w / vb.w); }
+    }
+    /* predicted ripple on the main map: faint dotted arrows to small "future" ghost nodes beside the selected node */
+    function placeFutures(s) {
+      if (futG && futG.parentNode) futG.parentNode.removeChild(futG); futG = null; futS = s;
+      if (!S.showPred || !S.sel || S.focus || !SC || !s || !isFinite(s)) return;
+      var o = SC.nodes[S.sel], g0 = nodeEl[S.sel]; if (!o || !g0 || g0.classList.contains("hid")) return;
+      var preds = predsOf(S.sel, cardOf(S.sel)).filter(function (p) { return p.src === "card"; }).slice(0, 3); if (!preds.length) return;
+      var others = [];
+      Object.keys(SC.nodes).forEach(function (id) {
+        if (id === S.sel || !nodeEl[id] || nodeEl[id].classList.contains("hid")) return; var n2 = SC.nodes[id], ex = EXT[N[id].t], t = nodeEl[id].querySelector("text.nlabel:not(.sh)");
+        var dx = (n2.x - o.x) * s, dy = (n2.y - o.y) * s; others.push([dx - ex[0] * s * n2.k - 4, dy - ex[1] * s * n2.k - 4, dx + ex[0] * s * n2.k + 4, dy + ex[1] * s * n2.k + 4]);
+        if (t && !t.classList.contains("lh")) others.push([dx - 46, dy + ex[1] * s * n2.k, dx + 46, dy + ex[1] * s * n2.k + 30]);
+      });
+      var r = box2(), cx = (o.x - vb.x) * s, cy = (o.y - vb.y) * s, placed = [], angs = [-18, 18, 52, -52, 86, -86, 122, -122, 160, 180], rads = [86, 118];
+      futG = sv("g", { "class": "futs" }); futG._items = [];
+      preds.forEach(function (p, j) {
+        var best = null, bp = 1e9, lw = 124;
+        rads.forEach(function (R) { angs.forEach(function (A, ai) {
+          var a = A * Math.PI / 180, gx = Math.cos(a) * R, gy = Math.sin(a) * R, right = Math.cos(a) >= -0.3, rc = [right ? gx + 6 : gx - 6 - lw, gy - 15, right ? gx + 6 + lw : gx - 6, gy + 17], pen = ai * 0.6 + R * 0.02;
+          others.concat(placed).forEach(function (b) { if (rc[0] < b[2] && rc[2] > b[0] && rc[1] < b[3] && rc[3] > b[1]) pen += 10; });
+          if (cx + rc[0] < 4 || cx + rc[2] > r.w - 4 || cy + rc[1] < 4 || cy + rc[3] > r.h - 4) pen += 25;
+          if (pen < bp) { bp = pen; best = { gx: gx, gy: gy, right: right, rc: rc, a: a }; }
+        }); });
+        placed.push(best.rc);
+        var G = sv("g", { "class": "ft", tabindex: "0", role: "button", "aria-label": "Predicted: " + (p.then || "") + ", " + (p.odds || "unknown") + " odds" });
+        var r0 = Math.max(EXT[N[S.sel].t][0], EXT[N[S.sel].t][1]) * s * o.k + 5, ca = Math.cos(best.a), sa = Math.sin(best.a), mx = (r0 * ca + best.gx - ca * 9) / 2 - sa * 8, my = (r0 * sa + best.gy - sa * 9) / 2 + ca * 8;
+        G.appendChild(sv("path", { "class": "ft-ln", d: "M" + r1(r0 * ca) + " " + r1(r0 * sa) + "Q" + r1(mx) + " " + r1(my) + " " + r1(best.gx - ca * 9) + " " + r1(best.gy - sa * 9), "marker-end": "url(#mk" + UID + "-none2)" }));
+        G.appendChild(sv("circle", { "class": "ft-dot", cx: r1(best.gx), cy: r1(best.gy), r: 6.5 }));
+        var t = sv("text", { "class": "ftl", "text-anchor": best.right ? "start" : "end" }), lines = wrap(p.then || "", 20, 2), tx = best.gx + (best.right ? 12 : -12);
+        lines.forEach(function (ln, i) { var ts = sv("tspan", { x: r1(tx), y: r1(best.gy - 2 + i * 13.5) }); ts.textContent = ln; t.appendChild(ts); });
+        var t2 = sv("tspan", { x: r1(tx), y: r1(best.gy - 2 + lines.length * 13.5), "class": "fto" }); t2.textContent = (p.odds || "?") + " odds"; t.appendChild(t2);
+        G.appendChild(t);
+        var tt = sv("title"); tt.textContent = "Could happen: " + (p.then || "") + " (" + (p.odds || "?") + " odds)"; G.appendChild(tt);
+        G.addEventListener("click", function (ev) { ev.stopPropagation(); showPop(predContent(p), ev); });
+        G.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); ev.stopPropagation(); var b = G.getBoundingClientRect(); showPop(predContent(p), { clientX: b.right, clientY: b.top }); } });
+        G.setAttribute("transform", "translate(" + r1(o.x) + " " + r1(o.y) + ") scale(" + (1 / s).toFixed(4) + ")");
+        futG._items.push({ g: G, x: r1(o.x), y: r1(o.y) }); futG.appendChild(G);
+      });
+      gScene.insertBefore(futG, gScene.lastChild);   /* under the nodes so a ghost dot can never swallow a node's tap */
     }
     function matches(id, q) { var n = N[id]; return (n.l + " " + n.dn + " " + n.r + " " + (data.typeLabel[n.t] || "")).toLowerCase().indexOf(q) >= 0; }
 
-    /* ---------- panel ---------- */
-    function fxGlyph(e) { if (e.kind === "contradicts") return ["≠", "con"]; var f = FX[e.effect] || FX.none; return [f[0], f[1]]; }
     function badge(st) { var b = el("span", "bdg " + st, st === "mixed" ? "Reported + predicted" : st === "predicted" ? "Predicted" : "Reported"); if (st !== "reported") b.title = "Dashed = forecast, not yet reported"; return b; }
-    function item(otherId, i, arrow) {
-      var e = E[i], o = N[otherId], b = el("button", "pitem"); b.type = "button";
-      var g = fxGlyph(e), fx = el("span", "fx " + g[1], g[0]); fx.setAttribute("aria-hidden", "true");
-      b.appendChild(fx); b.appendChild(document.createTextNode(" " + (o ? o.l : "?")));
-      var meta = [e.kind !== "causal" ? e.kind : "", (e.conf || "?") + " conf.", e.status || "reported", e.lag || ""].filter(Boolean).join(" · ");
-      b.appendChild(el("span", "mech", (e.label || "no mechanism given") + "  (" + meta + ")"));
-      b.setAttribute("aria-label", (arrow || "") + " " + (o ? o.l : "") + ": " + (e.label || "") + ", " + (FX[e.effect] ? FX[e.effect][2] : "") + ", " + meta);
-      b.addEventListener("click", function () { goTo(otherId); });
-      var li = el("li"); li.appendChild(b); return li;
+    /* ---------- focus view: points | currency | seen before  +  causes, hub, effects, then, could happen ---------- */
+    var CURS = ["INR", "CAD", "USD"];
+    var CURNAME = { INR: "Indian rupee", CAD: "Canadian dollar", USD: "US dollar" };
+    var CURMK = { INR: ["usd/inr"], CAD: ["usd/cad"], USD: ["us dollar index", "dollar index", "dxy", "usd index"] };
+    var MKTRX = { INR: /usd\s*\/\s*inr|rupee/i, CAD: /usd\s*\/\s*cad|canadian dollar|loonie/i, USD: /usd\s*index|dollar index|\bdxy\b|usd\s*\/\s*(inr|cad)/i };
+    var CDG = { stronger: "▲", weaker: "▼", flat: "▬" };
+    var PTS = ["What's happening", "Why it happens", "What's likely next", "Watch for"];
+    var HZ = { days: "next few days", weeks: "next few weeks" };
+    var ESIGN = { up: 1, down: -1 };
+    var MKT = {};
+    (data.mk || []).forEach(function (m) { MKT[String(m.l).toLowerCase()] = m; });
+    function mkFor(K) { var ks = CURMK[K]; for (var i = 0; i < ks.length; i++) if (MKT[ks[i]]) return MKT[ks[i]]; return null; }
+    function clip(s, n) { s = String(s || ""); return s.length > n ? s.slice(0, n - 1).replace(/\s+\S*$/, "") + "…" : s; }
+    function sentences(s) {
+      s = String(s || "").trim(); var out = [], re = /[.!?]["”')]*\s+(?=[A-Z0-9“"(])/g, m, last = 0;
+      while ((m = re.exec(s))) { var end = m.index + m[0].length; out.push(s.slice(last, end).trim()); last = end; }
+      if (last < s.length) out.push(s.slice(last).trim());
+      return out.filter(Boolean);
     }
-    function section(title, arr) {
-      if (!arr.length) return null;
-      var d = document.createDocumentFragment(); d.appendChild(el("h6", "", title));
-      var ul = el("ul"); arr.forEach(function (x) { ul.appendChild(x); }); d.appendChild(ul); return d;
-    }
-    function domChips(list) {
-      var w = el("div", "pmeta");
-      list.forEach(function (d) { var s = el("span", "dchip " + dcls(d), d >= 0 ? data.short[d] : "Other"); w.appendChild(s); });
-      return w;
-    }
-    function chainPanel() {
-      var c = CH[S.chain];
-      panel.appendChild(el("h5", "", c.title));
-      var m = el("div", "pmeta"); m.appendChild(badge(c.st)); c.d.forEach(function (d) { m.appendChild(el("span", "dchip " + dcls(d), d >= 0 ? data.short[d] : "Other")); });
-      panel.appendChild(m);
-      panel.appendChild(el("p", "empty", "Read it step by step. Click a step for the full story, or a faint node on the map to see what else it touches."));
-      var ol = el("ul");
-      c.n.forEach(function (id, i) {
-        var li = el("li"), b = el("button", "step"); b.type = "button";
-        if (i) {
-          var e = E[c.e[i - 1]], g = fxGlyph(e);
-          b.appendChild(el("span", "how", g[0] + " " + (e.label || "leads to") + "  (" + [e.conf ? e.conf + " conf." : "", e.status, e.lag].filter(Boolean).join(" · ") + ")"));
+    function hostOf(u) { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (x) { return ""; } }
+    var MKIDS = {};
+    CURS.forEach(function (K) { MKIDS[K] = ids.filter(function (id) { return MKTRX[K].test(N[id].l); }); });
+    function mkFactor(id, K) { return /usd\s*\/\s*(inr|cad)/i.test(N[id].l) ? (K === "USD" ? 1 : -1) : 1; }
+    function deriveCur(id, K) {
+      var list = MKIDS[K]; if (!list.length) return null;
+      if (list.indexOf(id) >= 0) {
+        var d = N[id].dir; if (d !== "up" && d !== "down") return { dir: "flat", why: N[id].l + " is steady.", derived: true };
+        var up = (d === "up") === (mkFactor(id, K) > 0);
+        return { dir: up ? "stronger" : "weaker", why: "Read from " + N[id].l + " moving " + d + ".", derived: true };
+      }
+      var seen = {}; seen[id] = true; var front = [{ id: id, sign: 1, path: [id] }];
+      for (var d2 = 1; d2 <= 3; d2++) {
+        var next = [];
+        for (var a = 0; a < front.length; a++) {
+          var cur = front[a], outs = outE[cur.id].slice().sort(function (x, y) { return E[y].s - E[x].s; });
+          for (var b = 0; b < outs.length; b++) {
+            var e = E[outs[b]]; if (e.kind === "contradicts" || seen[e.t]) continue; seen[e.t] = true;
+            var sg = cur.sign * (ESIGN[e.effect] || 0), p = cur.path.concat([e.t]);
+            if (list.indexOf(e.t) >= 0) {
+              var via = p.map(function (x) { return N[x].l; }).join(" ▸ ");
+              if (!sg) return { dir: "flat", why: "Mixed effect via " + via + ".", derived: true };
+              var st = (sg * mkFactor(e.t, K)) > 0;
+              return { dir: st ? "stronger" : "weaker", why: "Via links: " + via + ".", derived: true };
+            }
+            next.push({ id: e.t, sign: sg, path: p });
+          }
         }
-        b.appendChild(el("span", "sn", N[id].l));
-        b.addEventListener("click", function () { choose(id, true); });
-        li.appendChild(b); ol.appendChild(li);
+        front = next;
+      }
+      return null;
+    }
+    function cardOf(id) {
+      var n = N[id], c = n.c, o = { full: !!c, light: !!(c && c.light), hl: "", pts: [], fy: {}, cur: {}, pred: [], ag: [], pat: "", hist: {} };
+      if (c) { o.hl = c.hl || ""; o.pts = c.pts || []; o.fy = c.fy || {}; o.cur = c.cur || {}; o.pred = c.pred || []; o.ag = c.ag || []; o.pat = c.pat || ""; o.hist = c.hist || {}; }
+      var det = sentences(n.det);
+      if (!o.hl) o.hl = clip(det[0] || n.why || "", 170);
+      o.labelled = o.full && !o.light && o.pts.filter(Boolean).length >= 2;
+      if (!o.labelled) {
+        var pts = o.pts.filter(Boolean);
+        if (!pts.length) {
+          det.slice(0, 2).forEach(function (x) { pts.push(x); });
+          if (n.why) pts.push("Why it matters: " + n.why);
+          if (n.mkt) pts.push("Market: " + (n.mkt.label || n.l) + (n.mkt.price ? " " + n.mkt.price : "") + (n.mkt.change ? " " + n.mkt.change : ""));
+          if (n.thr) pts.push("Running " + n.thr.days + " day" + (n.thr.days === 1 ? "" : "s") + " across " + n.thr.stories + " " + (n.thr.stories === 1 ? "story" : "stories") + ".");
+        }
+        o.pts = pts.slice(0, 4);
+      }
+      return o;
+    }
+    function ptsOf(info) {
+      var out = [];
+      info.pts.forEach(function (t, i) {
+        if (!t) return;
+        if (info.labelled && i < 4) out.push({ k: PTS[i], t: String(t).replace(/^(next|watch|why|what'?s happening)\s*:\s*/i, "") });
+        else out.push({ k: "", t: t });
       });
-      panel.appendChild(ol);
-      if (SC && SC.gp && SC.gp.total) {
-        var shown = Object.keys(SC.nodes).filter(function (id) { return SC.nodes[id].ghost; });
-        var rest = SC.vertical ? SC.gp.up.concat(SC.gp.dn) : [];
-        if (SC.gp.more || rest.length) {
-          var lis = rest.map(function (id) { var li = el("li"), b = el("button", "pitem", N[id].l); b.type = "button"; b.addEventListener("click", function () { goTo(id); }); li.appendChild(b); return li; });
-          var s = section("Also linked to this chain", lis); if (s) panel.appendChild(s);
-        }
-      }
+      return out;
     }
-    function renderPanel() {
-      panel.textContent = "";
-      if (!S.sel) {
-        if (S.view === "chains" && CH.length) { chainPanel(); return; }
-        panel.appendChild(el("p", "empty", "Select a node to see what drives it, what it drives, and its multi-step chains. Drag to pan; wheel, pinch or +/− to zoom; arrow keys move between nodes."));
-        var vis = Object.keys(SC.nodes).filter(function (id) { return nodeOk(id) && !SC.nodes[id].ghost; }).sort(function (a, b) { return N[b].k - N[a].k || (a < b ? -1 : 1); }).slice(0, 6);
-        if (vis.length) {
-          panel.appendChild(el("h6", "", "Most connected"));
-          var ul = el("ul"); vis.forEach(function (id) {
-            var b = el("button", "pitem", N[id].l); b.type = "button"; b.appendChild(el("span", "mech", N[id].dn + (N[id].r ? " · " + N[id].r : "")));
-            b.addEventListener("click", function () { choose(id, true); }); var li = el("li"); li.appendChild(b); ul.appendChild(li);
-          }); panel.appendChild(ul);
-        }
-        return;
-      }
-      var sel = S.sel, n = N[sel], c = el("button", "clear", "Clear"); c.type = "button"; c.addEventListener("click", function () { choose(null); }); panel.appendChild(c);
-      panel.appendChild(el("h5", "", n.l));
-      var meta = el("div", "pmeta"); meta.appendChild(el("span", "", data.typeLabel[n.t] || n.t));
-      if (n.dn) meta.appendChild(el("span", "dchip " + dcls(n.d), n.dn)); if (n.r) meta.appendChild(el("span", "", n.r));
-      if (n.dir && n.dir !== "none") meta.appendChild(el("span", "", { up: "▲ rising", down: "▼ falling", flat: "▬ steady" }[n.dir] || ""));
-      panel.appendChild(meta);
-      if (SC.nodes[sel] && SC.nodes[sel].ghost && S.view === "topic") {
-        var tk = n.d >= 0 ? "d" + n.d : "dx";
-        if (LAY["t:" + tk]) { var gb = el("button", "gobtn", "Open topic: " + (n.d >= 0 ? data.doms[n.d] : "Other")); gb.type = "button"; gb.addEventListener("click", function () { setView("topic", { topic: tk, sel: sel }); }); panel.appendChild(gb); }
-      }
-      if (n.mkt) {
-        var m = n.mkt, p = el("p"), s = el("span", "mkt " + (m.cp > 0 ? "up" : m.cp < 0 ? "down" : ""), (m.label || n.l) + (m.price ? " " + m.price : "") + (m.change ? " " + m.change : (m.cp != null ? " " + (m.cp > 0 ? "+" : "") + m.cp + "%" : "")));
-        p.appendChild(s); panel.appendChild(p);
-      }
-      if (n.thr) panel.appendChild(el("p", "thr", "Running " + n.thr.days + " day" + (n.thr.days === 1 ? "" : "s") + ", " + n.thr.stories + " " + (n.thr.stories === 1 ? "story" : "stories") + (n.thr.first ? " (since " + n.thr.first + ")" : "")));
-      if (n.det) panel.appendChild(el("p", "", n.det));
-      if (n.why) { var w = el("p"); w.appendChild(el("span", "pl", "Why it matters: ")); w.appendChild(document.createTextNode(n.why)); panel.appendChild(w); }
-      var drivers = inE[sel].filter(edgeOk).map(function (i) { return item(E[i].f, i, "driven by"); });
-      var driven = outE[sel].filter(edgeOk).map(function (i) { return item(E[i].t, i, "drives"); });
-      var s1 = section("Driven by (" + drivers.length + ")", drivers), s2 = section("Drives (" + driven.length + ")", driven);
-      if (s1) panel.appendChild(s1); if (s2) panel.appendChild(s2);
-      if (!s1 && !s2) panel.appendChild(el("p", "empty", "No visible links with the current filters."));
-      var ch = chain || chainsOf(sel);
-      [["Further downstream (to 3 steps)", ch.down], ["Further upstream (to 3 steps)", ch.up]].forEach(function (g) {
-        var far = g[1].filter(function (x) { return x.d > 1; }).slice(0, 8);
-        var items = far.map(function (x) {
-          var path = g[0].indexOf("down") > 0 ? x.path.slice(1) : x.path.slice(1).reverse();
-          var b = el("button", "pitem", path.map(function (id) { return N[id].l; }).join(" → ")); b.type = "button";
-          b.addEventListener("click", function () { goTo(x.id); }); var li = el("li"); li.appendChild(b); return li;
-        });
-        var s = section(g[0], items); if (s) panel.appendChild(s);
+    function predsOf(id, info) {
+      var arr = info.pred.map(function (p, i) { return { src: "card", idx: i, if: p.if, then: p.then, odds: p.odds, hz: p.hz, why: p.why, watch: p.watch, wrong: p.wrong }; });
+      if (arr.length < 3) outE[id].forEach(function (i) {
+        var e = E[i]; if (arr.length >= 3 || e.status !== "predicted" || e.kind === "contradicts" || !N[e.t]) return;
+        arr.push({ src: "edge", edge: i, if: "", then: N[e.t].l + " " + (e.effect === "up" ? "rises" : e.effect === "down" ? "falls" : "is affected"), odds: e.conf === "high" ? "high" : e.conf === "low" ? "low" : "medium", hz: e.lag, why: (e.label || "") + (e.why ? ". " + e.why : ""), watch: "", wrong: "" });
       });
+      return arr;
+    }
+    function oddsBars(odds) {
+      var n = CR[odds] || 0, w = el("span", "odds o-" + (odds || "none")), b = el("i"); b.setAttribute("aria-hidden", "true");
+      for (var k = 0; k < 3; k++) b.appendChild(el("b", k < n ? "on" : ""));
+      w.appendChild(b); w.appendChild(document.createTextNode(odds ? odds + " odds" : "odds unknown")); return w;
+    }
+    function shapeIcon(type, d, px) {
+      var s = sv("svg", { viewBox: "-24 -24 48 48", width: px, height: px, "class": "sic", "aria-hidden": "true" });
+      s.appendChild(sv("path", { "class": dcls(d), d: SH[type] })); return s;
+    }
+    function tileOf(K, info) {
+      var c = info.cur[K], dv = false;
+      if (!c || !c.dir) { c = deriveCur(sel0(), K); dv = !!c; }
+      var t = el("div", "tile" + (c ? " t-" + c.dir : " t-none") + (dv ? " derived" : "")), m = mkFor(K);
+      t.setAttribute("tabindex", "0"); t.setAttribute("role", "group");
+      var h = el("div", "th"); h.appendChild(el("b", "", K)); h.appendChild(el("span", "tn", CURNAME[K]));
+      var dr = el("span", "td", c ? CDG[c.dir] + " " + c.dir : "– not linked"); h.appendChild(dr); t.appendChild(h);
+      var num = el("div", "tv"), mv = el("span", "mv", m ? (m.l + " " + (m.p || "-")) : "-"); num.appendChild(mv);
+      if (m && m.c) num.appendChild(el("span", "mc " + (m.cp > 0 ? "up" : m.cp < 0 ? "down" : ""), m.c));
+      t.appendChild(num);
+      var why = c && c.why ? c.why : (c ? "" : "No link to this currency in the graph."); if (dv) why = why + " (from graph links)";
+      t.appendChild(el("div", "tw", why));
+      t.title = K + " (" + CURNAME[K] + "): " + (c ? c.dir : "no link") + ". " + why;
+      t.setAttribute("aria-label", t.title);
+      return t;
+    }
+    var FS = { id: null };
+    function sel0() { return FS.id; }
+
+    function seenBlock(id, info) {
+      var n = N[id], b = el("div", "seen"), hh = n.h || null, any = false;
+      b.appendChild(el("h6", "", "Seen before"));
+      function line(txt, cls) { if (!txt) return; any = true; b.appendChild(el("p", cls || "", txt)); }
+      if (hh) {
+        var bits = [];
+        if (hh.trend && hh.trend !== "unknown") bits.push({ heating: "▲ heating up", cooling: "▼ cooling", steady: "▬ steady", "new": "● new" }[hh.trend] || "");
+        if (hh.days_running != null) bits.push(hh.days_running + " day" + (hh.days_running === 1 ? "" : "s") + " running");
+        if (hh.stories != null) bits.push(hh.stories + " stories");
+        if (hh.last7 != null && hh.prev7 != null) bits.push("last 7 days " + hh.last7 + " vs " + hh.prev7 + " before");
+        line(bits.filter(Boolean).join(" · "), "hs");
+        line(hh.note, "hn");
+        if (hh.hit != null) line("Past calls held up " + Math.round(hh.hit * 100) + "% of the time.");
+        (hh.past || []).slice(0, 2).forEach(function (p) { line("Earlier call: " + clip(p.if + (p.then ? " → " + p.then : ""), 110) + (p.st ? " (" + p.st + ")" : ""), "hp"); });
+      }
+      var ch = info.hist || {};
+      if (!hh || hh.days_running == null) {
+        var bits2 = [];
+        if (ch.days != null) bits2.push(ch.days + " day" + (ch.days === 1 ? "" : "s") + " running");
+        if (ch.stories != null) bits2.push(ch.stories + " " + (ch.stories === 1 ? "story" : "stories"));
+        if (!bits2.length && n.thr) bits2.push(n.thr.days + " day" + (n.thr.days === 1 ? "" : "s") + " running, " + n.thr.stories + " " + (n.thr.stories === 1 ? "story" : "stories"));
+        line(bits2.join(" · "), "hs");
+      }
+      line(ch.seen, "hn");
+      if (info.pat) line("Pattern: " + info.pat, "pt");
+      var hot = [], cold = [], lab = n.l.toLowerCase(), words = lab.split(/\W+/).filter(function (w) { return w.length > 3; });
+      function rel(t) { t = t.toLowerCase(); return t.indexOf(lab) >= 0 || words.some(function (w) { return t.indexOf(w) >= 0; }); }
+      ((data.pat && data.pat.heating) || []).forEach(function (t) { if (rel(t)) hot.push(t); });
+      ((data.pat && data.pat.cooling) || []).forEach(function (t) { if (rel(t)) cold.push(t); });
+      if (hot.length) line("▲ Heating: " + hot.join(", "), "hs");
+      if (cold.length) line("▼ Cooling: " + cold.join(", "), "hs");
+      if (info.ag.length) { any = true; var u = el("ul", "ag"); info.ag.slice(0, 2).forEach(function (t) { u.appendChild(el("li", "", t)); }); b.appendChild(el("h6", "sub", "The case against")); b.appendChild(u); }
+      if (!any) b.appendChild(el("p", "empty", "Nothing recorded yet. This node has not been seen before in the archive."));
+      return b;
+    }
+
+    /* ---- build the focus view ---- */
+    var dgHost = null, dgModelCache = null;
+    function renderFocus() {
+      var id = FS.id = S.sel; fv.textContent = ""; if (!id || !N[id]) return;
+      var n = N[id], info = cardOf(id), dc = dcls(n.d);
+      var top = el("div", "fv-top");
+      var back = el("button", "fv-back", "◂ Back to map"); back.type = "button"; back.setAttribute("data-f", "back"); back.addEventListener("click", closeFocus); top.appendChild(back);
+      var ti = el("div", "fv-title"), h2 = el("h2", "", n.l); h2.tabIndex = -1; h2.setAttribute("data-f", "name");
+      var row = el("div", "fv-chips"); row.appendChild(shapeIcon(n.t, n.d, 20)); row.appendChild(el("span", "", data.typeLabel[n.t] || n.t));
+      if (n.dn) row.appendChild(el("span", "dchip " + dc, n.dn)); if (n.r) row.appendChild(el("span", "", n.r));
+      if (n.dir && n.dir !== "none") row.appendChild(el("span", "dirb2 " + n.dir, { up: "▲ rising", down: "▼ falling", flat: "▬ steady" }[n.dir]));
+      ti.appendChild(h2); ti.appendChild(row); top.appendChild(ti);
+      var tools = el("div", "fv-tools"), lab = el("label", "trace"); lab.appendChild(el("span", "", "Trace to"));
+      var sl = el("select"); sl.setAttribute("aria-label", "Trace the shortest causal path from " + n.l + " to another node");
+      var o0 = el("option", "", "Pick a node…"); o0.value = ""; sl.appendChild(o0);
+      ids.filter(function (x) { return x !== id; }).sort(function (a, b) { return N[a].l.toLowerCase() < N[b].l.toLowerCase() ? -1 : 1; }).forEach(function (x) { var o = el("option", "", N[x].l); o.value = x; if (S.trace && S.trace.to === x) o.selected = true; sl.appendChild(o); });
+      sl.addEventListener("change", function () { setTrace(sl.value || null); });
+      lab.appendChild(sl); tools.appendChild(lab); top.appendChild(tools);
+      fv.appendChild(top);
+      var hl = el("p", "fv-hl", info.hl); if (info.hl) fv.appendChild(hl);
+      if (!info.full) fv.appendChild(el("p", "fv-note", "Short card: the AI only writes full cards for the 15 busiest nodes."));
+      else if (info.light) fv.appendChild(el("p", "fv-note", "Short version: the AI summary wasn't available this run."));
+      var trb = el("div", "fv-trace"); trb.hidden = !S.trace; fv.appendChild(trb); FS.trb = trb;
+      var main = el("div", "fv-main");
+      var left = el("div", "fv-left");
+      var pts = ptsOf(info), ol = el("ol", "keypts");
+      pts.forEach(function (p, i) { var li = el("li"); if (p.k) li.appendChild(el("b", "pk", p.k)); li.appendChild(el("span", "pv", p.t)); ol.appendChild(li); });
+      if (!pts.length) ol.appendChild(el("li", "", "No summary available for this node."));
+      left.appendChild(ol);
+      var cs = el("div", "cstrip"); cs.setAttribute("role", "group"); cs.setAttribute("aria-label", "Effect on the Indian rupee, Canadian dollar and US dollar");
+      var cwhy = el("div", "cwhy"); cwhy.setAttribute("aria-live", "polite");
+      CURS.forEach(function (K) {
+        var t = tileOf(K, info); cs.appendChild(t);
+        function show() { [].forEach.call(cs.children, function (x) { x.classList.toggle("open", x === t); }); cwhy.textContent = K + ": " + (t.querySelector(".tw").textContent || "no explanation"); }
+        t.addEventListener("click", show); t.addEventListener("focus", show);
+      });
+      left.appendChild(cs); left.appendChild(cwhy);
+      var firstT = cs.firstChild; if (firstT) { firstT.classList.add("open"); cwhy.textContent = "INR: " + (firstT.querySelector(".tw").textContent || ""); }
+      var fyk = ["India", "US", "Canada"].filter(function (k) { return info.fy[k]; });
+      if (fyk.length) { var fy = el("dl", "fy"); fyk.forEach(function (k) { fy.appendChild(el("dt", "", k)); fy.appendChild(el("dd", "", info.fy[k])); }); left.appendChild(fy); }
+      left.appendChild(seenBlock(id, info));
+      var right = el("div", "fv-right");
+      var host = el("div", "fv-dg"); right.appendChild(host); if (dgRO) { try { dgRO.disconnect(); } catch (x) {} dgRO.observe(host); } dgHost = host;
+      right.appendChild(legendEl());
       var good = (n.src || []).map(function (s) { return [s[0], safeUrl(s[1])]; }).filter(function (s) { return s[1]; });
       if (good.length) {
-        panel.appendChild(el("h6", "", "Sources")); var ul2 = el("ul", "src");
-        good.slice(0, 6).forEach(function (s) { var li = el("li"), a = el("a", "", s[0] || s[1]); a.href = s[1]; a.target = "_blank"; a.rel = "noopener noreferrer"; li.appendChild(a); ul2.appendChild(li); });
-        panel.appendChild(ul2);
+        var sr = el("div", "fv-src"); sr.appendChild(el("b", "", "Sources"));
+        good.slice(0, 3).forEach(function (s) { var a = el("a", "", clip(s[0], 46) + " (" + hostOf(s[1]) + ")"); a.href = s[1]; a.target = "_blank"; a.rel = "noopener noreferrer"; sr.appendChild(a); });
+        right.appendChild(sr);
       }
+      main.appendChild(left); main.appendChild(right); fv.appendChild(main);
+      FS.pg = { cs: 0, ef: 0 }; renderTrace();
+      draw();
+      var nm = fv.querySelector('[data-f="name"]'); if (nm && FS.refocus) { try { nm.focus({ preventScroll: true }); } catch (x) {} }
+      FS.refocus = false;
+      var live = box.querySelector(".sronly"); if (live) live.textContent = "Showing " + n.l;
     }
+    function legendEl() {
+      var d = el("div", "fv-leg"); d.setAttribute("aria-label", "Legend");
+      function it(cls, txt) { var s = el("span"); var g = sv("svg", { width: 34, height: 10, viewBox: "0 0 34 10", "aria-hidden": "true" }); g.appendChild(sv("path", { d: "M1 5H33", "class": "lg " + cls })); s.appendChild(g); s.appendChild(document.createTextNode(txt)); return s; }
+      d.appendChild(it("rep", "reported")); d.appendChild(it("pred", "predicted")); d.appendChild(it("con", "contradicts"));
+      d.appendChild(el("span", "", "▲ raises  ▼ lowers  thicker = stronger  click a line for the steps"));
+      return d;
+    }
+    function draw() { if (dgHost) drawDiagram(dgHost); }
+
+    /* ---- diagram ---- */
+    function sortLinks(list, other) { return list.map(function (i) { var e = E[i]; return { i: i, e: e, o: other(e) }; }).filter(function (x) { return N[x.o]; }).sort(function (a, b) { return b.e.s - a.e.s || conf(b.e) - conf(a.e) || (N[a.o].l < N[b.o].l ? -1 : 1); }); }
+    function edgeGlyph(e) { return e.kind === "contradicts" ? "≠" : (FX[e.effect] || FX.none)[0]; }
+    function mkLine(g, d, e, extra) {
+      var eg = sv("g", { "class": "ed e-" + e.effect + " k-" + e.kind + " st-" + e.status + " perm" + (extra ? " " + extra : ""), style: "--eo:1;--sw:" + r1(1.4 + e.s * 0.7) + "px" });
+      var line = sv("path", { "class": "line", d: d, "marker-end": "url(#mk" + UID + "-" + (e.kind === "contradicts" ? "bar" : e.effect) + e.s + ")" });
+      eg.appendChild(line); return eg;
+    }
+    function lblText(g, txt, x, y, w, maxL, anchor, cls) {
+      var lines = wrap(txt, Math.max(6, Math.floor(w / 5.5)), maxL), t = sv("text", { "class": "dg-l " + (cls || ""), "text-anchor": anchor || "middle" });
+      lines.forEach(function (s, i) { var ts = sv("tspan", { x: r1(x), y: r1(y + i * 13) }); ts.textContent = s; t.appendChild(ts); });
+      g.appendChild(t); return t;
+    }
+    function drawDiagram(host) {
+      var id = FS.id; if (!id) return;
+      var W = Math.floor(host.clientWidth);
+      if (W < 160) return;
+      var n = N[id], info = cardOf(id), preds = predsOf(id, info);
+      var causes = sortLinks(inE[id], function (e) { return e.f; }), effects = sortLinks(outE[id], function (e) { return e.t; });
+      host.textContent = "";
+      var vertical = W < 560, svgD;
+      if (vertical) {
+        svgD = drawVertical(W, id, n, info, preds, causes, effects);
+        host.style.height = "auto";
+      } else {
+        host.style.height = "";
+        var H = Math.floor(host.clientHeight); if (H < 160) return;
+        svgD = drawHoriz(W, H, id, n, info, preds, causes, effects);
+      }
+      host.appendChild(svgD);
+    }
+    function openLinkAt(i, ev) { showPop(edgeContent(i), ev); }
+    function neighbourBox(g, o, x, y, w, h, linkI) {
+      var nd = N[o], G = sv("g", { "class": "dg-n", tabindex: "0", role: "button", transform: "translate(" + r1(x) + " " + r1(y) + ")", "aria-label": nd.l + ". Centre the card on this node." });
+      var tt = sv("title"); tt.textContent = nd.l + " (" + (data.typeLabel[nd.t] || nd.t) + (nd.dn ? ", " + nd.dn : "") + ")"; G.appendChild(tt);
+      G.appendChild(sv("rect", { "class": "dg-box", width: w, height: h, rx: 7 }));
+      G.appendChild(sv("rect", { "class": "dg-bar " + dcls(nd.d), width: 4, height: h - 8, x: 0, y: 4, rx: 2 }));
+      var ic = sv("g", { transform: "translate(15 " + r1(h / 2) + ") scale(.34)" }); ic.appendChild(sv("path", { "class": "dg-ic " + dcls(nd.d), d: SH[nd.t] })); G.appendChild(ic);
+      var lines = wrap(nd.l, Math.max(6, Math.floor((w - 34) / 6.3)), 2), t = sv("text", { "class": "dg-nm", x: 28 });
+      lines.forEach(function (s, i) { var ts = sv("tspan", { x: 28, y: r1(h / 2 + (i - (lines.length - 1) / 2) * 13.5 + 4.2) }); ts.textContent = s; t.appendChild(ts); });
+      G.appendChild(t);
+      if (nd.dir === "up" || nd.dir === "down") { var tg = sv("text", { "class": "dg-dir " + nd.dir, x: w - 8, y: 13, "text-anchor": "end" }); tg.textContent = nd.dir === "up" ? "▲" : "▼"; G.appendChild(tg); }
+      function go(ev) { ev.stopPropagation(); FS.refocus = true; navTo(o); }
+      G.addEventListener("click", go);
+      G.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); go(ev); } });
+      g.appendChild(G); return G;
+    }
+    function linkGroup(g, i, pathD, lx, ly, lw, maxL, side) {
+      var e = E[i], eg = mkLine(g, pathD, e), hit = sv("path", { "class": "hit", d: pathD, tabindex: "0", role: "button" });
+      hit.setAttribute("aria-label", "Open the steps for: " + (N[e.f].l + " to " + N[e.t].l + ", " + (e.label || "")));
+      var tt = sv("title"); tt.textContent = (e.label || "no mechanism given"); hit.appendChild(tt);
+      eg.appendChild(hit);
+      var lt = lblText(eg, edgeGlyph(e) + " " + (e.label || "no mechanism given"), lx, ly, lw, maxL, "middle", "lnk");
+      function open(ev) { ev.stopPropagation(); openLinkAt(i, ev); }
+      hit.addEventListener("click", open); lt.addEventListener("click", open);
+      hit.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); open(ev); } });
+      lt.style.cursor = "pointer"; lt.style.pointerEvents = "all";
+      g.appendChild(eg); return eg;
+    }
+    function packRows(list, page, cap) { var vis = list.slice(page, page + cap); return { vis: vis, rest: Math.max(0, list.length - page - cap) }; }
+    function moreBtn(g, x, y, w, rest, page, cap, key) {
+      var G = sv("g", { "class": "dg-more", tabindex: "0", role: "button", transform: "translate(" + r1(x) + " " + r1(y) + ")", "aria-label": rest > 0 ? rest + " more links. Show them." : "Back to the first links." });
+      G.appendChild(sv("rect", { width: w, height: 22, rx: 6 }));
+      var t = sv("text", { x: w / 2, y: 15, "text-anchor": "middle" }); t.textContent = rest > 0 ? "+" + rest + " more ▸" : "◂ first links"; G.appendChild(t);
+      function go(ev) { ev.stopPropagation(); FS.pg[key] = rest > 0 ? page + cap : 0; draw(); }
+      G.addEventListener("click", go); G.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); go(ev); } });
+      g.appendChild(G);
+    }
+    function drawHoriz(W, H, id, n, info, preds, causes, effects) {
+      var s = sv("svg", { viewBox: "0 0 " + W + " " + H, width: W, height: H, "class": "dg", role: "group" });
+      s.setAttribute("aria-label", "Connections of " + n.l + ": " + causes.length + " causes, " + effects.length + " effects, " + preds.length + " possible next steps");
+      var pw = 92, titleH = 20, bandH = preds.length ? 132 : 0, ah = H - titleH - bandH - 6, boxH = 40, pitch = 58;
+      var cap = Math.max(2, Math.floor(ah / pitch)), top = titleH;
+      var pc = packRows(causes, FS.pg.cs, cap), pe = packRows(effects, FS.pg.ef, cap);
+      if (pc.rest || FS.pg.cs) pc = packRows(causes, FS.pg.cs, Math.max(1, cap - 1));
+      if (pe.rest || FS.pg.ef) pe = packRows(effects, FS.pg.ef, Math.max(1, cap - 1));
+      // "Then": knock-on effects of the visible direct effects (grouped by parent, strongest first)
+      var shown = {}; shown[id] = true; pc.vis.forEach(function (x) { shown[x.o] = true; }); pe.vis.forEach(function (x) { shown[x.o] = true; });
+      var seenT = {}, thr = [];
+      pe.vis.forEach(function (x, k) {
+        sortLinks(outE[x.o], function (e) { return e.t; }).forEach(function (y) { if (shown[y.o] || seenT[y.o] || y.o === id) return; seenT[y.o] = true; thr.push({ par: x, k: k, y: y }); });
+      });
+      thr.sort(function (a, b) { return (b.y.e.s - a.y.e.s) || (a.k - b.k); }); thr = thr.slice(0, cap); thr.sort(function (a, b) { return a.k - b.k || b.y.e.s - a.y.e.s; });
+      var nb = thr.length ? 3 : 2, colw = Math.max(104, Math.min(200, Math.floor((W - 8 - pw) / (nb * 1.7)))), gw = Math.floor((W - 8 - pw - nb * colw) / nb);
+      var xL = 4, xP = xL + colw + gw, xE = xP + pw + gw, xT = xE + colw + gw, mxL = gw >= 100 ? 3 : 2;
+      var gB = sv("g"), gN = sv("g"), gT = sv("g", { "class": "dg-t" });
+      function title(x, w, txt) { var t = sv("text", { x: x, y: 13, "class": "dg-title" }); t.textContent = txt; gT.appendChild(t); }
+      title(xL, colw, "What drives it · " + causes.length); title(xE, colw, "What it drives · " + effects.length);
+      // pillar
+      var pillar = sv("g", { "class": "dg-pillar " + dcls(n.d) });
+      var mrows = Math.max(Math.min(causes.length, cap), Math.min(effects.length, cap), thr.length, 1), ph = Math.min(ah, Math.max(250, mrows * pitch + 40)), top0 = top + (ah - ph) / 2;
+      pillar.appendChild(sv("rect", { x: xP, y: top0, width: pw, height: ph, rx: 12, "class": "dg-pil" }));
+      var ic = sv("g", { transform: "translate(" + (xP + pw / 2) + " " + (top0 + 30) + ") scale(.9)" }); ic.appendChild(sv("path", { "class": "dg-ic " + dcls(n.d), d: SH[n.t] })); pillar.appendChild(ic);
+      var pl = wrap(n.l, 11, 4), pt = sv("text", { "class": "dg-pn", "text-anchor": "middle" });
+      pl.forEach(function (x, i) { var ts = sv("tspan", { x: xP + pw / 2, y: top0 + 64 + i * 15 }); ts.textContent = x; pt.appendChild(ts); }); pillar.appendChild(pt);
+      var py = top0 + 64 + pl.length * 15 + 8;
+      if (n.dir && n.dir !== "none") { var dt = sv("text", { "class": "dg-pd " + n.dir, x: xP + pw / 2, y: py, "text-anchor": "middle" }); dt.textContent = { up: "▲ rising", down: "▼ falling", flat: "▬ steady" }[n.dir]; pillar.appendChild(dt); py += 16; }
+      if (n.mkt && (n.mkt.price || n.mkt.change)) { var mt2 = sv("text", { "class": "dg-pm", x: xP + pw / 2, y: py, "text-anchor": "middle" }); mt2.textContent = n.mkt.price || ""; pillar.appendChild(mt2); if (n.mkt.change) { var mc = sv("text", { "class": "dg-pm " + (n.mkt.cp > 0 ? "up" : n.mkt.cp < 0 ? "down" : ""), x: xP + pw / 2, y: py + 14, "text-anchor": "middle" }); mc.textContent = n.mkt.change; pillar.appendChild(mc); } }
+      gN.appendChild(pillar);
+      function rowsY(k) { var p = Math.min(pitch + 24, Math.max(pitch, ah / Math.max(1, k))); var y0 = top + (ah - p * k) / 2; var a = []; for (var i = 0; i < k; i++) a.push(y0 + p * (i + 0.5)); return a; }
+      var yc = rowsY(pc.vis.length), ye = rowsY(pe.vis.length);
+      if (!causes.length) { var e0 = sv("text", { x: xL, y: top + 24, "class": "dg-empty" }); (wrap("Nothing in the graph drives this node.", Math.floor(colw / 5.8), 3)).forEach(function (x, i) { var ts = sv("tspan", { x: xL, y: top + 24 + i * 14 }); ts.textContent = x; e0.appendChild(ts); }); gN.appendChild(e0); }
+      if (!effects.length) { var e1 = sv("text", { x: xE, y: top + 24, "class": "dg-empty" }); (wrap("This node does not drive anything else yet.", Math.floor(colw / 5.8), 3)).forEach(function (x, i) { var ts = sv("tspan", { x: xE, y: top + 24 + i * 14 }); ts.textContent = x; e1.appendChild(ts); }); gN.appendChild(e1); }
+      pc.vis.forEach(function (x, k) { var y = yc[k]; linkGroup(gB, x.i, "M" + (xL + colw + 2) + " " + r1(y) + "H" + (xP - 2), xL + colw + gw / 2 + 1, y - 7 - 6.5 * (Math.min(mxL, wrap(x.e.label || "x", Math.max(6, Math.floor(gw / 5.5)), mxL).length) - 1), gw, mxL); neighbourBox(gN, x.o, xL, y - boxH / 2, colw, boxH, x.i); });
+      var effY = {};
+      pe.vis.forEach(function (x, k) { var y = ye[k]; effY[x.o] = { y: y, k: k }; linkGroup(gB, x.i, "M" + (xP + pw + 2) + " " + r1(y) + "H" + (xE - 3), xP + pw + gw / 2, y - 7 - 6.5 * (Math.min(mxL, wrap(x.e.label || "x", Math.max(6, Math.floor(gw / 5.5)), mxL).length) - 1), gw, mxL); neighbourBox(gN, x.o, xE, y - boxH / 2, colw, boxH, x.i); });
+      if (pc.rest || FS.pg.cs) moreBtn(gN, xL, top + ah - 22, colw, pc.rest, FS.pg.cs, Math.max(1, cap - 1), "cs");
+      if (pe.rest || FS.pg.ef) moreBtn(gN, xE, top + ah - 22, colw, pe.rest, FS.pg.ef, Math.max(1, cap - 1), "ef");
+      if (thr.length) {
+        title(xT, colw, "Then (knock-on) · " + thr.length);
+        var ty = [], last = top + boxH / 2 + 2;
+        thr.forEach(function (t) { var y = Math.max(effY[t.par.o].y, last); ty.push(y); last = y + pitch; });
+        var over = ty.length ? ty[ty.length - 1] + boxH / 2 - (top + ah) : 0; if (over > 0) ty = ty.map(function (y) { return Math.max(top + boxH / 2, y - over); });
+        thr.forEach(function (t, k) {
+          var y0 = effY[t.par.o].y, y1 = ty[k], x0 = xE + colw + 2, x1 = xT - 3, dm = (x1 - x0) / 2, d = "M" + x0 + " " + r1(y0) + "C" + r1(x0 + dm) + " " + r1(y0) + " " + r1(x1 - dm) + " " + r1(y1) + " " + x1 + " " + r1(y1);
+          var tl2 = Math.abs(y1 - y0) < 6 ? 0.5 : 0.72, ly = y0 + (y1 - y0) * (3 * tl2 * tl2 - 2 * tl2 * tl2 * tl2);
+          linkGroup(gB, t.y.i, d, x0 + (x1 - x0) * tl2, ly - 7 - 6.5 * (Math.min(mxL, wrap(t.y.e.label || "x", Math.max(6, Math.floor(gw / 5.5)), mxL).length) - 1), gw, mxL);
+          neighbourBox(gN, t.y.o, xT, y1 - boxH / 2, colw, boxH, t.y.i);
+        });
+      }
+      // could happen next
+      if (preds.length) {
+        var by = top + ah + 16, k2 = preds.length, gap2 = 10, cwF = Math.min(260, Math.floor((W - 8 - gap2 * (k2 - 1)) / k2)), tot = k2 * cwF + gap2 * (k2 - 1), x0F = Math.max(4, Math.min(W - 4 - tot, xP + pw / 2 - tot / 2));
+        var tl = sv("text", { x: 4, y: by - 2, "class": "dg-title" }); tl.textContent = "Could happen next (dashed = predicted)"; gT.appendChild(tl);
+        preds.forEach(function (p, k) {
+          var x = x0F + k * (cwF + gap2), y = by + 8, h = bandH - 26, ax = xP + 14 + (pw - 28) * (k2 === 1 ? 0.5 : k / (k2 - 1));
+          var d = "M" + r1(ax) + " " + r1(top0 + ph + 2) + "C" + r1(ax) + " " + r1(top0 + ph + 12) + " " + r1(x + cwF / 2) + " " + (y - 12) + " " + r1(x + cwF / 2) + " " + (y - 2);
+          var fl = sv("path", { "class": "dg-fut-ln", d: d, "marker-end": "url(#mk" + UID + "-none2)" }); gB.appendChild(fl);
+          var G = sv("g", { "class": "dg-f", tabindex: "0", role: "button", transform: "translate(" + r1(x) + " " + y + ")", "data-pi": k, "aria-label": "Could happen: " + (p.then || "") + ", " + (p.odds || "unknown") + " odds. Show the reasoning." });
+          G.appendChild(sv("rect", { width: cwF, height: h, rx: 8, "class": "dg-fb" }));
+          var ob = CR[p.odds] || 0; for (var q = 0; q < 3; q++) G.appendChild(sv("rect", { x: 9 + q * 7, y: 8, width: 5, height: 10, rx: 1, "class": "dg-ob" + (q < ob ? " on" : "") }));
+          var ot = sv("text", { x: 34, y: 17, "class": "dg-o" }); ot.textContent = (p.odds || "?") + " odds · " + (HZ[String(p.hz || "").toLowerCase()] || p.hz || "soon"); G.appendChild(ot);
+          var nch = Math.max(8, Math.floor((cwF - 18) / 6.1)), ifl = p.if ? wrap("If " + p.if, nch, 2) : [], thl = wrap("→ " + (p.then || ""), nch, 3);
+          var tx = sv("text", { "class": "dg-ft" });
+          ifl.forEach(function (x2, i) { var ts = sv("tspan", { x: 9, y: 34 + i * 13, "class": "dg-if" }); ts.textContent = x2; tx.appendChild(ts); });
+          thl.forEach(function (x2, i) { var ts = sv("tspan", { x: 9, y: 34 + (ifl.length + i) * 13 + 1 }); ts.textContent = x2; tx.appendChild(ts); });
+          G.appendChild(tx);
+          function go(ev) { ev.stopPropagation(); showPop(predContent(p), ev); }
+          G.addEventListener("click", go); G.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); go(ev); } });
+          gN.appendChild(G);
+        });
+      }
+      s.appendChild(gB); s.appendChild(gT); s.appendChild(gN);
+      return s;
+    }
+    function drawVertical(W, id, n, info, preds, causes, effects) {
+      var sections = [], rowH = 54, y = 4, items = [];
+      function sec(title, list, kind) { if (!list.length) return; items.push({ t: title, y: y }); y += 20; list.forEach(function (x) { items.push({ x: x, kind: kind, y: y }); y += rowH; }); y += 4; }
+      var shown = {}; shown[id] = true;
+      var ce = causes.slice(0, 3), ef = effects.slice(0, 3); ce.concat(ef).forEach(function (x) { shown[x.o] = true; });
+      var thr = [], seenT = {};
+      ef.forEach(function (x) { sortLinks(outE[x.o], function (e) { return e.t; }).forEach(function (t) { if (shown[t.o] || seenT[t.o]) return; seenT[t.o] = true; thr.push(t); }); });
+      thr.sort(function (a, b) { return b.e.s - a.e.s; });
+      sec("What drives it · " + causes.length, ce, "c");
+      items.push({ hub: true, y: y }); y += 52;
+      sec("What it drives · " + effects.length, ef, "e");
+      sec("Then (knock-on)", thr.slice(0, 2), "t");
+      if (preds.length) { items.push({ t: "Could happen next (dashed = predicted)", y: y }); y += 20; preds.slice(0, 2).forEach(function (p) { items.push({ p: p, y: y }); y += 76; }); }
+      var H = y + 4, s = sv("svg", { viewBox: "0 0 " + W + " " + H, width: W, height: H, "class": "dg vert", role: "group" });
+      s.setAttribute("aria-label", "Connections of " + n.l);
+      var g = sv("g"), gl = sv("g");
+      var xr = 10, bw = W - 22;
+      items.forEach(function (it) {
+        if (it.t) { var t = sv("text", { x: 4, y: it.y + 13, "class": "dg-title" }); t.textContent = it.t; g.appendChild(t); return; }
+        if (it.hub) {
+          var hb = sv("g", { "class": "dg-pillar " + dcls(n.d), transform: "translate(4 " + it.y + ")" }); hb.appendChild(sv("rect", { width: W - 8, height: 44, rx: 10, "class": "dg-pil" }));
+          var ic = sv("g", { transform: "translate(24 22) scale(.7)" }); ic.appendChild(sv("path", { "class": "dg-ic " + dcls(n.d), d: SH[n.t] })); hb.appendChild(ic);
+          var pt = sv("text", { x: 46, y: 26, "class": "dg-pn" }); pt.textContent = clip(n.l, Math.floor((W - 70) / 7.2)) + (n.dir === "up" ? "  ▲" : n.dir === "down" ? "  ▼" : ""); hb.appendChild(pt); g.appendChild(hb); return;
+        }
+        if (it.p) {
+          var p = it.p, G = sv("g", { "class": "dg-f", tabindex: "0", role: "button", transform: "translate(" + xr + " " + it.y + ")", "aria-label": "Could happen: " + p.then });
+          G.appendChild(sv("rect", { width: bw, height: 68, rx: 8, "class": "dg-fb" }));
+          var ob = CR[p.odds] || 0; for (var q = 0; q < 3; q++) G.appendChild(sv("rect", { x: 9 + q * 7, y: 8, width: 5, height: 10, rx: 1, "class": "dg-ob" + (q < ob ? " on" : "") }));
+          var ot = sv("text", { x: 34, y: 17, "class": "dg-o" }); ot.textContent = (p.odds || "?") + " odds · " + (HZ[String(p.hz || "").toLowerCase()] || p.hz || "soon"); G.appendChild(ot);
+          var tl = wrap((p.if ? "If " + p.if + " → " : "→ ") + (p.then || ""), Math.floor((bw - 18) / 6.1), 3), tx = sv("text", { "class": "dg-ft" });
+          tl.forEach(function (x2, i) { var ts = sv("tspan", { x: 9, y: 34 + i * 13 }); ts.textContent = x2; tx.appendChild(ts); }); G.appendChild(tx);
+          function go(ev) { ev.stopPropagation(); showPop(predContent(p), ev); }
+          G.addEventListener("click", go); G.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); go(ev); } });
+          g.appendChild(G); return;
+        }
+        var x = it.x, e = x.e, up = it.kind === "c", nd = N[x.o];
+        var G2 = sv("g", { transform: "translate(" + xr + " " + it.y + ")" });
+        var eg = mkLine(G2, up ? "M14 36V50" : "M14 -4V8", e, ""); G2.appendChild(eg);
+        G2.appendChild(sv("rect", { "class": "dg-box", x: 26, width: bw - 16, height: 48, rx: 7 }));
+        G2.appendChild(sv("rect", { "class": "dg-bar " + dcls(nd.d), x: 26, y: 4, width: 4, height: 40, rx: 2 }));
+        var nm = sv("text", { "class": "dg-nm", x: 38, y: 17 }); nm.textContent = clip(nd.l, Math.floor((bw - 70) / 6.8)); G2.appendChild(nm);
+        var mt = sv("text", { "class": "dg-l lnk", x: 38, y: 33, "text-anchor": "start" }); var ml = wrap(edgeGlyph(e) + " " + (e.label || "no mechanism given"), Math.floor((bw - 60) / 5.5), 2);
+        ml.forEach(function (s2, i) { var ts = sv("tspan", { x: 38, y: 32 + i * 12 }); ts.textContent = s2; mt.appendChild(ts); }); G2.appendChild(mt);
+        var hitR = sv("rect", { x: 26, width: bw - 16, height: 48, fill: "transparent", tabindex: "0", role: "button", "class": "vhit" }); hitR.setAttribute("aria-label", nd.l + ". " + (e.label || "") + ". Show the steps.");
+        hitR.addEventListener("click", function (ev) { ev.stopPropagation(); openLinkAt(x.i, ev); });
+        hitR.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); openLinkAt(x.i, ev); } });
+        var nav = sv("g", { "class": "vnav", tabindex: "0", role: "button", transform: "translate(" + (bw - 38) + " 6)" }); nav.setAttribute("aria-label", "Centre the card on " + nd.l);
+        nav.appendChild(sv("rect", { width: 34, height: 36, rx: 6, "class": "dg-more-r" })); var nt = sv("text", { x: 17, y: 23, "text-anchor": "middle", "class": "dg-nvt" }); nt.textContent = "Open"; nav.appendChild(nt);
+        nav.addEventListener("click", function (ev) { ev.stopPropagation(); FS.refocus = true; navTo(x.o); });
+        nav.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); FS.refocus = true; navTo(x.o); } });
+        G2.appendChild(hitR); G2.appendChild(nav); g.appendChild(G2);
+      });
+      s.appendChild(gl); s.appendChild(g); return s;
+    }
+
+    /* ---- popover (link steps / prediction reasoning) ---- */
+    var pop = box.querySelector(".pop");
+    function closePop() { if (pop) { pop.hidden = true; pop.textContent = ""; } }
+    function popSec(parent, title, txt) { if (!txt) return; var d = el("div", "ps"); d.appendChild(el("b", "", title)); d.appendChild(el("span", "", txt)); parent.appendChild(d); }
+    function edgeContent(i) {
+      var e = E[i], c = e.c || {};
+      return function (p) {
+        var h = el("div", "ph"); h.appendChild(el("b", "pt", N[e.f].l + " → " + N[e.t].l)); p.appendChild(h);
+        p.appendChild(el("p", "pm", edgeGlyph(e) + " " + (e.label || "no mechanism given")));
+        var chips = el("div", "pc");
+        [(FX[e.effect] ? FX[e.effect][2] : ""), e.kind !== "causal" ? e.kind : "", "strength " + e.s + "/3", (e.conf || "?") + " confidence", e.status || "reported", e.lag ? "lag " + e.lag : ""].filter(Boolean).forEach(function (t) { chips.appendChild(el("span", "chp" + (t === "predicted" ? " dashed" : ""), t)); });
+        p.appendChild(chips);
+        var steps = (c.steps && c.steps.length) ? c.steps : [N[e.f].l, e.label || "leads to", N[e.t].l];
+        var ol = el("ol", "psteps"); steps.forEach(function (t) { ol.appendChild(el("li", "", t)); }); p.appendChild(ol);
+        popSec(p, "Evidence", c.ev || e.why || "");
+        popSec(p, "What could weaken it", c.wk || "");
+        popSec(p, "Where it leads next", c.nx || (outE[e.t].slice(0, 2).map(function (k) { return N[E[k].t].l + " (" + (E[k].label || "") + ")"; }).join("; ")));
+        popSec(p, "Seen before", c.seen || "");
+        if (!c.steps && !c.ev && !c.wk) p.appendChild(el("p", "pn", "Short link: the AI writes step-by-step notes for the strongest links only."));
+      };
+    }
+    function predContent(pr) {
+      return function (p) {
+        var h = el("div", "ph"); h.appendChild(el("b", "pt", "Could happen: " + (pr.then || "")));  p.appendChild(h);
+        var chips = el("div", "pc"); chips.appendChild(oddsBars(pr.odds)); if (pr.hz) chips.appendChild(el("span", "chp", HZ[String(pr.hz).toLowerCase()] || pr.hz)); p.appendChild(chips);
+        popSec(p, "If", pr.if); popSec(p, "Why", pr.why); popSec(p, "Watch for", pr.watch); popSec(p, "Wrong if", pr.wrong);
+        if (pr.src === "edge") p.appendChild(el("p", "pn", "From a predicted link in the graph."));
+      };
+    }
+    function showPop(build, ev) {
+      if (!pop) return; pop.textContent = ""; var x = el("button", "px", "✕"); x.type = "button"; x.setAttribute("aria-label", "Close"); x.addEventListener("click", function (e2) { e2.stopPropagation(); closePop(); }); pop.appendChild(x);
+      build(pop); pop.hidden = false;
+      var br = box.getBoundingClientRect(), px = (ev && ev.clientX != null ? ev.clientX : br.left + br.width / 2) - br.left, py = (ev && ev.clientY != null ? ev.clientY : br.top + 200) - br.top, w = pop.offsetWidth, h = pop.offsetHeight;
+      var left = Math.max(6, Math.min(br.width - w - 6, px + 12)), topP = Math.max(6, Math.min(br.height - h - 6, py + 12));
+      if (window.innerWidth < 700) { left = Math.max(6, (br.width - w) / 2); topP = Math.max(6, Math.min(br.height - h - 6, py - h / 2)); }
+      pop.style.left = left + "px"; pop.style.top = topP + "px"; try { x.focus({ preventScroll: true }); } catch (e3) {}
+    }
+    document.addEventListener("click", function (ev) { if (pop && !pop.hidden && !(ev.target.closest && ev.target.closest(".pop"))) closePop(); });
+
+    /* ---- trace (shortest causal path) ---- */
+    function bfsPath(from, to, nbr) {
+      var prev = {}; prev[from] = null; var q = [from];
+      while (q.length) { var u = q.shift(); if (u === to) break; nbr(u).forEach(function (x) { if (!(x.o in prev)) { prev[x.o] = { u: u, i: x.i }; q.push(x.o); } }); }
+      if (!(to in prev)) return null;
+      var nodes = [to], edges = [], c = to; while (prev[c]) { edges.unshift(prev[c].i); c = prev[c].u; nodes.unshift(c); }
+      return { nodes: nodes, edges: edges };
+    }
+    function fwdN(u) { return outE[u].filter(function (i) { return E[i].kind !== "contradicts"; }).sort(function (a, b) { return E[b].s - E[a].s; }).map(function (i) { return { o: E[i].t, i: i }; }); }
+    function bothN(u) { return fwdN(u).concat(inE[u].sort(function (a, b) { return E[b].s - E[a].s; }).map(function (i) { return { o: E[i].f, i: i }; })); }
+    function setTrace(to) {
+      if (!to || !S.sel || to === S.sel) { S.trace = null; renderTrace(); applyAll(); return; }
+      var a = S.sel, r = bfsPath(a, to, fwdN), mode = "fwd";
+      if (!r) { var r2 = bfsPath(to, a, fwdN); if (r2) { r = r2; mode = "back"; } }
+      if (!r) { r = bfsPath(a, to, bothN); mode = "any"; }
+      S.trace = r ? { to: to, nodes: r.nodes, edges: r.edges, mode: mode } : { to: to, nodes: [], edges: [], mode: "none" };
+      renderTrace(); applyAll();
+      if (S.trace.nodes.length && !S.focus && S.trace.nodes.some(function (x) { return !nodeEl[x]; })) setView("all", { sel: S.sel });
+    }
+    function renderTrace() {
+      var b = FS.trb; if (!b) return; b.textContent = ""; b.hidden = !S.trace; if (!S.trace) return;
+      var t = S.trace, head = el("b", "", t.nodes.length ? "Trace · " + (t.nodes.length - 1) + " step" + (t.nodes.length === 2 ? "" : "s") : "Trace · no path"); b.appendChild(head);
+      var note = { fwd: "causal path", back: N[t.to].l + " drives " + N[S.sel].l + " (reverse direction)", any: "linked, but not as a one-way cause-and-effect chain", none: "these two nodes are not connected" }[t.mode];
+      b.appendChild(el("span", "tn", " " + note + ". "));
+      var ol = el("span", "tsteps");
+      t.nodes.forEach(function (id, k) {
+        if (k) { var e = E[t.edges[k - 1]]; var bt = el("button", "tl", edgeGlyph(e) + " " + clip(e.label || "leads to", 34)); bt.type = "button"; bt.addEventListener("click", function (ev) { openLinkAt(t.edges[k - 1], ev); }); ol.appendChild(bt); }
+        var nb = el("button", "tnode", N[id].l); nb.type = "button"; nb.addEventListener("click", function () { FS.refocus = true; navTo(id); }); ol.appendChild(nb);
+      });
+      b.appendChild(ol);
+      var cl = el("button", "tx", "Clear trace"); cl.type = "button"; cl.addEventListener("click", function () { setTrace(null); var sl = fv.querySelector(".fv-tools select"); if (sl) sl.selectedIndex = 0; }); b.appendChild(cl);
+    }
+
+    /* ---- open / close / navigate ---- */
+    function openFocus(id) {
+      if (!N[id]) return; closePop();
+      if (S.sel !== id) { S.trace = null; }
+      S.sel = id; S.focus = true; FS.refocus = true; applyAll();
+      box.classList.add("is-focus"); fv.hidden = false; renderFocus();
+      try { box.scrollIntoView({ block: "start" }); } catch (x) {}
+    }
+    function navTo(id) { if (!N[id]) return; closePop(); S.trace = null; S.sel = id; applyAll(); renderFocus(); }
+    function closeFocus() {
+      closePop(); S.focus = false; box.classList.remove("is-focus"); fv.hidden = true;
+      if (S.sel && !nodeEl[S.sel]) { var keep = S.sel; setView("all", { sel: keep }); return; }
+      applyAll(); setVB();
+      var b = S.sel && nodeEl[S.sel]; if (b) { try { b.focus({ preventScroll: true }); } catch (x) {} }
+    }
+    var dgRO = window.ResizeObserver ? new ResizeObserver(function () { if (S.focus) draw(); }) : null;
 
     /* ---------- selection ---------- */
     function choose(id, pan) {
-      S.sel = id && (id !== S.sel || pan) ? id : null;
-      if (id == null) S.sel = null;
+      S.sel = id || null; if (!S.sel) { S.trace = null; }
       hideTip();
       if (S.sel && nodeEl[S.sel] && SC.nodes[S.sel].ghost) nodeEl[S.sel].classList.add("open");
       applyAll();
@@ -992,14 +1580,13 @@ SCRIPT = r"""
         else if (LAY["t:" + tk]) setView("topic", { topic: tk, sel: id });
         else setView("all", { sel: id });
         if (!nodeEl[id]) setView("all", { sel: id });
-        return;
       }
-      choose(id, true);
+      openFocus(id);
     }
     function wireNode(n, id) {
-      n.addEventListener("click", function (ev) { ev.stopPropagation(); choose(S.sel === id ? null : id, false); });
+      n.addEventListener("click", function (ev) { ev.stopPropagation(); if (ev.shiftKey && S.sel && S.sel !== id) { setTrace(id); return; } openFocus(id); });
       n.addEventListener("keydown", function (ev) {
-        if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); ev.stopPropagation(); choose(S.sel === id ? null : id, false); }
+        if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); ev.stopPropagation(); if (ev.shiftKey && S.sel && S.sel !== id) setTrace(id); else openFocus(id); }
         else if (ev.key.indexOf("Arrow") === 0) { ev.preventDefault(); ev.stopPropagation(); spatial(id, ev.key); }
       });
       n.addEventListener("focus", function () { ensureVisible(id); hover(id); });
@@ -1007,7 +1594,11 @@ SCRIPT = r"""
       n.addEventListener("mouseenter", function () { if (!(drag && moved)) hover(id); });
       n.addEventListener("mousemove", function (ev) {
         if (drag && moved) return;
-        showTip(function (t) { t.appendChild(el("b", "", N[id].l)); t.appendChild(el("span", "tm", (data.typeLabel[N[id].t] || "") + (N[id].dn ? " · " + N[id].dn : "") + (N[id].r ? " · " + N[id].r : ""))); }, ev);
+        showTip(function (t) {
+          var n3 = N[id], c3 = n3.c, kp = (c3 && c3.pts && c3.pts[0]) || n3.det || n3.why || "", mv = n3.mkt ? ((n3.mkt.label || n3.l) + (n3.mkt.price ? " " + n3.mkt.price : "") + (n3.mkt.change ? " " + n3.mkt.change : "")) : (n3.dir === "up" ? "▲ rising" : n3.dir === "down" ? "▼ falling" : n3.dir === "flat" ? "▬ steady" : "");
+          t.appendChild(el("b", "", n3.l)); t.appendChild(el("span", "tm", (data.typeLabel[n3.t] || "") + (n3.dn ? " · " + n3.dn : "") + (n3.r ? " · " + n3.r : "")));
+          if (mv) t.appendChild(el("span", "tm", mv)); if (kp) t.appendChild(el("span", "tm", clip(kp, 130))); t.appendChild(el("span", "tm", "Click to open the focus view"));
+        }, ev);
       });
       n.addEventListener("mouseleave", function () { hideTip(); clearHover(); });
     }
@@ -1020,14 +1611,15 @@ SCRIPT = r"""
       });
       if (best) { ensureVisible(best); nodeEl[best].focus({ preventScroll: true }); }
     }
-    svg.addEventListener("click", function (ev) { if (!ev.target.closest || !ev.target.closest(".nd")) { if (S.sel) choose(null); } });
+    svg.addEventListener("click", function (ev) { closePop(); if (!ev.target.closest || !(ev.target.closest(".nd") || ev.target.closest(".ft"))) { if (S.sel) choose(null); } });
+    box.addEventListener("keydown", function (ev) { if (ev.key === "Escape") { if (pop && !pop.hidden) { closePop(); } else if (S.focus) { closeFocus(); ev.stopPropagation(); } } });
     view.addEventListener("keydown", function (ev) {
       if (ev.target.closest && ev.target.closest("input,select,textarea")) return;
       var k = ev.key, onNode = ev.target.closest && ev.target.closest(".nd");
       if (k === "+" || k === "=") { ev.preventDefault(); zoomCenter(1.4); }
       else if (k === "-" || k === "_") { ev.preventDefault(); zoomCenter(1 / 1.4); }
       else if (k === "0") { ev.preventDefault(); fit(true); }
-      else if (k === "Escape") { choose(null); hideTip(); }
+      else if (k === "Escape") { if (S.focus) return; choose(null); hideTip(); }
       else if (!onNode && k.indexOf("Arrow") === 0) {
         ev.preventDefault(); var f = 0.15;
         panBy(k === "ArrowLeft" ? -f : k === "ArrowRight" ? f : 0, k === "ArrowUp" ? -f : k === "ArrowDown" ? f : 0);
@@ -1037,7 +1629,7 @@ SCRIPT = r"""
     /* ---------- chooser rail + headers + views ---------- */
     function buildRail() {
       rail.textContent = "";
-      if (S.view === "all") return;
+      if (S.view === "all" || S.view === "full") return;
       var wrapEl = el("div", "rail-in");
       if (S.view === "chains") {
         wrapEl.appendChild(el("div", "rh", "Key causal chains"));
@@ -1077,27 +1669,30 @@ SCRIPT = r"""
         var t = TOP.filter(function (x) { return x.k === S.topic; })[0];
         mt.textContent = (t ? t.l : "Topic") + (t ? " · " + t.n + " nodes" : "");
         mh.textContent = "Faint nodes belong to other topics. Click any node for its links.";
+      } else if (S.view === "full") {
+        mt.textContent = "Full map · " + ids.length + " nodes, " + E.length + " links";
+        mh.textContent = "Every node is named and every arrow says why. Drag to pan, zoom in for detail; links stay faint until you pick a node.";
       } else {
         mt.textContent = "Everything · " + ids.length + " nodes, " + E.length + " links";
-        mh.textContent = "Click any node to light up its links. Hover or zoom in to read every label.";
+        mh.textContent = "Hover a node for a quick look, click it to open the focus view. Links light up as you hover.";
       }
     }
     function sizeView() {
       if (SC.kind === "chain" && SC.vertical) view.style.height = Math.min(SC.H + 16, 820) + "px";
-      else if (SC.narrow && view.clientWidth > 0) view.style.height = Math.round(Math.min(720, Math.max(380, SC.H * view.clientWidth / (SC.W + 24) + 110))) + "px";
+      else if (SC.narrow && view.clientWidth > 0) view.style.height = Math.round(Math.min(760, Math.max(380, SC.H * ((view.clientWidth - 68) / SC.W) + 84))) + "px";
       else view.style.height = "";
     }
     function rebuild() {
       hideTip(); clearHover();
-      SC = buildScene(); sizeView(); box.setAttribute("data-view", S.view);
-      var fl = box.querySelector(".cflt"); if (fl) fl.hidden = S.view !== "all";
+      box.setAttribute("data-view", S.view); SC = buildScene(); sizeView();
+      var fl = box.querySelector(".cflt"); if (fl) fl.hidden = !(S.view === "all" || S.view === "full");
       [].forEach.call(box.querySelectorAll(".seg button"), function (b) { var on = b.getAttribute("data-view") === S.view; b.setAttribute("aria-checked", on ? "true" : "false"); b.tabIndex = on ? 0 : -1; });
       buildRail(); headers(); render();
       if (S.sel && !nodeEl[S.sel]) S.sel = null;
       lastW = view.clientWidth; fit(); applyAll();
     }
     function setView(v, o) {
-      o = o || {}; S.view = v;
+      o = o || {}; S.view = v; if (S.focus) { S.focus = false; box.classList.remove("is-focus"); fv.hidden = true; closePop(); }
       if (o.chain != null) S.chain = o.chain; if (o.topic) S.topic = o.topic;
       S.sel = o.sel || null; rebuild();
       if (o.sel && nodeEl[o.sel]) choose(o.sel, true);
@@ -1158,8 +1753,15 @@ SCRIPT = r"""
     });
     function sel2(name, key, num) { var s = box.querySelector('select[name="' + name + '"]'); if (s) s.addEventListener("change", function () { F[key] = num ? +s.value : s.value; applyAll(); }); }
     sel2("region", "region"); sel2("conf", "conf", true); sel2("order", "order", true); sel2("status", "status");
-    var bar0 = box.querySelector(".cbar");
-    if (bar0) { bar0.addEventListener("pointerdown", function (ev) { ev.stopPropagation(); }); bar0.addEventListener("click", function () { panel.scrollIntoView({ block: "start", behavior: "smooth" }); }); }
+    /* currency lens + predicted-ghosts toggle */
+    [].forEach.call(box.querySelectorAll(".lens button"), function (b) {
+      b.addEventListener("click", function () {
+        S.lens = b.getAttribute("data-lens") || "";
+        [].forEach.call(box.querySelectorAll(".lens button"), function (x) { x.setAttribute("aria-checked", x === b ? "true" : "false"); });
+        lastLK = ""; applyAll();
+      });
+    });
+    var ptog = box.querySelector(".ptog input"); if (ptog) ptog.addEventListener("change", function () { S.showPred = ptog.checked; placeFutures(box2().w / vb.w); });
     var cl = box.querySelector(".cclear");
     if (cl) cl.addEventListener("click", function () {
       F.hideDom = {}; F.region = ""; F.conf = 1; F.order = 3; F.status = "";
@@ -1213,6 +1815,133 @@ def _http(u):
     return u if re.match(r"^https?://[^\s]+$", u, re.I) and len(u) < 600 else ""
 
 
+def _lst(v, n=5, ln=260):
+    """List of clean strings (accepts a single string too)."""
+    if isinstance(v, str):
+        v = [v]
+    out = []
+    for x in v if isinstance(v, list) else []:
+        if isinstance(x, dict):
+            x = " ".join(str(x.get(k)) for k in ("label", "name", "title", "text", "why", "detail") if x.get(k))
+        t = _txt(x, ln)
+        if t:
+            out.append(t)
+    return out[:n]
+
+
+def _str_any(v, ln=400):
+    """A string from a string or list-of-strings field (e.g. seen_before)."""
+    if isinstance(v, list):
+        return _txt("; ".join(_txt(x, 200) for x in v if x and not isinstance(x, (dict, list))), ln)
+    return _txt(v, ln)
+
+
+_ODDS = ("low", "medium", "high")
+_CURS = ("INR", "CAD", "USD")
+
+
+def _clean_card(c):
+    """Story card of a hub node (every field optional). Returns None when there is nothing usable."""
+    if not isinstance(c, dict):
+        return None
+    fy = c.get("for_you") if isinstance(c.get("for_you"), dict) else {}
+    fy2 = {}
+    alias = {"india": "India", "us": "US", "usa": "US", "united states": "US", "canada": "Canada"}
+    for kk, vv in fy.items():
+        K = alias.get(str(kk).strip().lower())
+        if K and _txt(vv, 240):
+            fy2[K] = _txt(vv, 240)
+    cur = c.get("currency") if isinstance(c.get("currency"), dict) else {}
+    cur2 = {}
+    for k, v in cur.items():
+        K = str(k).strip().upper()
+        if K not in _CURS:
+            continue
+        if isinstance(v, str):
+            v = {"why": v}
+        if not isinstance(v, dict):
+            continue
+        d = _txt(v.get("dir") or v.get("direction"), 10).lower()
+        d = {"up": "stronger", "down": "weaker", "strengthen": "stronger", "strengthens": "stronger", "weaken": "weaker", "weakens": "weaker", "stable": "flat", "steady": "flat"}.get(d, d)
+        cur2[K] = {"dir": d if d in ("stronger", "weaker", "flat") else "flat", "why": _txt(v.get("why"), 220)}
+    preds = []
+    for p in c.get("predictions") if isinstance(c.get("predictions"), list) else []:
+        if not isinstance(p, dict):
+            continue
+        odds = _txt(p.get("odds"), 10).lower()
+        q = {"if": _txt(p.get("if"), 200), "then": _txt(p.get("then"), 200), "odds": odds if odds in _ODDS else "",
+             "hz": _txt(p.get("horizon"), 40), "why": _txt(p.get("reasoning"), 360), "watch": _txt(p.get("watch"), 220),
+             "wrong": _txt(p.get("wrong_if"), 220)}
+        if q["then"] or q["if"]:
+            preds.append(q)
+    h = c.get("history") if isinstance(c.get("history"), dict) else {}
+    hist = {}
+    if h.get("days_running") is not None or h.get("days") is not None:
+        hist["days"] = _int(h.get("days_running", h.get("days")), 0, 9999, 0)
+    if h.get("stories") is not None:
+        hist["stories"] = _int(h.get("stories"), 0, 9999, 0)
+    if _str_any(h.get("seen_before")):
+        hist["seen"] = _str_any(h.get("seen_before"), 320)
+    pat = c.get("pattern")
+    out = {"hl": _txt(c.get("headline"), 240), "pts": [_txt(x, 320) for x in (c.get("points") if isinstance(c.get("points"), list) else [])[:5]], "light": bool(c.get("light")), "fy": fy2, "cur": cur2, "pred": preds[:4],
+           "ag": _lst(c.get("against"), 4, 280), "pat": _str_any(pat, 600), "hist": hist}
+    return out if (out["hl"] or any(out["pts"]) or out["pred"] or out["cur"] or out["fy"]) else None
+
+
+def _clean_hist(h):
+    """Archive stats of a node (every field optional)."""
+    if not isinstance(h, dict):
+        return None
+    out = {}
+    for k in ("days_running", "stories", "last7", "prev7"):
+        if h.get(k) is not None:
+            out[k] = _int(h.get(k), 0, 99999, 0)
+    t = _txt(h.get("trend"), 12).lower()
+    if t in ("heating", "cooling", "steady", "new", "unknown"):
+        out["trend"] = t
+    for k, kk, n in (("first_seen", "first", 20), ("note", "note", 320)):
+        if _txt(h.get(k), n):
+            out[kk] = _txt(h.get(k), n)
+    hr = _num(h.get("hit_rate"))
+    if hr is not None:
+        out["hit"] = round(hr, 2)
+    past = []
+    for p in h.get("past_predictions") if isinstance(h.get("past_predictions"), list) else []:
+        if isinstance(p, dict) and (p.get("if") or p.get("then")):
+            past.append({"if": _txt(p.get("if"), 160), "then": _txt(p.get("then"), 160), "st": _txt(p.get("status"), 20).lower(),
+                         "ev": _txt(p.get("evidence"), 200)})
+    if past:
+        out["past"] = past[:3]
+    return out or None
+
+
+def _clean_market(graph):
+    out = []
+    m = graph.get("market") if isinstance(graph, dict) else None
+    for x in m if isinstance(m, list) else []:
+        if isinstance(x, dict) and _txt(x.get("label"), 40):
+            out.append({"l": _txt(x.get("label"), 40), "p": _txt(x.get("price"), 24), "c": _txt(x.get("change"), 24), "cp": _num(x.get("change_pct"))})
+    return out[:30]
+
+
+def _clean_ecard(c):
+    if not isinstance(c, dict):
+        return None
+    out = {"steps": _lst(c.get("steps"), 6, 120), "ev": _txt(c.get("evidence"), 420), "wk": _str_any(c.get("weaken"), 360),
+           "nx": _str_any(c.get("next"), 360), "seen": _str_any(c.get("seen_before"), 320)}
+    return out if any(out.values()) else None
+
+
+def _clean_patterns(graph):
+    pt = graph.get("patterns") if isinstance(graph, dict) and isinstance(graph.get("patterns"), dict) else {}
+    out = {}
+    for k in ("heating", "cooling"):
+        v = _lst(pt.get(k), 6, 200)
+        if v:
+            out[k] = v
+    return out
+
+
 def _clean_graph(graph):
     """Defensive normalisation: any malformed input yields (nodes, edges) lists, never raises."""
     if not isinstance(graph, dict):
@@ -1259,7 +1988,7 @@ def _clean_graph(graph):
             "id": nid, "label": _txt(n.get("label"), 80) or nid, "type": t if t in TYPES else "event",
             "dom": dom, "di": di, "region": _txt(n.get("region"), 24), "detail": _txt(n.get("detail"), 500),
             "why": _txt(n.get("why_it_matters"), 400), "dir": d if d in ("up", "down", "flat") else "none",
-            "src": src[:6], "mkt": mkt, "thr": thr})
+            "src": src[:6], "mkt": mkt, "thr": thr, "card": _clean_card(n.get("card")), "hist": _clean_hist(n.get("history"))})
     edges, es = [], set()
     ids = {n["id"] for n in nodes}
     for e in raw_edges if isinstance(raw_edges, list) else []:
@@ -1277,7 +2006,8 @@ def _clean_graph(graph):
         edges.append({
             "from": f, "to": t, "label": _txt(e.get("label"), 140), "effect": eff if eff in ("up", "down", "mixed") else "none",
             "strength": _int(e.get("strength"), 1, 3, 1), "conf": conf if conf in _CONF else "", "status": "predicted" if stat == "predicted" else "reported",
-            "order": _int(e.get("order"), 1, 3, 1), "kind": kind, "why": _txt(e.get("why"), 300), "lag": _txt(e.get("lag"), 40)})
+            "order": _int(e.get("order"), 1, 3, 1), "kind": kind, "why": _txt(e.get("why"), 300), "lag": _txt(e.get("lag"), 40),
+            "card": _clean_ecard(e.get("card"))})
     if len(nodes) > MAX_NODES:
         deg = {}
         for e in edges:
@@ -1481,7 +2211,7 @@ def _seg_cross(a, b, c, d):
     return o(a, b, c) * o(a, b, d) < 0 and o(c, d, a) * o(c, d, b) < 0
 
 
-def _flow_layout(nodes, edges, lane_of, cap=3, layers=None, ghosts=(), ghost_cap=5, row_h=ROW_H, col_w=COL_W, gutter=GUTTER, tail=LANE_TAIL):
+def _flow_layout(nodes, edges, lane_of, cap=3, layers=None, ghosts=(), ghost_cap=5, row_h=ROW_H, col_w=COL_W, gutter=GUTTER, tail=LANE_TAIL, min_h=0):
     """Columns = causal depth (causes left, outcomes right); rows = topic lanes; inside a lane the
     nodes of one column stack in slots ordered by barycentre sweeps to cut crossings. A column
     holding more than `cap` nodes of one lane splits into sub-columns to its left, so lanes stay short.
@@ -1545,7 +2275,7 @@ def _flow_layout(nodes, edges, lane_of, cap=3, layers=None, ghosts=(), ghost_cap
     for i in ids:
         groups.setdefault((lane[i], col[i]), []).append(i)
     R = {l: max([len(g) for (ln, c), g in groups.items() if ln == l] or [1]) for l in best}
-    heights = {l: SLOT_PAD + (R[l] - 1) * row_h + tail for l in best}
+    heights = {l: max(min_h, SLOT_PAD + (R[l] - 1) * row_h + tail) for l in best}
     tops, y = {}, PAD_TOP
     for l in best:
         tops[l] = y
@@ -1615,6 +2345,240 @@ def _flow_layout(nodes, edges, lane_of, cap=3, layers=None, ghosts=(), ghost_cap
     W = X0 + (ncol - 1) * col_w + 66
     lanes = [(l, tops[l], heights[l]) for l in best]
     return {"pos": pos, "lanes": lanes, "W": W, "H": H, "col": col, "layer": L, "crossings": bestn}
+
+
+# ---------------------------------------------------------------- "Full map": the first detailed layout (ported)
+
+OROW_H = 70
+OLANE_GAP = 8
+OPAD_X = 120
+OPAD_Y = 8
+
+SAME_DX = 108   # min x distance between linked nodes in one lane (labels need room)
+CROSS_DX = 48   # min x distance between linked nodes in different lanes (link runs diagonally)
+MIN_ROW_DX = 106  # nodes of one lane row never closer than this
+
+
+def _old_layout(nodes, edges):
+    """Swim-lane layout. x = causal depth (weighted longest path, left to right), lane = domain
+    (ordered to shorten cross-lane links), rows inside a lane packed so labels never overlap.
+    Returns pos {id: (x, y)}, lanes [(lane, top, height)], width, height, xs."""
+    ids = [n["id"] for n in nodes]
+    order_ix = {i: k for k, i in enumerate(ids)}
+    lane = {n["id"]: _lane_of(n) for n in nodes}
+    succ = {i: [] for i in ids}
+    for e in edges:
+        if e["kind"] == "causal":
+            succ[e["from"]].append(e["to"])
+    indeg = {i: 0 for i in ids}
+    deg = {i: 0 for i in ids}
+    for e in edges:
+        indeg[e["to"]] += 1
+        deg[e["from"]] += 1
+        deg[e["to"]] += 1
+    nbr0 = {i: [] for i in ids}
+    for e in edges:
+        nbr0[e["from"]].append(e["to"])
+        nbr0[e["to"]].append(e["from"])
+    state, fwd = {}, []
+
+    def dfs(u):
+        state[u] = 1
+        for v in succ[u]:
+            if state.get(v) == 1:
+                continue
+            fwd.append((u, v))
+            if v not in state:
+                dfs(v)
+        state[u] = 2
+
+    for i in sorted(ids, key=lambda k: (indeg[k], -deg[k], order_ix[k])):
+        if i not in state:
+            dfs(i)
+    fwd = list(dict.fromkeys(fwd))
+    preds = {i: [] for i in ids}
+    fsucc = {i: [] for i in ids}
+    for u, v in fwd:
+        preds[v].append(u)
+        fsucc[u].append(v)
+
+    def wdx(a, b):
+        return SAME_DX if lane[a] == lane[b] else CROSS_DX
+
+    xs = {}
+
+    def px(i):
+        if i not in xs:
+            xs[i] = 0 if not preds[i] else max(px(p) + wdx(p, i) for p in preds[i])
+        return xs[i]
+
+    for i in ids:
+        px(i)
+    for _ in range(2):  # pull sources next to their first consumer so links stay short
+        for i in ids:
+            if not preds[i] and fsucc[i]:
+                xs[i] = max(xs[i], min(xs[s] - wdx(i, s) for s in fsucc[i]))
+
+    for _ in range(10):  # slide nodes toward the median of their neighbours inside their legal interval
+        for i in sorted(ids, key=lambda k: (xs[k], order_ix[k])):
+            lo = max([xs[p] + wdx(p, i) for p in preds[i]] or [-10 ** 6])
+            hi = min([xs[q] - wdx(i, q) for q in fsucc[i]] or [10 ** 6])
+            nb = sorted(xs[j] for j in nbr0[i])
+            if not nb or lo > hi:
+                continue
+            med = nb[len(nb) // 2] if len(nb) % 2 else (nb[len(nb) // 2 - 1] + nb[len(nb) // 2]) / 2
+            xs[i] = min(max(med, lo), hi)
+    mn = min(xs.values())
+    for i in ids:
+        xs[i] -= mn
+
+    used = sorted(set(lane.values()))
+    wt = {}
+    for e in edges:
+        a, b = lane[e["from"]], lane[e["to"]]
+        if a != b:
+            k = (min(a, b), max(a, b))
+            wt[k] = wt.get(k, 0) + e["strength"] + (0.5 if e["kind"] == "causal" else 0)
+    best, bestc = tuple(used), None
+    if len(used) > 1:
+        for perm in itertools.permutations(used):
+            pos = {l: k for k, l in enumerate(perm)}
+            c = sum(w * abs(pos[a] - pos[b]) for (a, b), w in wt.items())
+            if bestc is None or c < bestc - 1e-9:
+                best, bestc = perm, c
+    lane_pos = {l: k for k, l in enumerate(best)}
+    nbr = {i: [] for i in ids}
+    for e in edges:
+        nbr[e["from"]].append(e["to"])
+        nbr[e["to"]].append(e["from"])
+
+    # row packing inside each lane
+    row = {}
+    nrows = {}
+    for l in best:
+        members = sorted([i for i in ids if lane[i] == l], key=lambda i: (xs[i], order_ix[i]))
+        for pass_no in (1, 2):
+            placed = {}
+            R = nrows.get(l, 1)
+            for i in members:
+                if pass_no == 1:
+                    scan = range(0, 50)
+                else:
+                    pref = sum(lane_pos[lane[j]] - lane_pos[l] for j in nbr[i] if lane[j] != l)
+                    scan = range(R - 1, -1, -1) if pref > 0 else range(0, R)
+                for r in scan:
+                    if all(abs(xs[j] - xs[i]) >= MIN_ROW_DX for j in placed.get(r, [])):
+                        placed.setdefault(r, []).append(i)
+                        row[i] = r
+                        break
+            if pass_no == 1:
+                nrows[l] = (max(row[i] for i in members) + 1) if members else 1
+        used_rows = sorted({row[i] for i in members})
+        remap = {r: k for k, r in enumerate(used_rows)}
+        for i in members:
+            row[i] = remap[row[i]]
+        nrows[l] = max(1, len(used_rows))
+    heights = {l: 26 + (nrows[l] - 1) * OROW_H + 62 for l in best}
+    tops, y = {}, OPAD_Y
+    for l in best:
+        tops[l] = y
+        y += heights[l] + OLANE_GAP
+    H = y - OLANE_GAP + OPAD_Y
+    X0 = OPAD_X + 40
+    pos = {i: (X0 + xs[i], tops[lane[i]] + 26 + row[i] * OROW_H) for i in ids}
+    W = X0 + max(xs.values()) + 56
+    lanes = [(l, tops[l], heights[l]) for l in best]
+    return pos, lanes, W, H, {i: pos[i][0] for i in ids}
+
+
+def _full_layout(nodes, edges):
+    """The first detailed layout with roomier columns so every node name and arrow label has space."""
+    global SAME_DX, CROSS_DX, MIN_ROW_DX
+    old = (SAME_DX, CROSS_DX, MIN_ROW_DX)
+    SAME_DX, CROSS_DX, MIN_ROW_DX = 190, 110, 120
+    try:
+        return _old_layout(nodes, edges)
+    finally:
+        SAME_DX, CROSS_DX, MIN_ROW_DX = old
+
+
+def _old_route(edges, nodes_by_id, pos, layer):
+    """Return per-edge dict(pts=[P0,C1,C2,P3], mode). Modes: fwd (side to side), down (side to top),
+    up (top to side), side (loop around the right edge for same-column links), top (arched loop)."""
+    ports = {"fo": {}, "fi": {}, "to": {}, "ti": {}}
+    modes = []
+    for i, e in enumerate(edges):
+        a, b = e["from"], e["to"]
+        dx = layer[b] - layer[a]
+        dy = pos[b][1] - pos[a][1]
+        if e["kind"] == "feedback" or dx < -4:
+            mode, o, d = "top", "to", "ti"
+        elif dx < 30:
+            mode, o, d = "side", "fo", "fi"
+        elif dx < 118 and dy > 46:
+            mode, o, d = "down", "fo", "ti"
+        elif dx < 118 and dy < -46:
+            mode, o, d = "up", "to", "fi"
+        else:
+            mode, o, d = "fwd", "fo", "fi"
+        modes.append(mode)
+        ports[o].setdefault(a, []).append(i)
+        ports[d].setdefault(b, []).append(i)
+    off = {}
+    for tag, dd in ports.items():
+        for nid, lst in dd.items():
+            far = "to" if tag in ("fo", "to") else "from"
+            if tag in ("ti", "to"):
+                lst.sort(key=lambda i: (pos[edges[i][far]][0], i))
+            else:
+                lst.sort(key=lambda i: (pos[edges[i][far]][1], i))
+            for k, i in enumerate(lst):
+                off[(i, tag)] = _spread(k, len(lst), 7)
+    routes = []
+    for i, e in enumerate(edges):
+        a, b = e["from"], e["to"]
+        (x1, y1), (x2, y2) = pos[a], pos[b]
+        hw1, hh1 = _EXT[nodes_by_id[a]["type"]]
+        hw2, hh2 = _EXT[nodes_by_id[b]["type"]]
+        mode = modes[i]
+        right = (x1 + hw1 + 1, y1 + off.get((i, "fo"), 0))
+        left = (x2 - hw2 - 2, y2 + off.get((i, "fi"), 0))
+        if mode == "fwd":
+            dx = max(36, (left[0] - right[0]) * 0.45)
+            pts = [right, (right[0] + dx, right[1]), (left[0] - dx, left[1]), left]
+        elif mode == "down":
+            p3 = (x2 + off.get((i, "ti"), 0), y2 - hh2 - 3)
+            k = max(30, (p3[1] - right[1]) * 0.45)
+            pts = [right, (right[0] + max(24, (p3[0] - right[0]) * 0.7), right[1]), (p3[0], p3[1] - k), p3]
+        elif mode == "up":
+            p0 = (x1 + off.get((i, "to"), 0), y1 - hh1 - 1)
+            k = max(30, (p0[1] - left[1]) * 0.45)
+            pts = [p0, (p0[0], p0[1] - k), (left[0] - max(24, (left[0] - p0[0]) * 0.7), left[1]), left]
+        elif mode == "side":
+            p3 = (x2 + hw2 + 2, y2 + off.get((i, "fi"), 0))
+            bulge = 54 + 0.12 * abs(y2 - y1)
+            pts = [right, (right[0] + bulge, right[1]), (p3[0] + bulge, p3[1]), p3]
+        else:
+            p0 = (x1 + off.get((i, "to"), 0), y1 - hh1 - 1)
+            p3 = (x2 + off.get((i, "ti"), 0), y2 - hh2 - 3)
+            up = min(p0[1], p3[1]) - 44 - min(0.1 * abs(x2 - x1), 30)
+            sg = 6 if x2 >= x1 else -6
+            pts = [p0, (p0[0] - sg, up), (p3[0] + sg, up), p3]
+        routes.append({"pts": pts, "mode": mode})
+    return routes
+
+
+# ---------------------------------------------------------------- legend
+
+_SHP = {
+    "event": '<circle cx="8" cy="8" r="6"/>',
+    "country": '<path d="M8 1.5 L14.5 8 L8 14.5 L1.5 8Z"/>',
+    "company": '<rect x="2.5" y="2.5" width="11" height="11" rx="2"/>',
+    "sector": '<polygon points="14.5,8 11.2,13.7 4.8,13.7 1.5,8 4.8,2.3 11.2,2.3"/>',
+    "commodity": '<rect x="0.8" y="3.5" width="14.4" height="9" rx="4.5"/>',
+    "index": '<path d="M8 1.8 L14.6 13.5 L1.4 13.5Z"/>',
+    "institution": '<path d="M8 1.5 L14.2 6 L14.2 13.5 L1.8 13.5 L1.8 6Z"/>',
+}
 
 
 # ---------------------------------------------------------------- edge routing around nodes
@@ -1867,8 +2831,13 @@ def _connection_map(graph, note=""):
     lane_of = {n["id"]: _lane_of(n) for n in nodes}
 
     # everything: layered layout with topic rows
-    res = _pick_layout(nodes, edges, lane_of, (2, 3, 4, 5), 1000, 860, row_h=96, col_w=132, gutter=140, tail=72)
-    lay = {"all": _scene_json(res, _route_edges(range(len(edges)), edges, res["pos"], byid), (), True, cw=132, gut=140)}
+    res = _pick_layout(nodes, edges, lane_of, (2, 3, 4, 5), 1000, 860, row_h=100, col_w=132, gutter=190, tail=76, min_h=150)
+    lay = {"all": _scene_json(res, _route_edges(range(len(edges)), edges, res["pos"], byid), (), True, cw=132, gut=190)}
+    # "Full map": the first detailed layout (wide topic lanes, a name on every node, labelled arrows)
+    fpos, flanes, fW, fH, flayer = _full_layout(nodes, edges)
+    froutes = _old_route(edges, byid, fpos, flayer)
+    lay["full"] = _scene_json({"W": fW, "H": fH, "pos": fpos, "lanes": flanes},
+                              {k: [round(c, 1) for pt in r["pts"] for c in pt] for k, r in enumerate(froutes)}, (), True, cw=150, gut=OPAD_X + 10)
     # phone variants (key ":m"): chosen for a tall, narrow viewport so the whole map fits at a readable scale
     resm = _pick_layout(nodes, edges, lane_of, (2, 3, 4, 5, 6, 8), 366, 720, row_h=90, col_w=150, gutter=215, tail=82)
     lay["all:m"] = _scene_json(resm, _route_edges(range(len(edges)), edges, resm["pos"], byid), (), True, cw=150, gut=215)
@@ -1912,11 +2881,22 @@ def _connection_map(graph, note=""):
             jn[n["id"]]["mkt"] = n["mkt"]
         if n["thr"]:
             jn[n["id"]]["thr"] = n["thr"]
+        if n.get("card"):
+            jn[n["id"]]["c"] = n["card"]
+        if n.get("hist"):
+            jn[n["id"]]["h"] = n["hist"]
     hub = max(nodes, key=lambda n: (deg[n["id"]], -order_ix[n["id"]]))["id"]
+    ltop = {}
+    for l, mem in members_by.items():
+        top = max(mem, key=lambda n: (deg[n["id"]], -order_ix[n["id"]]))
+        t = (top.get("card") or {}).get("hl") or top["detail"] or top["why"] or ""
+        first = re.split(r"(?<=[.!?])\s", t)[0].strip()
+        if first:
+            ltop[str(l if l < 7 else -1)] = (first if len(first) <= 62 else first[:60].rsplit(" ", 1)[0] + "\u2026")
     je = [{"f": e["from"], "t": e["to"], "label": e["label"], "effect": e["effect"], "s": e["strength"], "conf": e["conf"],
-           "status": e["status"], "order": e["order"], "kind": e["kind"], "why": e["why"], "lag": e["lag"]} for e in edges]
+           "status": e["status"], "order": e["order"], "kind": e["kind"], "why": e["why"], "lag": e["lag"], **({"c": e["card"]} if e.get("card") else {})} for e in edges]
     payload = {"uid": uid, "nodes": jn, "edges": je, "chains": chains, "topics": topics, "lay": lay, "hub": hub,
-               "typeLabel": TYPE_LABEL, "short": SHORT, "doms": DOMAINS,
+               "typeLabel": TYPE_LABEL, "short": SHORT, "doms": DOMAINS, "pat": _clean_patterns(graph), "mk": _clean_market(graph), "ltop": ltop,
                "shapes": {t: _shape_path(t) for t in TYPES}, "ext": {t: list(_EXT[t]) for t in TYPES}}
 
     defs = ['<defs>']
@@ -1952,7 +2932,8 @@ def _connection_map(graph, note=""):
     seg = ('<div class="seg" role="radiogroup" aria-label="Map view">'
            '<button type="button" role="radio" aria-checked="true" data-view="chains">Key chains</button>'
            '<button type="button" role="radio" aria-checked="false" data-view="topic">By topic</button>'
-           '<button type="button" role="radio" aria-checked="false" data-view="all">Everything</button></div>')
+           '<button type="button" role="radio" aria-checked="false" data-view="all">Everything</button>'
+           '<button type="button" role="radio" aria-checked="false" data-view="full">Full map</button></div>')
     search = ''
     if len(nodes) >= 4:
         search = (f'<div class="csw"><input class="csearch" type="search" role="combobox" aria-expanded="false" aria-controls="sres{uid}" '
@@ -1964,14 +2945,20 @@ def _connection_map(graph, note=""):
     nos = ""
     if chains:
         nos = ('<noscript><ol class="nos">' + "".join(f'<li>{_e(c["title"])}: {_e(c["sum"])}</li>' for c in chains) + "</ol></noscript>")
+    tools = ('<div class="mtools"><div class="lens" role="radiogroup" aria-label="Currency lens: dim everything except what touches one currency">'
+             '<span class="lbl">Currency lens</span><button type="button" role="radio" aria-checked="true" data-lens="">All</button>'
+             '<button type="button" role="radio" aria-checked="false" data-lens="INR" title="Indian rupee">INR</button>'
+             '<button type="button" role="radio" aria-checked="false" data-lens="CAD" title="Canadian dollar">CAD</button>'
+             '<button type="button" role="radio" aria-checked="false" data-lens="USD" title="US dollar">USD</button></div>'
+             '<label class="ptog"><input type="checkbox" checked> Show predictions</label></div>')
     note_html = f'<p class="vnote">{_e(note)}</p>' if note else ""
     return (f'<h4>How the news moves markets, step by step</h4><p class="vnote">Each arrow is one cause-and-effect step. Green raises, red lowers.</p>{note_html}<div class="cmapwrap">'
             f'<div class="cmap" id="cmap{uid}" data-view="chains"><div class="ctop">{seg}{search}</div>{filters}{nos}<div class="cbody">'
             f'<nav class="crail" aria-label="Chooser"></nav>'
-            f'<div class="cmain"><div class="mhead"><div class="mt"></div><div class="mh"></div></div>'
+            f'<div class="cmain"><div class="mhead"><div class="mt"></div><div class="mh"></div>{tools}</div>'
             f'<div class="cview" tabindex="0" aria-label="Map area. Plus and minus zoom, zero fits, arrow keys pan, Tab moves between nodes.">{svg}{zoom}'
-            f'<div class="chint">Drag to pan, scroll or pinch to zoom</div><button type="button" class="cbar" hidden></button><div class="ctip" aria-hidden="true"></div></div></div>'
-            f'<div class="cpanel" aria-live="polite"></div></div>{_legend(types_used, {e["kind"]: True for e in edges})}'
+            f'<div class="ctip" aria-hidden="true"></div></div><div class="chint">Drag to pan, scroll or pinch to zoom</div></div></div>'
+            f'<section class="fview" aria-label="Focus view" hidden></section><div class="pop" role="dialog" aria-label="Details" hidden></div><div class="sronly" aria-live="polite"></div>{_legend(types_used, {e["kind"]: True for e in edges})}'
             f'<script type="application/json" class="cdata">{_json_embed(payload)}</script></div></div>')
 
 # ---------------------------------------------------------------- scenario tree
