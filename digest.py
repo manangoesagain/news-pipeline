@@ -606,7 +606,7 @@ def build_intelligence(stories, articles_today, snapshot):
         themes = "; ".join(c.get("title", "") for c in (result.get("causal_chains") or []) if isinstance(c, dict))[:600]
         gres = llm.generate_json(GRAPH_PROMPT.format(lines=lines, market=mkt, today=NOW.strftime("%A, %B %d, %Y"),
                                                      themes=themes or "n/a", domains="; ".join(DOMAIN_ORDER)),
-                                 label="GRAPH", require="graph", temperature=0.3, budget_s=360, per_model_s=130)
+                                 label="GRAPH", require="graph", temperature=0.3, budget_s=400, per_model_s=200)
         g = sanitize_graph((gres or {}).get("graph"))
     except Exception as e:
         print(f"[INTEL] graph validation error: {e}")
@@ -777,7 +777,7 @@ def add_focus_cards(g, snapshot, themes=""):
         mkt = "\n".join(f"{m['label']}: {m['price']} {m['change']}" for m in g.get("market", [])) or "n/a"
         res = llm.generate_json(CARDS_PROMPT.format(today=NOW.strftime("%A, %B %d, %Y"), market=mkt, nodes=nodes_txt,
                                                     links=links_txt, hub_ids=", ".join(hubs), link_keys=", ".join(keys)),
-                                label="CARDS", require="cards", temperature=0.3, budget_s=330, per_model_s=170)
+                                label="CARDS", require="cards", temperature=0.3, budget_s=360, per_model_s=180)
         kept = sanitize_cards(res, g, hubs)
         print(f"[CARDS] {kept} of {len(hubs)} focus cards kept")
     except Exception as e:
