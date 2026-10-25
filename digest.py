@@ -25,8 +25,10 @@ import feedparser
 import requests
 
 import archive
+import graph_image
 import llm
 import market
+import patterns
 
 # --- Secrets from GitHub Actions env ---
 BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
@@ -558,9 +560,14 @@ Today is {today}. Write an analytical brief grounded ONLY in these headlines and
   "second_order": [{{"event": "headline-level fact", "effect": "non-obvious knock-on effect", "who_is_affected": "..."}}],
   "scenarios": [{{"if": "trigger to watch in the next 1-2 weeks", "then": "likely consequence", "likelihood": "low|medium|high", "signpost": "what would confirm it"}}],
   "contrarian": [{{"signal": "evidence in today's news", "mainstream_view": "what most coverage assumes", "why_it_matters": "..."}}],
-  "bottom_line": "two sentences on what matters most tonight"
+  "bottom_line": "two sentences on what matters most tonight",
+  "graph": {{
+    "nodes": [{{"id": "n1", "label": "short name, max 28 chars", "type": "event|company|country|sector|market", "domain": "one of: {domains}, or empty"}}],
+    "edges": [{{"from": "n1", "to": "n2", "label": "verb phrase, max 24 chars", "strength": 1}}]
+  }}
 }}
 Give 3-4 causal chains, 3-5 second-order effects, 3-4 scenarios and 2-3 contrarian signals.
+For "graph": a connection map of tonight's news. 8-14 nodes and 8-20 edges. Each edge is a cause->effect arrow (from causes to), and most edges should link nodes from DIFFERENT domains. Use only facts from the headlines above; strength 3 = directly reported link, 2 = strong inference, 1 = plausible spillover. Every edge endpoint must be a node id; ids are n1, n2, ...
 """
 
 
@@ -572,11 +579,101 @@ def build_intelligence(stories, articles_today, snapshot):
     rows += [(a.get("domain", ""), a.get("region", ""), a.get("source", ""), a["title"]) for a in extra[:220]]
     lines = "\n".join(f"{i} | {d} | {r} | {src} | {t}" for i, (d, r, src, t) in enumerate(rows))
     mkt = "\n".join(f"{m['label']}: {market.fmt_price(m)} {market.fmt_change(m)}" for m in snapshot) or "n/a"
-    result = llm.generate_json(INTEL_PROMPT.format(lines=lines, market=mkt, today=NOW.strftime("%A, %B %d, %Y")), label="INTEL", require="causal_chains",
+    result = llm.generate_json(INTEL_PROMPT.format(lines=lines, market=mkt, today=NOW.strftime("%A, %B %d, %Y"),
+                                                       domains="; ".join(DOMAIN_ORDER)), label="INTEL", require="causal_chains",
                               temperature=0.4, budget_s=300)
     if not result or not any(result.get(k) for k in ("causal_chains", "scenarios", "second_order")):
         return None
+    try:
+        g = sanitize_graph(result.get("graph"))
+    except Exception as e:
+        print(f"[INTEL] graph validation error: {e}")
+        g = None
+    if g:
+        result["graph"] = g
+    else:
+        result.pop("graph", None)
+        print("[INTEL] no valid graph in reply")
     return result
+
+
+GRAPH_NODE_TYPES = {"event", "company", "country", "sector", "market"}
+
+
+def sanitize_graph(g):
+    """Validate LLM graph data. Returns a clean {"nodes","edges"} dict or None."""
+    if not isinstance(g, dict):
+        return None
+    nodes, ids = [], set()
+    for n in g.get("nodes") or []:
+        if not isinstance(n, dict):
+            continue
+        nid = str(n.get("id") or "").strip()
+        label = re.sub(r"\s+", " ", str(n.get("label") or "")).strip()
+        if not nid or not label or nid in ids:
+            continue
+        label = truncate(label, 28) if len(label) > 28 else label
+        ntype = str(n.get("type") or "").strip().lower()
+        if ntype not in GRAPH_NODE_TYPES:
+            ntype = "event"
+        domain = str(n.get("domain") or "").strip()
+        if domain not in DOMAIN_ORDER:
+            domain = ""
+        ids.add(nid)
+        nodes.append({"id": nid, "label": label, "type": ntype, "domain": domain})
+    nodes = nodes[:14]
+    ids = {n["id"] for n in nodes}
+    edges, seen = [], set()
+    for e in g.get("edges") or []:
+        if not isinstance(e, dict):
+            continue
+        a, b = str(e.get("from") or "").strip(), str(e.get("to") or "").strip()
+        if a not in ids or b not in ids or a == b or (a, b) in seen:
+            continue
+        label = re.sub(r"\s+", " ", str(e.get("label") or "")).strip()
+        label = truncate(label, 24) if len(label) > 24 else label
+        try:
+            strength = min(3, max(1, int(round(float(e.get("strength", 2))))))
+        except (TypeError, ValueError):
+            strength = 2
+        seen.add((a, b))
+        edges.append({"from": a, "to": b, "label": label, "strength": strength})
+    edges = edges[:20]
+    used = {x for e in edges for x in (e["from"], e["to"])}
+    nodes = [n for n in nodes if n["id"] in used]  # drop orphans
+    if len(nodes) < 4 or len(edges) < 3:
+        return None
+    return {"nodes": nodes, "edges": edges}
+
+
+def build_fallback_graph(stories, thread_store):
+    """Cheap non-AI graph: one node per cross-domain thread (2+ stories), edges between
+    threads sharing >=2 keywords. Returns {"graph":..., "source":"threads"} or None."""
+    threads = [t for t in (thread_store or {}).get("threads", [])
+               if len(t.get("stories", [])) >= 2 and len(t.get("domains", [])) >= 2]
+    threads.sort(key=lambda t: (len(t["stories"]), t.get("last_seen", "")), reverse=True)
+    threads = threads[:12]
+    if len(threads) < 2:
+        return None
+    nodes = []
+    for i, t in enumerate(threads, 1):
+        label = truncate(t["title"], 28) if len(t["title"]) > 28 else t["title"]
+        nodes.append({"id": f"n{i}", "label": label, "type": "event",
+                      "domain": t["domains"][0] if t["domains"][0] in DOMAIN_ORDER else ""})
+    edges = []
+    for i in range(len(threads)):
+        for j in range(i + 1, len(threads)):
+            shared = set(threads[i].get("keywords", [])) & set(threads[j].get("keywords", []))
+            if len(shared) >= 2:
+                edges.append({"from": f"n{i+1}", "to": f"n{j+1}",
+                              "label": truncate(", ".join(sorted(shared)[:2]), 24),
+                              "strength": 3 if len(shared) >= 4 else 2 if len(shared) == 3 else 1})
+    edges = sorted(edges, key=lambda e: -e["strength"])[:20]
+    used = {x for e in edges for x in (e["from"], e["to"])}
+    nodes = [n for n in nodes if n["id"] in used]
+    if len(nodes) < 2 or not edges:
+        return None
+    return {"graph": {"nodes": nodes, "edges": edges}, "source": "threads"}
 
 
 # ---------------------------------------------------------------- article store + state
@@ -657,7 +754,7 @@ def serialize_story(s):
     return {k: (v.isoformat() if isinstance(v, datetime) else v) for k, v in s.items()}
 
 
-def save_digest(domain_items, breaking, snapshot, intel, ranked_by):
+def save_digest(domain_items, breaking, snapshot, intel, ranked_by, intel_lite=None, extra=None):
     os.makedirs(SAVE_DIR, exist_ok=True)
     timestamp = NOW.strftime("%Y%m%d_%H%M")
     data = {
@@ -669,6 +766,10 @@ def save_digest(domain_items, breaking, snapshot, intel, ranked_by):
         "market": snapshot,
         "intelligence": intel,
     }
+    if intel_lite:
+        data["intel_lite"] = intel_lite
+    if extra:
+        data.update(extra)
     filepath = os.path.join(SAVE_DIR, f"digest_{timestamp}.json")
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
@@ -799,9 +900,20 @@ def send_telegram(message: str) -> bool:
     return ok
 
 
+def send_telegram_photo(png: bytes, caption: str) -> bool:
+    resp = requests.post(f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto",
+                         data={"chat_id": CHAT_ID, "caption": caption[:1000], "parse_mode": "HTML"},
+                         files={"photo": ("connection_map.png", png, "image/png")}, timeout=60)
+    if resp.status_code == 200:
+        print("[TELEGRAM] sent connection map")
+        return True
+    print(f"[TELEGRAM ERROR] map image: {resp.status_code}: {resp.text[:200]}")
+    return False
+
+
 # ---------------------------------------------------------------- email
 
-def send_email(subject: str, html_content: str) -> bool:
+def send_email(subject: str, html_content: str, attachments=None) -> bool:
     if not RESEND_API_KEY:
         print("[EMAIL] skipped — RESEND_API_KEY not set")
         return True
@@ -817,6 +929,8 @@ def send_email(subject: str, html_content: str) -> bool:
         "subject": subject,
         "html": html_content,
     }
+    if attachments:
+        payload["attachments"] = attachments
     resp = requests.post(url, json=payload, headers=headers, timeout=20)
     if resp.status_code == 200:
         print("[EMAIL] sent successfully")
@@ -988,13 +1102,23 @@ def main():
         since = NOW.replace(hour=0, minute=0, second=0, microsecond=0)
         intel = build_intelligence(stories, articles_since(articles, since), snapshot)
 
+    # Pattern detection + prediction scoring (all failures are non-fatal)
+    extra = {}
+    try:
+        if intel:
+            recent = [a["title"] for a in articles_since(articles, NOW - timedelta(days=3))]
+            patterns.review_predictions(NOW, llm, recent)
+            patterns.record_predictions(intel.get("scenarios") or [], NOW)
+        extra["patterns"] = patterns.detect_patterns(NOW)
+        extra["prediction_accuracy"] = patterns.accuracy_summary()
+    except Exception as e:
+        print(f"[PATTERNS ERROR] {e}")
+
     message = build_telegram(domain_items, breaking, snapshot, intel)
     email_html = build_email_html(domain_items, breaking, snapshot, intel)
     email_subject = f"📰 News Brief — {NOW.strftime('%b %d')} {NOW.strftime('%I:%M %p ET')}"
     if intel:
         email_subject += " + Intelligence Brief"
-
-    save_digest(domain_items, breaking, snapshot, intel, ranked_by)
 
     try:
         added = archive.update_archive(domain_items, breaking, NOW)
@@ -1002,18 +1126,49 @@ def main():
     except Exception as e:  # memory is a bonus; never block a delivery
         print(f"[ARCHIVE ERROR] {e}")
 
+    intel_lite = None
+    try:
+        intel_lite = build_fallback_graph(stories, load_json(archive.THREADS_FILE, {"threads": []}))
+    except Exception as e:
+        print(f"[GRAPH LITE ERROR] {e}")
+
+    save_digest(domain_items, breaking, snapshot, intel, ranked_by, intel_lite, extra)
+
+    # Static picture of the connection map for Telegram and email
+    map_png, map_note = None, ""
+    try:
+        graph = (intel or {}).get("graph") or (intel_lite or {}).get("graph")
+        if graph:
+            map_note = "Connection map" if (intel or {}).get("graph") else "Connection map (from story threads, no AI brief this run)"
+            map_png = graph_image.render_graph_png(graph, f"Connections — {NOW.strftime('%b %d, %I:%M %p ET')}")
+    except Exception as e:
+        print(f"[MAP ERROR] {e}")
+    attachments = None
+    if map_png:
+        import base64
+        attachments = [{"filename": "connection_map.png", "content": base64.b64encode(map_png).decode(),
+                        "content_id": "connmap"}]
+        block = (f'<div style="margin:16px 0"><div style="font-weight:600;margin-bottom:6px">{html.escape(map_note)}</div>'
+                 f'<img src="cid:connmap" alt="Connection map" style="max-width:100%;height:auto"></div>')
+        email_html = re.sub(r"(<body[^>]*>)", lambda m: m.group(1) + block, email_html, count=1) if "<body" in email_html else block + email_html
+
     if DRY_RUN:
         os.makedirs("preview", exist_ok=True)
         with open("preview/telegram.html", "w", encoding="utf-8") as f:
             f.write(message)
         with open("preview/email.html", "w", encoding="utf-8") as f:
             f.write(email_html)
+        if map_png:
+            with open("preview/connection_map.png", "wb") as f:
+                f.write(map_png)
         print(f"[DRY RUN] Telegram message ({len(message)} chars, {len(split_message(message))} parts) "
               f"and email written to preview/ — nothing sent")
         print(message[:3000])
     else:
         sent_tg = send_telegram(message)
-        sent_mail = send_email(email_subject, email_html)
+        if sent_tg and map_png:
+            send_telegram_photo(map_png, map_note)
+        sent_mail = send_email(email_subject, email_html, attachments)
         if not (sent_tg or sent_mail):
             print("FATAL: both deliveries failed")
             sys.exit(1)

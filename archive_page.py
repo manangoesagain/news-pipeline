@@ -7,9 +7,9 @@ PAGE = r"""<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>News Archive</title>
 <style>
-  :root { --bg:#f5f5f7; --card:#fff; --text:#1a1a1a; --muted:#666; --border:#e0e0e0; --accent:#2563eb; --chip:#eef2ff; }
+  :root { --bg:#f5f5f7; --card:#fff; --text:#1a1a1a; --muted:#666; --border:#e0e0e0; --accent:#2563eb; --chip:#eef2ff; --heat:37,99,235; --heat-ink:#fff; --lo:217,119,6; }
   @media (prefers-color-scheme: dark) {
-    :root { --bg:#0f172a; --card:#1e293b; --text:#f1f5f9; --muted:#94a3b8; --border:#334155; --accent:#60a5fa; --chip:#27354f; }
+    :root { --bg:#0f172a; --card:#1e293b; --text:#f1f5f9; --muted:#94a3b8; --border:#334155; --accent:#60a5fa; --chip:#27354f; --heat:96,165,250; --heat-ink:#0f172a; --lo:251,191,36; }
   }
   * { box-sizing:border-box; margin:0; padding:0; }
   body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--text); line-height:1.5; padding:20px; }
@@ -35,6 +35,17 @@ PAGE = r"""<!DOCTYPE html>
   .tl div { margin-bottom:8px; font-size:14px; }
   .tl .d { color:var(--muted); font-size:12px; }
   .empty { color:var(--muted); text-align:center; padding:30px 0; }
+  .tabs button:focus-visible, .hm button:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+  .hmwrap { overflow-x:auto; border:1px solid var(--border); border-radius:10px; background:var(--card); }
+  table.hm { border-collapse:collapse; width:100%; font-size:13px; min-width:340px; }
+  table.hm th { font-weight:600; color:var(--muted); padding:6px 4px; text-align:center; font-size:12px; }
+  table.hm th.rh { text-align:left; padding-left:10px; color:var(--text); min-width:96px; max-width:150px; position:sticky; left:0; background:var(--card); }
+  table.hm td { padding:3px; text-align:center; }
+  table.hm td button { width:100%; min-width:44px; height:40px; border:1px solid var(--border); border-radius:6px; font:inherit; font-variant-numeric:tabular-nums; cursor:pointer; background:transparent; color:var(--text); }
+  table.hm td button[aria-pressed="true"] { outline:2px solid var(--text); }
+  table.hm td button.zero { color:var(--muted); }
+  .hmkey { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted); margin:8px 0; flex-wrap:wrap; }
+  .hmkey .bar { width:90px; height:10px; border-radius:5px; border:1px solid var(--border); }
   h2.day { font-size:15px; margin:18px 0 8px; color:var(--muted); }
 </style>
 </head>
@@ -48,6 +59,7 @@ PAGE = r"""<!DOCTYPE html>
   <div class="tabs" role="tablist">
     <button role="tab" id="tab-browse" aria-selected="true">Browse &amp; search</button>
     <button role="tab" id="tab-threads" aria-selected="false">Story threads</button>
+    <button role="tab" id="tab-heat" aria-selected="false">Heat map</button>
   </div>
 
   <section id="browse">
@@ -57,6 +69,18 @@ PAGE = r"""<!DOCTYPE html>
       <select id="day" aria-label="Day"><option value="">All days</option></select>
     </div>
     <div id="results"></div>
+  </section>
+
+  <section id="heat" hidden>
+    <p class="meta" style="margin-bottom:12px" id="hmnote"></p>
+    <div class="row">
+      <select id="hmmode" aria-label="Heat map view">
+        <option value="cur">Last 7 days</option><option value="prev">Previous 7 days</option><option value="delta">Change vs previous</option>
+      </select>
+    </div>
+    <div class="hmwrap"><table class="hm" id="hmtable"></table></div>
+    <div class="hmkey" id="hmkey"></div>
+    <div id="hmlist"></div>
   </section>
 
   <section id="threads" hidden>
@@ -126,11 +150,61 @@ function renderThreads() {
     </div></details></div>`).join("");
 }
 
-function tab(which) {
-  $("browse").hidden = which !== "browse"; $("threads").hidden = which !== "threads";
-  $("tab-browse").setAttribute("aria-selected", which === "browse"); $("tab-threads").setAttribute("aria-selected", which === "threads");
+/* ---- heat map: domain x region, last 7 days vs the 7 before (relative to newest day loaded) ---- */
+let hmSel = null;
+function dayNum(s) { return Math.floor(Date.parse(s + "T00:00:00Z") / 864e5); }
+function renderHeat() {
+  if (!stories.length) { $("hmtable").innerHTML = ""; $("hmnote").textContent = "No stories loaded yet."; return; }
+  const maxD = Math.max(...stories.map(s => dayNum(s.day)));
+  const per = s => { const a = maxD - dayNum(s.day); return a < 7 ? "cur" : a < 14 ? "prev" : null; };
+  const doms = [...new Set(stories.map(s => s.domain || "Other"))].sort();
+  const regs = [...new Set(stories.map(s => s.region || "Other"))].sort();
+  const cnt = {}; // key -> {cur, prev, list}
+  stories.forEach(s => {
+    const p = per(s); if (!p) return;
+    const k = (s.domain || "Other") + "|" + (s.region || "Other");
+    const c = cnt[k] || (cnt[k] = { cur: 0, prev: 0, cl: [] });
+    c[p]++; if (p === "cur") c.cl.push(s);
+  });
+  const mode = $("hmmode").value;
+  const val = c => !c ? 0 : mode === "cur" ? c.cur : mode === "prev" ? c.prev : c.cur - c.prev;
+  let mx = 1;
+  doms.forEach(d => regs.forEach(r => { mx = Math.max(mx, Math.abs(val(cnt[d + "|" + r]))); }));
+  const fmt = v => mode === "delta" ? (v > 0 ? "+" + v : v < 0 ? "−" + Math.abs(v) : "0") : String(v);
+  let h = '<thead><tr><th class="rh" scope="col">Topic</th>' + regs.map(r => `<th scope="col">${esc(r)}</th>`).join("") + "</tr></thead><tbody>";
+  doms.forEach(d => {
+    h += `<tr><th class="rh" scope="row">${esc(d)}</th>`;
+    regs.forEach(r => {
+      const c = cnt[d + "|" + r], v = val(c), a = Math.abs(v) / mx;
+      const rgb = mode === "delta" && v < 0 ? "var(--lo)" : "var(--heat)";
+      const bg = v === 0 ? "transparent" : `rgba(${rgb}, ${(0.12 + 0.88 * a).toFixed(2)})`;
+      const ink = v !== 0 && a > 0.5 ? "var(--heat-ink)" : "var(--text)";
+      const label = `${d}, ${r}: ${mode === "delta" ? `${c ? c.cur : 0} now vs ${c ? c.prev : 0} before` : fmt(v) + " stories"}`;
+      h += `<td><button type="button" class="${v === 0 ? "zero" : ""}" style="background:${bg};${v ? "color:" + ink : ""}" data-k="${esc(d + "|" + r)}" aria-pressed="${hmSel === d + "|" + r}" aria-label="${esc(label)}" title="${esc(label)}">${fmt(v)}</button></td>`;
+    });
+    h += "</tr>";
+  });
+  $("hmtable").innerHTML = h + "</tbody>";
+  const lo = mode === "delta" ? `<span class="bar" style="background:linear-gradient(90deg, rgba(var(--lo),.9), transparent 50%, rgba(var(--heat),.9))"></span> fewer ← same → more` :
+    `<span class="bar" style="background:linear-gradient(90deg, rgba(var(--heat),.12), rgba(var(--heat),1))"></span> 0 → ${mx} stories`;
+  $("hmkey").innerHTML = lo;
+  const cur = stories.filter(s => per(s) === "cur").length, prev = stories.filter(s => per(s) === "prev").length;
+  $("hmnote").textContent = `Stories per topic and region. Last 7 days (to ${new Date(maxD * 864e5).toISOString().slice(0, 10)}): ${cur}; the 7 days before: ${prev}. Tap a cell to list its stories.`;
+  const sel = hmSel && cnt[hmSel];
+  $("hmlist").innerHTML = sel ? `<h2 class="day">${esc(hmSel.replace("|", " · "))} — last 7 days</h2>` + (sel.cl.map(storyHtml).join("") || '<p class="empty">None in the last 7 days.</p>') : "";
 }
-$("tab-browse").onclick = () => tab("browse"); $("tab-threads").onclick = () => tab("threads");
+$("hmtable").addEventListener("click", ev => {
+  const b = ev.target.closest("button[data-k]"); if (!b) return;
+  hmSel = hmSel === b.dataset.k ? null : b.dataset.k; renderHeat();
+  const again = document.querySelector(`button[data-k="${CSS.escape(b.dataset.k)}"]`); if (again) again.focus();
+});
+$("hmmode").addEventListener("input", renderHeat);
+
+function tab(which) {
+  ["browse", "threads", "heat"].forEach(n => { $(n).hidden = which !== n; $("tab-" + n).setAttribute("aria-selected", which === n); });
+  if (which === "heat") renderHeat();
+}
+$("tab-browse").onclick = () => tab("browse"); $("tab-threads").onclick = () => tab("threads"); $("tab-heat").onclick = () => tab("heat");
 ["q", "domain", "day"].forEach(i => $(i).addEventListener("input", renderResults));
 ["tq", "tmode"].forEach(i => $(i).addEventListener("input", renderThreads));
 init();

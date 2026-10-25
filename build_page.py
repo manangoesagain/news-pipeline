@@ -12,6 +12,8 @@ import re
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+from graph_page import CSS as GRAPH_CSS, SCRIPT as GRAPH_SCRIPT, connection_map, scenario_tree, causal_flows
+
 ET = ZoneInfo("America/Toronto")
 DATA_DIR = "_data"
 OUTPUT_FILE = "index.html"
@@ -117,12 +119,9 @@ def market_html(rows):
     return f'<div class="ticks">{"".join(cells)}</div>'
 
 
-def intel_html(intel):
-    if not intel:
-        return ""
-    parts = ['<div class="intel"><h3>🔗 Intelligence Brief</h3>']
-    if intel.get("bottom_line"):
-        parts.append(f'<p class="bottom-line">{esc(intel["bottom_line"])}</p>')
+def intel_text_html(intel):
+    """Plain text sections of the brief (shown collapsed under 'Details')."""
+    parts = []
     if intel.get("causal_chains"):
         parts.append("<h4>Causal chains</h4>")
         for c in intel["causal_chains"]:
@@ -130,7 +129,8 @@ def intel_html(intel):
     if intel.get("second_order"):
         parts.append("<h4>Second-order effects</h4>")
         for e in intel["second_order"]:
-            parts.append(f'<div class="intel-item">{esc(e.get("event"))} ⇒ <b>{esc(e.get("effect"))}</b></div>')
+            who = f' <span class="muted">(affects: {esc(e["who_is_affected"])})</span>' if e.get("who_is_affected") else ""
+            parts.append(f'<div class="intel-item">{esc(e.get("event"))} ⇒ <b>{esc(e.get("effect"))}</b>{who}</div>')
     if intel.get("scenarios"):
         parts.append("<h4>If-then scenarios (1-2 weeks)</h4>")
         for sc in intel["scenarios"]:
@@ -140,9 +140,56 @@ def intel_html(intel):
     if intel.get("contrarian"):
         parts.append("<h4>Contrarian signals</h4>")
         for c in intel["contrarian"]:
+            why = f'<br><span class="muted">Why it matters: {esc(c["why_it_matters"])}</span>' if c.get("why_it_matters") else ""
             parts.append(f'<div class="intel-item">{esc(c.get("signal"))}<br><span class="muted">Consensus: '
-                         f'{esc(c.get("mainstream_view"))}</span></div>')
-    parts.append('<p class="muted small">AI-generated analysis from headlines; not investment advice.</p></div>')
+                         f'{esc(c.get("mainstream_view"))}</span>{why}</div>')
+    return "".join(parts)
+
+
+def intel_html(intel, intel_lite=None):
+    graph = (intel or {}).get("graph")
+    lite = False
+    if not graph and intel_lite and intel_lite.get("graph"):
+        graph, lite = intel_lite["graph"], True
+    if not intel and not graph:
+        return ""
+    intel = intel or {}
+    parts = ['<div class="intel viz"><h3>🔗 Intelligence Brief</h3>']
+    if intel.get("bottom_line"):
+        parts.append(f'<p class="bottom-line">{esc(intel["bottom_line"])}</p>')
+    note = "Built from story threads, no AI brief this run." if lite else ""
+    parts.append(connection_map(graph, note))
+    parts.append(scenario_tree(intel.get("scenarios")))
+    parts.append(causal_flows(intel.get("causal_chains")))
+    text = intel_text_html(intel)
+    if text:
+        parts.append(f'<details class="idetails"><summary>Details</summary><div>{text}</div></details>')
+    if intel:
+        parts.append('<p class="muted small">AI-generated analysis from headlines; not investment advice.</p>')
+    parts.append("</div>")
+    return "".join(parts)
+
+
+def patterns_html(digest):
+    pat = digest.get("patterns") or {}
+    acc = digest.get("prediction_accuracy") or {}
+    heating = [h for h in pat.get("heating", []) if h.get("thread_id")][:5] or pat.get("heating", [])[:5]
+    cooling = pat.get("cooling", [])[:4]
+    cross = pat.get("cross_domain", [])[:4]
+    if not (heating or cooling or cross or acc.get("resolved")):
+        return ""
+    parts = ['<div class="intel"><h3>Patterns</h3>']
+    if heating:
+        parts.append('<div class="intel-item"><b>Heating up:</b> ' + ", ".join(esc(h["term"]) for h in heating) + "</div>")
+    if cooling:
+        parts.append('<div class="intel-item"><b>Cooling off:</b> ' + ", ".join(esc(h["term"]) for h in cooling) + "</div>")
+    if cross:
+        parts.append('<div class="intel-item"><b>Active across several topics:</b><br>' +
+                     "<br>".join(f"{esc(c['title'])} <span class=\"muted\">({esc(', '.join(c['domains']))})</span>" for c in cross) + "</div>")
+    if acc.get("resolved"):
+        parts.append(f'<div class="intel-item"><b>Prediction track record:</b> {acc["happened"]} happened, '
+                     f'{acc["partly"]} partly, {acc["missed"]} missed of {acc["resolved"]} scored</div>')
+    parts.append("</div>")
     return "".join(parts)
 
 
@@ -178,7 +225,8 @@ def digest_card(digest):
         <h3>📉 Market Snapshot</h3>
         {market_html(digest.get("market"))}
       </div>
-      {intel_html(digest.get("intelligence"))}
+      {intel_html(digest.get("intelligence"), digest.get("intel_lite"))}
+      {patterns_html(digest)}
     </section>
     """
 
@@ -439,6 +487,8 @@ def generate_html(digests):
       border-top: 1px solid var(--border);
     }}
 
+    {GRAPH_CSS}
+
     @media (max-width: 480px) {{
       body {{ padding: 12px; }}
       .digest-card {{ padding: 16px; }}
@@ -464,6 +514,7 @@ def generate_html(digests):
       Auto-generated by News Digest Bot &bull; <a href="https://github.com/manangoesagain/news-pipeline" style="color: var(--accent); text-decoration: none;">GitHub</a>
     </footer>
   </div>
+  <script>{GRAPH_SCRIPT}</script>
 </body>
 </html>"""
 
