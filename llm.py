@@ -199,7 +199,8 @@ def _nvidia_live_models():
 
 
 def generate_json(prompt: str, label: str = "LLM", require: str = None,
-                  max_tokens: int = 16384, temperature: float = 0.2, budget_s: int = 300):
+                  max_tokens: int = 16384, temperature: float = 0.2, budget_s: int = 300,
+                  per_model_s: int = None):
     """Try each configured model until one returns a JSON object (containing `require`).
     Gives up once `budget_s` seconds have been spent across all models."""
     global last_model
@@ -219,7 +220,7 @@ def generate_json(prompt: str, label: str = "LLM", require: str = None,
             print(f"[{label}] time budget ({budget_s}s) used up")
             break
         started = time.time()
-        text = (call(model, prompt, label, max_tokens, temperature, deadline_s=remaining)
+        text = (call(model, prompt, label, max_tokens, temperature, deadline_s=min(remaining, per_model_s or remaining))
                 if call is _nvidia else call(model, prompt, label, max_tokens, temperature))
         if not text:
             continue

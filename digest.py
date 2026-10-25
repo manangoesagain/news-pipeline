@@ -606,7 +606,7 @@ def build_intelligence(stories, articles_today, snapshot):
         themes = "; ".join(c.get("title", "") for c in (result.get("causal_chains") or []) if isinstance(c, dict))[:600]
         gres = llm.generate_json(GRAPH_PROMPT.format(lines=lines, market=mkt, today=NOW.strftime("%A, %B %d, %Y"),
                                                      themes=themes or "n/a", domains="; ".join(DOMAIN_ORDER)),
-                                 label="GRAPH", require="graph", temperature=0.3, budget_s=240)
+                                 label="GRAPH", require="graph", temperature=0.3, budget_s=360, per_model_s=130)
         g = sanitize_graph((gres or {}).get("graph"))
     except Exception as e:
         print(f"[INTEL] graph validation error: {e}")
