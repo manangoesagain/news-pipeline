@@ -233,6 +233,8 @@ CSS = """
     .cmap .nd.sel .ring { stroke: var(--text); }
     .cmap .nd.m .ring { stroke: var(--focus); stroke-dasharray: 3 2; }
     .cmap .nlabel { font-size: var(--nfs, 13px); fill: var(--text); paint-order: stroke; stroke: var(--halo); stroke-width: 4px; stroke-linejoin: round; pointer-events: none; }
+    .cmap .lh { opacity: 0; visibility: hidden; transition: opacity .15s, visibility 0s .15s; }
+    .cmap .nlabel, .cmap .lanelabel, .cmap .lanecount, .cmap .axis { transition: opacity .15s, visibility 0s; }
     .cmap .nlabel.mid { text-anchor: middle; }
     .cmap .nlabel.hub { font-weight: 600; }
     .cmap svg.scn-all:not(.zl) .nlabel.ln { display: none; }
@@ -495,6 +497,10 @@ SCRIPT = r"""
       return sc;
     }
     /* ---------- scene: topic / everything (positions precomputed in Python) ---------- */
+    function topRank(L, gh, id) {
+      if (!L.rk) L.rk = Object.keys(L.p).filter(function (x) { return N[x] && !gh[x]; }).sort(function (a, b) { return HUB[a] - HUB[b]; });
+      return L.rk.indexOf(id);
+    }
     function buildLayout(key, kind) {
       var narrow = view.clientWidth > 0 && view.clientWidth < 600;
       if (narrow && LAY[key + ":m"]) key = key + ":m"; else narrow = narrow && /:m$/.test(key);
@@ -507,7 +513,7 @@ SCRIPT = r"""
       (L.g || []).forEach(function (g) { gh[g] = true; });
       Object.keys(L.p).forEach(function (id) {
         if (!N[id]) return;
-        var q = L.p[id], hub = kind === "all" && HUB[id] < nHub;
+        var q = L.p[id], hub = kind === "all" ? HUB[id] < nHub : (kind === "topic" && !gh[id] && topRank(L, gh, id) < (narrow ? 6 : 8));
         sc.nodes[id] = { x: q[0], y: q[1], k: gh[id] ? 0.8 : 1, ghost: !!gh[id], lab: "below", w: kind === "all" ? (hub ? Math.min(nc + (narrow ? 2 : 5), 18) : 13) : (narrow ? nc + 1 : Math.min(17, nc + 2)), ln: hub && narrow ? 3 : 2, fs: 0, lo: false, hub: hub, sn: Math.min(13, nc + 2) };
       });
       Object.keys(L.e || {}).forEach(function (k) {
@@ -584,7 +590,7 @@ SCRIPT = r"""
       return g;
     }
     function render() {
-      gScene.textContent = ""; nodeEl = {}; edgeEl = {}; laneEl = {};
+      gScene.textContent = ""; nodeEl = {}; edgeEl = {}; laneEl = {}; LR = {}; AXR = null; lastLK = "";
       svg.setAttribute("class", "scn-" + SC.kind + (SC.vertical ? " vert" : ""));
       if (!svg.getAttribute("data-al")) svg.setAttribute("data-al", svg.getAttribute("aria-label") || "");
       if (SC.kind === "chain") { var cc = CH[S.chain]; svg.setAttribute("aria-label", cc.title + ": " + cc.n.map(function (id) { return N[id].l; }).join(", then ") + ". Select a node for details."); } else svg.setAttribute("aria-label", svg.getAttribute("data-al"));
@@ -595,28 +601,23 @@ SCRIPT = r"""
           var d = ln[0], top = ln[1], h = ln[2], c = dcls(d), g = sv("g", { "class": "lg", "data-d": d });
           g.appendChild(sv("rect", { "class": "lane " + c, x: 6, y: top, width: SC.W - 12, height: h, rx: 8 }));
           g.appendChild(sv("rect", { "class": "ltag " + c, x: 6, y: top, width: 5, height: h, rx: 2 }));
-          var name = d >= 0 ? data.doms[d] : "Other", t = sv("text", null, "lanelabel");
-          if (SC.narrow) {   /* phone: short topic names in a bigger font so the lane is readable at fit */
-            var lf = Math.round(SC.fsU * 1.02), nm = d >= 0 ? NARROW_LANE[d] : "Other";
-            t.setAttribute("style", "font-size:" + lf + "px"); var ts1 = sv("tspan", { x: 16, y: top + 10 + lf }); ts1.textContent = nm; t.appendChild(ts1); g.appendChild(t);
-            var tc1 = sv("text", { "class": "lanecount", x: 16, y: top + 14 + lf * 2, style: "font-size:" + Math.round(lf * 0.85) + "px" }); tc1.textContent = cnt[d]; g.appendChild(tc1);
-          } else {
-          wrap(name, 13, 3).forEach(function (s, i) { var ts = sv("tspan", { x: 22, y: top + 24 + i * 15.5 }); ts.textContent = s; t.appendChild(ts); });
-          g.appendChild(t);
-          var tc = sv("text", { "class": "lanecount", x: 22, y: top + 24 + wrap(name, 13, 3).length * 15.5 + 2 }); tc.textContent = cnt[d] + (cnt[d] === 1 ? " node" : " nodes"); g.appendChild(tc);
-          }
+          var name = d >= 0 ? data.doms[d] : "Other", t = sv("text", null, "lanelabel"), tc = sv("text", { "class": "lanecount" }), lf = Math.round(SC.fsU * 1.02);
+          if (SC.narrow) name = d >= 0 ? NARROW_LANE[d] : "Other";   /* phone: short topic names */
+          g.appendChild(t); g.appendChild(tc);
+          LR[d] = { t: t, tc: tc, name: name, top: top, h: h, x: SC.narrow ? 16 : 22, base: SC.narrow ? lf : 16, cbase: SC.narrow ? Math.round(lf * 0.85) : 14, ctxt: SC.narrow ? String(cnt[d]) : cnt[d] + (cnt[d] === 1 ? " node" : " nodes") };
           gl.appendChild(g); laneEl[d] = g;
         });
-        var ax = sv("g", null, "axisg"), x1 = SC.gut + 48, x2 = SC.W - 20, axs = SC.narrow ? "font-size:" + Math.round(SC.fsU * 0.8) + "px" : null;
-        var t1 = sv("text", { "class": "axis", x: x1 - 20, y: 18 }); t1.textContent = "Causes"; if (axs) t1.setAttribute("style", axs); ax.appendChild(t1);
-        var t2 = sv("text", { "class": "axis", x: x2, y: 18, "text-anchor": "end" }); t2.textContent = "Outcomes"; if (axs) t2.setAttribute("style", axs); ax.appendChild(t2);
-        ax.appendChild(sv("path", { "class": "axisln", d: "M" + (x1 + 44) + " 14H" + (x2 - 70) + "M" + (x2 - 76) + " 10L" + (x2 - 68) + " 14L" + (x2 - 76) + " 18", fill: "none" }));
+        var ax = sv("g", null, "axisg"), x1 = SC.gut + 48, x2 = SC.W - 20;
+        var t1 = sv("text", { "class": "axis", x: x1 - 20, y: 18 }); t1.textContent = "Causes"; ax.appendChild(t1);
+        var t2 = sv("text", { "class": "axis", x: x2, y: 18, "text-anchor": "end" }); t2.textContent = "Outcomes"; ax.appendChild(t2);
+        var al = sv("path", { "class": "axisln", fill: "none" }); ax.appendChild(al);
+        AXR = { t1: t1, t2: t2, ln: al, x1: x1 - 20, x2: x2, base: SC.narrow ? Math.round(SC.fsU * 0.8) : 14, top: Math.min.apply(null, SC.lanes.map(function (l) { return l[1]; })) };
         gl.appendChild(ax);
       }
       SC.edges.slice().sort(function (a, b) { return E[a.i].s - E[b.i].s; }).forEach(function (o) { var g = mkEdge(o); ge.appendChild(g); edgeEl[o.i] = g; });
       Object.keys(SC.nodes).forEach(function (id) {
         var o = SC.nodes[id]; o.id = id;
-        o.lo = false; o.short = SC.kind === "all" && !o.hub;
+        o.lo = false; o.short = false;
         var g = mkNode(id, o); gn.appendChild(g); nodeEl[id] = g; wireNode(g, id);
       });
       gScene.appendChild(gl); gScene.appendChild(ge); gScene.appendChild(gn);
@@ -624,14 +625,62 @@ SCRIPT = r"""
     }
 
     /* ---------- viewport ---------- */
-    var vb = { x: 0, y: 0, w: 800, h: 400 }, fitS = 1;
+    var vb = { x: 0, y: 0, w: 800, h: 400 }, fitS = 1, LR = {}, AXR = null, lastLK = "";
+    /* Label floor: SVG text scales with the zoom, so every map label is sized in screen pixels. Hubs, lane and axis
+       labels are counter-scaled to stay >= MIN px on screen; other node labels keep their natural size and fade out
+       while that would be < 11px. Overlaps between visible node labels drop the lower-priority one. */
+    function layoutLabels(s, force) {
+      if (!SC || SC.kind === "chain") return;
+      var key = s.toFixed(3) + "|" + SC.kind + "|" + (S.sel || ""); if (!force && key === lastLK) return; lastLK = key;
+      var MIN = 11.5, FLOOR = 11;
+      Object.keys(LR).forEach(function (d) {
+        var q = LR[d], fs = Math.max(q.base, MIN / s), cf = Math.max(q.cbase, MIN / s), avail = SC.gut - q.x - 8;
+        var lines, used, longest = q.name.split(/\s+/).reduce(function (m, w) { return Math.max(m, w.length); }, 3);
+        for (var pass = 0; pass < 3; pass++) {
+          lines = wrap(q.name, Math.max(longest, Math.floor(avail / (fs * 0.56))), 4); used = 6 + fs + (lines.length - 1) * fs * 1.12;
+          var wid = lines.reduce(function (m, l) { return Math.max(m, l.length); }, 0) * fs * 0.58;
+          if (wid <= avail || fs <= 11.2 / s) break;
+          fs = Math.max(11.2 / s, fs * avail / wid); cf = Math.min(cf, fs);
+        }
+        var showC = used + cf * 1.4 + 4 <= q.h, showL = used + 4 <= q.h;
+        q.t.textContent = ""; q.t.setAttribute("style", "font-size:" + r1(fs) + "px");
+        lines.forEach(function (ln, i) { var ts = sv("tspan", { x: q.x, y: r1(q.top + 6 + fs + i * fs * 1.12) }); ts.textContent = ln; q.t.appendChild(ts); });
+        q.tc.textContent = q.ctxt; q.tc.setAttribute("x", q.x); q.tc.setAttribute("y", r1(q.top + used + cf * 1.3)); q.tc.setAttribute("style", "font-size:" + r1(cf) + "px");
+        q.t.classList.toggle("lh", !showL); q.tc.classList.toggle("lh", !(showL && showC));
+      });
+      if (AXR) {
+        var fa = Math.max(AXR.base, MIN / s), ok = fa + 4 <= AXR.top, yb = r1(fa * 0.95 + 1), w1 = 6 * fa * 0.58, w2 = 8 * fa * 0.58, xa = AXR.x1 + w1 + 10, xb = AXR.x2 - w2 - 10, h = fa * 0.3;
+        [AXR.t1, AXR.t2].forEach(function (t) { t.setAttribute("y", yb); t.setAttribute("style", "font-size:" + r1(fa) + "px"); t.classList.toggle("lh", !ok); });
+        AXR.ln.setAttribute("d", xb - xa > 30 ? "M" + r1(xa) + " " + r1(yb - h) + "H" + r1(xb) + "M" + r1(xb - h * 1.4) + " " + r1(yb - h * 2) + "L" + r1(xb) + " " + r1(yb - h) + "L" + r1(xb - h * 1.4) + " " + r1(yb) : "");
+        AXR.ln.classList.toggle("lh", !ok);
+      }
+      var items = [];
+      Object.keys(SC.nodes).forEach(function (id) {
+        var g = nodeEl[id], o = SC.nodes[id], t = g && g.querySelector("text.nlabel"); if (!t || g.classList.contains("hid")) return;
+        var m = g.classList.contains("m"), pin = o.hub || id === S.sel || m, fs = pin ? Math.max(13, MIN / s) : 13;
+        t.style.fontSize = r1(fs) + "px";
+        var pr = id === S.sel ? -2 : m ? -1 : o.hub ? (HUB[id] || 0) / 100 : 1 + (HUB[id] || 0) / 1000;
+        items.push({ t: t, o: o, pin: pin, fs: fs, pr: pr, ok: pin || fs * s >= FLOOR });
+      });
+      items.sort(function (a, b) { return a.pr - b.pr; });
+      var taken = [], pad = 3 / s;
+      items.forEach(function (it) {
+        var vis = it.ok;
+        if (vis) {
+          var b = it.t.getBBox(), r = { x0: it.o.x + b.x - pad, x1: it.o.x + b.x + b.width + pad, y0: it.o.y + b.y - pad, y1: it.o.y + b.y + b.height + pad };
+          for (var i = 0; i < taken.length; i++) { var c = taken[i]; if (r.x0 < c.x1 && r.x1 > c.x0 && r.y0 < c.y1 && r.y1 > c.y0) { vis = false; break; } }
+          if (vis) taken.push(r);
+        }
+        it.t.classList.toggle("lh", !vis);
+      });
+    }
     function box2() { var r = view.getBoundingClientRect(); return { w: Math.max(r.width, 50), h: Math.max(r.height, 50), l: r.left, t: r.top }; }
     function setVB() {
       var r = box2(); vb.h = vb.w * r.h / r.w;
       svg.setAttribute("viewBox", vb.x.toFixed(1) + " " + vb.y.toFixed(1) + " " + vb.w.toFixed(1) + " " + vb.h.toFixed(1));
       var s = r.w / vb.w;
       svg.classList.toggle("zl", s >= 0.9);
-      if (SC && SC.kind !== "chain") { var f = Math.min(28, Math.max(13, (SC.narrow ? 10.5 : 12.5) / s)); svg.style.setProperty("--nfs", f.toFixed(1) + "px"); svg.style.setProperty("--efs", f.toFixed(1) + "px"); } else { svg.style.removeProperty("--nfs"); svg.style.removeProperty("--efs"); }
+      if (SC && SC.kind !== "chain") { var f = Math.max(13, 11.5 / s); svg.style.setProperty("--efs", f.toFixed(1) + "px"); layoutLabels(s, false); } else { svg.style.removeProperty("--nfs"); svg.style.removeProperty("--efs"); }
     }
     function clampVB() {
       var m = 90;
@@ -805,7 +854,7 @@ SCRIPT = r"""
       if (cnt) cnt.textContent = filtersOn() ? nv + " of " + total + " nodes · " + ev2 + " of " + E.length + " links" : "";
       var act = F.region || F.conf > 1 || F.order < 3 || F.status || Object.keys(F.hideDom).some(function (k) { return F.hideDom[k]; });
       var cl = box.querySelector(".cclear"); if (cl) cl.hidden = !act;
-      renderPanel();
+      renderPanel(); layoutLabels(box2().w / vb.w, true);
       var bar = box.querySelector(".cbar");
       if (bar) { bar.hidden = !S.sel; if (S.sel) bar.textContent = N[S.sel].l + " — details below ▾"; }
     }
@@ -1809,11 +1858,11 @@ def _connection_map(graph, note=""):
     lane_of = {n["id"]: _lane_of(n) for n in nodes}
 
     # everything: layered layout with topic rows
-    res = _pick_layout(nodes, edges, lane_of, (2, 3, 4, 5), 1000, 860, row_h=96, col_w=132, tail=72)
-    lay = {"all": _scene_json(res, _route_edges(range(len(edges)), edges, res["pos"], byid), (), True, cw=132)}
+    res = _pick_layout(nodes, edges, lane_of, (2, 3, 4, 5), 1000, 860, row_h=96, col_w=132, gutter=140, tail=72)
+    lay = {"all": _scene_json(res, _route_edges(range(len(edges)), edges, res["pos"], byid), (), True, cw=132, gut=140)}
     # phone variants (key ":m"): chosen for a tall, narrow viewport so the whole map fits at a readable scale
-    resm = _pick_layout(nodes, edges, lane_of, (2, 3, 4, 5, 6, 8), 366, 720, row_h=90, col_w=150, gutter=150, tail=82)
-    lay["all:m"] = _scene_json(resm, _route_edges(range(len(edges)), edges, resm["pos"], byid), (), True, cw=150, gut=150)
+    resm = _pick_layout(nodes, edges, lane_of, (2, 3, 4, 5, 6, 8), 366, 720, row_h=90, col_w=150, gutter=215, tail=82)
+    lay["all:m"] = _scene_json(resm, _route_edges(range(len(edges)), edges, resm["pos"], byid), (), True, cw=150, gut=215)
 
     # topics: one per domain (and per region with at least two nodes)
     members_by = {}
