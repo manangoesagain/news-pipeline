@@ -77,11 +77,11 @@ def _dcls(name):
 # Colour never works alone: lanes are labelled, every node is labelled and has a type shape.
 
 CSS = """
-    .viz { --d0:#6250d6; --d1:#008300; --d2:#1baf7a; --d3:#e87ba4; --d4:#2a78d6; --d5:#eb6834; --d6:#eda100; --dx:#64748b;
+    .viz { --d0:#6250d6; --d1:#0b8ea6; --d2:#1baf7a; --d3:#e87ba4; --d4:#2a78d6; --d5:#eb6834; --d6:#eda100; --dx:#64748b;
            --ln:#64748b; --halo:var(--card); --soft:rgba(100,116,139,.12); --soft2:rgba(100,116,139,.2);
            --up:#1a7f37; --down:#cf222e; --mix:#9a6700; --con:#b4236f; --ink2:#475569; --focus:#2563eb; --lane:.075; }
     @media (prefers-color-scheme: dark) {
-      .viz { --d0:#9085e9; --d1:#008300; --d2:#199e70; --d3:#d55181; --d4:#3987e5; --d5:#d95926; --d6:#c98500; --dx:#94a3b8; --ln:#94a3b8;
+      .viz { --d0:#9085e9; --d1:#2bb3cf; --d2:#199e70; --d3:#d55181; --d4:#3987e5; --d5:#d95926; --d6:#c98500; --dx:#94a3b8; --ln:#94a3b8;
              --up:#3fb950; --down:#f85149; --mix:#d29922; --con:#f778ba; --ink2:#cbd5e1; --focus:#79c0ff; --lane:.12;
              --soft:rgba(148,163,184,.14); --soft2:rgba(148,163,184,.24); }
     }
@@ -157,6 +157,9 @@ CSS = """
     /* chooser: key chains */
     .rail-in { display: flex; gap: 8px; overflow-x: auto; padding: 10px 12px; scroll-snap-type: x proximity; }
     .rail-in .rh { display: none; }
+    .rail-in ul.cl { display: contents; list-style: none; margin: 0; padding: 0; }
+    .rail-in ul.cl li { display: flex; flex: none; margin: 0; }
+    @media (min-width: 1280px) { .rail-in ul.cl { display: flex; flex-direction: column; gap: 8px; } .rail-in ul.cl li { display: block; } .rail-in ul.cl .ccard { width: 100%; } }
     @media (min-width: 1280px) { .rail-in { flex-direction: column; overflow: visible; padding: 12px; } .rail-in .rh { display: block; } }
     .rh { font-size: 13px; font-weight: 600; color: var(--ink2); margin: 0 2px 2px; }
     .ccard { flex: 0 0 min(260px, 78vw); scroll-snap-align: start; display: flex; flex-direction: column; gap: 5px; text-align: left; padding: 10px 12px; border: 1px solid var(--border);
@@ -167,10 +170,19 @@ CSS = """
     .ccard .ct { font-size: 14px; font-weight: 600; color: var(--text); }
     .ccard .cs { font-size: 12.5px; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .ccard .cm { display: flex; flex-wrap: wrap; gap: 3px 10px; align-items: center; }
-    .bdg { font-size: 11.5px; font-weight: 600; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--ink2); color: var(--text); white-space: nowrap; }
+    .bdg { font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--ink2); color: var(--text); white-space: nowrap; }
     .bdg.predicted { border-style: dashed; }
     .bdg.mixed { border-style: dashed; color: var(--ink2); }
     @media (max-width: 899px) {
+      .rail-in { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent); padding-right: 32px; }
+      .seg button { min-height: 44px; padding: 8px 14px; }
+      .cmap .csearch { font-size: 16px; min-height: 44px; }
+      .czoom button { width: 44px; height: 44px; }
+      .cpanel .step, .cpanel .pitem { min-height: 44px; display: flex; flex-direction: column; justify-content: center; }
+      .cmap[data-view="chains"] .mkey { display: inline; }
+      .cmap { display: flex; flex-direction: column; }
+      .cbody { display: contents; }
+      .ctop { order: 0; } .cflt, .nos { order: 1; } .crail { order: 2; } .cmain { order: 3; } .legend { order: 4; } .cpanel { order: 5; }
       .ccard { flex-basis: auto; width: max-content; max-width: 78vw; padding: 8px 12px; }
       .ccard .cs, .ccard .cm .dchip { display: none; }
       .ccard .ct { font-size: 13.5px; }
@@ -194,6 +206,7 @@ CSS = """
     .mhead .mt { font-size: 15px; font-weight: 600; }
     .mhead .mh { font-size: 13px; color: var(--muted); }
     .cview { position: relative; height: min(66vh, 480px); background: var(--card); outline-offset: -2px; overflow: hidden; }
+    @media (max-width: 899px) { .cmap[data-view="all"] .cview, .cmap[data-view="topic"] .cview { height: min(88vh, 720px); } }
     @media (min-width: 900px) { .cview { height: 600px; } .cmap[data-view="all"] .cview { height: 860px; } }
     .cview svg { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; font-family: inherit; user-select: none; -webkit-user-select: none; }
     .cview.drag svg { cursor: grabbing; }
@@ -221,14 +234,17 @@ CSS = """
     .cmap .nd.m .ring { stroke: var(--focus); stroke-dasharray: 3 2; }
     .cmap .nlabel { font-size: var(--nfs, 13px); fill: var(--text); paint-order: stroke; stroke: var(--halo); stroke-width: 4px; stroke-linejoin: round; pointer-events: none; }
     .cmap .nlabel.mid { text-anchor: middle; }
+    .cmap .nlabel.hub { font-weight: 600; }
     .cmap svg.scn-all:not(.zl) .nlabel.ln { display: none; }
     .cmap svg.scn-all.zl .nlabel.sh { display: none; }
     .cmap .nlabel.start { text-anchor: start; }
     .cmap .scn-chain .nlabel { font-weight: 600; }
     .cmap .dirb { stroke: var(--card); stroke-width: 1.5; pointer-events: none; }
     .cmap .dirb.up { fill: var(--up); } .cmap .dirb.down { fill: var(--down); } .cmap .dirb.flat { fill: var(--dx); }
-    .cmap .nd.ghost { opacity: .55; }
-    .cmap .nd.ghost:hover, .cmap .nd.ghost:focus-visible, .cmap .nd.ghost.sel, .cmap .nd.ghost.open { opacity: 1; }
+    .cmap .nd.ghost .shape, .cmap .nd.ghost .dirb { opacity: .5; }
+    .cmap .nd.ghost .nlabel { fill: var(--ink2); }
+    .cmap .nd.ghost:hover .shape, .cmap .nd.ghost:focus-visible .shape, .cmap .nd.ghost.sel .shape, .cmap .nd.ghost.open .shape { opacity: 1; }
+    .cmap .mkey { display: none; font-size: 12.5px; color: var(--ink2); white-space: nowrap; }
     .cmap .nd.lo .nlabel { opacity: 0; }
     .cmap .zl .nd.lo .nlabel, .cmap .nd.lo:hover .nlabel, .cmap .nd.lo:focus .nlabel, .cmap .nd.lo.m .nlabel, .cmap .nd.lo.sel .nlabel, .cmap .nd.lo.hl .nlabel, .cmap .nd.lo.hh .nlabel { opacity: 1; }
 
@@ -243,7 +259,7 @@ CSS = """
     .cmap .mk.e-up { fill: var(--up); } .cmap .mk.e-down { fill: var(--down); } .cmap .mk.e-mixed { fill: var(--mix); } .cmap .mk.e-none { fill: var(--ln); }
     .cmap .mk.bar { fill: none; stroke: var(--con); stroke-width: 2.4; stroke-linecap: round; }
     .cmap .elabel { font-size: var(--efs, 12.5px); fill: var(--text); paint-order: stroke; stroke: var(--halo); stroke-width: 4px; stroke-linejoin: round; pointer-events: none; display: none; }
-    .cmap .elabel.sub { font-size: 11.5px; fill: var(--muted); }
+    .cmap .elabel.sub { font-size: 12.5px; fill: var(--muted); }
     .cmap .ed.perm .elabel, .cmap .ed.hv .elabel { display: inline; }
     .cmap .ed.hh, .cmap .ed.hl, .cmap .ed.hv, .cmap .ed.perm { opacity: 1; }
     .cmap .ed.hh path.line, .cmap .ed.hl path.line, .cmap .ed.hv path.line { stroke-width: var(--sw2, 2.6); }
@@ -251,13 +267,17 @@ CSS = """
     .cmap .ed.ghosted.hl, .cmap .ed.ghosted.hh { opacity: 1; }
     .cmap svg.focus .ed:not(.hl):not(.perm) { opacity: .04; }
     .cmap svg.focus .nd:not(.hl):not(.ghost) { opacity: .22; }
-    .cmap svg.scn-chain.focus .nd:not(.hl) { opacity: 1; }
-    .cmap svg.scn-chain.focus .nd.ghost:not(.hl) { opacity: .5; }
+    .cmap svg.scn-chain.focus .nd:not(.hl):not(.ghost) { opacity: .5; }
+    .cmap svg.scn-chain.focus .nd.ghost { opacity: 1; }
+    .cmap svg.scn-chain.focus .ed:not(.hl):not(.perm) { opacity: .1; }
+    .cmap svg.scn-chain .ed.ghosted { opacity: .7; }
+    .cmap svg.scn-chain .ed.ghosted.hl { opacity: 1; }
+    .cmap svg.scn-chain .elabel { font-size: 12px; font-weight: 600; fill: var(--text); }
     .cmap svg.scn-chain.focus .ed.perm { opacity: 1; }
     .cmap svg.hov .ed:not(.hh):not(.perm):not(.hv) { opacity: .04; }
     .cmap svg.hov .nd:not(.hh):not(.hov1) { opacity: .28; }
     .cmap svg.scn-chain.hov .nd { opacity: 1; }
-    .cmap svg.scn-chain.hov .nd.ghost:not(.hh):not(.hov1) { opacity: .5; }
+    .cmap svg.scn-chain.hov .nd.ghost { opacity: 1; }
     .cmap svg.searching .nd:not(.m) { opacity: .25; }
     .cmap .hid { display: none; }
 
@@ -265,7 +285,7 @@ CSS = """
     .czoom button { width: 34px; height: 34px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); cursor: pointer; font-size: 18px; line-height: 1; padding: 0; opacity: .95; }
     .czoom button.fit { font-size: 12px; }
     .czoom button:hover { background: var(--soft2); }
-    .cbar { position: absolute; left: 8px; right: 52px; bottom: 8px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); text-align: left; font-size: 14px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.18); }
+    .cbar { position: absolute; left: 8px; right: 8px; top: 8px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); text-align: left; font-size: 14px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.18); }
     .cbar[hidden] { display: none; }
     @media (min-width: 900px) { .cbar { display: none !important; } }
     .chint { position: absolute; left: 10px; bottom: 6px; font-size: 12px; color: var(--muted); pointer-events: none; background: var(--card); padding: 1px 6px; border-radius: 6px; opacity: .92; }
@@ -300,7 +320,7 @@ CSS = """
     .cpanel .gobtn { margin: 6px 0 2px; font-size: 13px; padding: 5px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); cursor: pointer; }
     .cpanel .gobtn:hover { background: var(--soft2); }
 
-    .legend { display: flex; flex-wrap: wrap; gap: 5px 14px; font-size: 12px; color: var(--muted); padding: 8px 14px 10px; border-top: 1px solid var(--border); align-items: center; }
+    .legend { display: flex; flex-wrap: wrap; gap: 5px 14px; font-size: 13px; color: var(--muted); padding: 8px 14px 10px; border-top: 1px solid var(--border); align-items: center; }
     .legend > span { display: inline-flex; align-items: center; gap: 5px; }
     .legend svg { flex: none; }
     .legend .shp { width: 16px; height: 16px; fill: var(--muted); }
@@ -370,7 +390,7 @@ SCRIPT = r"""
   function conf(e) { return CR[e.conf] || 2; }
   function r1(v) { return Math.round(v * 10) / 10; }
   function wrap(s, width, lines) {
-    var words = String(s || "").split(/\s+/).filter(Boolean), out = [], cur = "";
+    var words = String(s || "").split(/\s+/).filter(Boolean).map(function (w) { return w.length > width ? w.slice(0, Math.max(1, width - 1)) + "…" : w; }), out = [], cur = "";
     words.forEach(function (w) { if (cur && cur.length + 1 + w.length > width) { out.push(cur); cur = w; } else cur = (cur ? cur + " " : "") + w; });
     if (cur) out.push(cur);
     if (out.length > lines) { out = out.slice(0, lines); var l = out[lines - 1]; out[lines - 1] = l.slice(0, Math.max(1, width - 1)).replace(/\s+$/, "") + "…"; }
@@ -390,7 +410,8 @@ SCRIPT = r"""
     var view = box.querySelector(".cview"), svg = view.querySelector("svg"), gScene = svg.querySelector(".scene"), tip = box.querySelector(".ctip");
     var panel = box.querySelector(".cpanel"), rail = box.querySelector(".crail"), mt = box.querySelector(".mt"), mh = box.querySelector(".mh");
     var N = data.nodes || {}, E = data.edges || [], CH = data.chains || [], TOP = data.topics || [], LAY = data.lay || {}, SH = data.shapes, EXT = data.ext, UID = data.uid;
-    var ids = Object.keys(N), outE = {}, inE = {};
+    var ids = Object.keys(N), outE = {}, inE = {}, HUB = {};
+    ids.slice().sort(function (a, b) { return (N[b].k || 0) - (N[a].k || 0) || (a < b ? -1 : 1); }).forEach(function (id, i) { HUB[id] = i; });
     ids.forEach(function (k) { outE[k] = []; inE[k] = []; });
     E.forEach(function (e, i) { if (outE[e.f]) outE[e.f].push(i); if (inE[e.t]) inE[e.t].push(i); });
 
@@ -475,12 +496,19 @@ SCRIPT = r"""
     }
     /* ---------- scene: topic / everything (positions precomputed in Python) ---------- */
     function buildLayout(key, kind) {
+      var narrow = view.clientWidth > 0 && view.clientWidth < 600;
+      if (narrow && LAY[key + ":m"]) key = key + ":m"; else narrow = narrow && /:m$/.test(key);
       var L = LAY[key]; if (!L) return null;
-      var sc = { kind: kind, W: L.W, H: L.H, nodes: {}, edges: [], lanes: L.lanes || null }, gh = {};
+      var sc = { kind: kind, W: L.W, H: L.H, nodes: {}, edges: [], lanes: L.lanes || null, narrow: narrow, gut: L.gut || 120 }, gh = {};
+      /* label sizing at the "fit" scale: font in map units, characters per label line from the column pitch */
+      var r0 = box2(), s0 = Math.min(r0.w / (L.W + 24), r0.h / (L.H + 24)), fsU = Math.min(28, Math.max(13, (narrow ? 10.5 : 12.5) / s0));
+      var nc = Math.max(7, Math.floor(((L.cw || 130) - 10) / (fsU * 0.6))), nHub = narrow ? 8 : 12;
+      sc.fsU = fsU; sc.nc = nc;
       (L.g || []).forEach(function (g) { gh[g] = true; });
       Object.keys(L.p).forEach(function (id) {
         if (!N[id]) return;
-        var q = L.p[id]; sc.nodes[id] = { x: q[0], y: q[1], k: gh[id] ? 0.8 : 1, ghost: !!gh[id], lab: "below", w: kind === "all" ? 13 : 17, ln: 2, fs: 0, lo: false };
+        var q = L.p[id], hub = kind === "all" && HUB[id] < nHub;
+        sc.nodes[id] = { x: q[0], y: q[1], k: gh[id] ? 0.8 : 1, ghost: !!gh[id], lab: "below", w: kind === "all" ? (hub ? Math.min(nc + (narrow ? 2 : 5), 18) : 13) : (narrow ? nc + 1 : Math.min(17, nc + 2)), ln: hub && narrow ? 3 : 2, fs: 0, lo: false, hub: hub, sn: Math.min(13, nc + 2) };
       });
       Object.keys(L.e || {}).forEach(function (k) {
         var e = E[+k]; if (!e || !sc.nodes[e.f] || !sc.nodes[e.t]) return;
@@ -489,6 +517,7 @@ SCRIPT = r"""
       });
       return sc;
     }
+    var NARROW_LANE = ["AI", "Tech", "Finance", "Markets", "Politics", "Conflict", "Prices"];
     function buildScene() {
       if (S.view === "chains" && CH.length) return buildChain();
       if (S.view === "topic" && LAY["t:" + S.topic]) return buildLayout("t:" + S.topic, "topic");
@@ -498,7 +527,7 @@ SCRIPT = r"""
     /* ---------- rendering ---------- */
     function mkNode(id, o) {
       var n = N[id], ext = EXT[n.t], k = o.k, hh = ext[1] * k, hw = ext[0] * k, dc = dcls(n.d);
-      var g = sv("g", { "class": "nd" + (o.ghost ? " ghost" : "") + (o.lo ? " lo" : ""), tabindex: "0", role: "button", "data-id": id, transform: "translate(" + r1(o.x) + " " + r1(o.y) + ")" });
+      var g = sv("g", { "class": "nd" + (o.ghost ? " ghost" : "") + (o.lo ? " lo" : ""), tabindex: o.ghost && SC.kind === "chain" ? "-1" : "0", role: "button", "data-id": id, transform: "translate(" + r1(o.x) + " " + r1(o.y) + ")" });
       var meta = (data.typeLabel[n.t] || n.t) + (n.dn ? ", " + n.dn : "") + (n.r ? ", " + n.r : "");
       g.setAttribute("aria-label", n.l + ", " + meta + (o.ghost ? ". Linked node outside this view." : "") + ". Show connections.");
       var lines = wrap(n.l, o.w, o.ln), fsz = o.fs ? o.fs : 13;
@@ -506,11 +535,11 @@ SCRIPT = r"""
       g.appendChild(sv("path", { "class": "shape " + dc, d: SH[n.t], transform: "scale(" + k + ")" }));
       g.appendChild(sv("path", { "class": "ring", d: SH[n.t], transform: "scale(" + r1(k * 1.3) + ")" }));
       if (n.dir === "up" || n.dir === "down" || n.dir === "flat") {
-        var bx = hw * 0.8, by = -hh * 0.8, d = n.dir === "up" ? "M" + bx + " " + (by - 5.5) + "L" + (bx + 5) + " " + (by + 4) + "L" + (bx - 5) + " " + (by + 4) + "Z"
-          : n.dir === "down" ? "M" + bx + " " + (by + 5.5) + "L" + (bx + 5) + " " + (by - 4) + "L" + (bx - 5) + " " + (by - 4) + "Z" : "M" + (bx - 5) + " " + (by - 2.2) + "H" + (bx + 5) + "V" + (by + 2.2) + "H" + (bx - 5) + "Z";
+        var bx = hw * 0.8, by = -hh * 0.8, d = n.dir === "up" ? "M" + bx + " " + (by - 7.5) + "L" + (bx + 6.5) + " " + (by + 5) + "L" + (bx - 6.5) + " " + (by + 5) + "Z"
+          : n.dir === "down" ? "M" + bx + " " + (by + 7.5) + "L" + (bx + 6.5) + " " + (by - 5) + "L" + (bx - 6.5) + " " + (by - 5) + "Z" : "M" + (bx - 6.5) + " " + (by - 2.8) + "H" + (bx + 6.5) + "V" + (by + 2.8) + "H" + (bx - 6.5) + "Z";
         g.appendChild(sv("path", { "class": "dirb " + n.dir, d: d }));
       }
-      var t = sv("text", null, "nlabel " + (o.lab === "right" ? "start" : "mid"));
+      var t = sv("text", null, "nlabel " + (o.lab === "right" ? "start" : "mid") + (o.hub ? " hub" : ""));
       if (o.fs) t.setAttribute("style", "font-size:" + o.fs + "px");
       var emH = o.lab === "above" ? -(hh + 6 + (lines.length - 1) * 1.12 * fsz) : o.lab === "right" ? -((lines.length - 1) * 0.56 * fsz) - fsz * 0.35 : hh + 3;
       var x = o.lab === "right" ? hw + 12 : 0;
@@ -521,20 +550,23 @@ SCRIPT = r"""
       g.appendChild(t);
       if (o.short) {
         t.setAttribute("class", t.getAttribute("class") + " ln");
-        var t0 = sv("text", { "class": "nlabel mid sh", y: r1(hh + 3) }), ts0 = sv("tspan", { x: 0, dy: "1em" }); ts0.textContent = n.l.length > 12 ? n.l.slice(0, 11).replace(/\s+$/, "") + "…" : n.l; t0.appendChild(ts0); g.appendChild(t0);
+        var t0 = sv("text", { "class": "nlabel mid sh", y: r1(hh + 3) });
+        wrap(n.l, o.sn || 12, SC.narrow ? 1 : 2).forEach(function (s0, i0) { var ts0 = sv("tspan", { x: 0, dy: i0 ? "1.12em" : "1em" }); ts0.textContent = s0; t0.appendChild(ts0); }); g.appendChild(t0);
       }
       return g;
     }
     function mkEdge(o) {
       var e = E[o.i], eff = e.effect, con = e.kind === "contradicts", p = o.pts;
       var eo = { 3: 0.5, 2: 0.34, 1: 0.2 }[conf(e)];
-      if (SC.kind !== "all") eo = { 3: 0.9, 2: 0.7, 1: 0.5 }[conf(e)];
+      if (SC.kind === "chain") eo = { 3: 1, 2: 0.85, 1: 0.7 }[conf(e)]; else if (SC.kind !== "all") eo = { 3: 0.9, 2: 0.7, 1: 0.5 }[conf(e)];
       var g = sv("g", { "class": "ed e-" + eff + " k-" + e.kind + " st-" + e.status + (o.perm ? " perm" : "") + (o.ghosted ? " ghosted" : ""), "data-i": o.i });
-      g.setAttribute("style", "--eo:" + (o.perm ? 1 : eo) + ";--sw:" + r1(o.sw) + "px;--sw2:" + r1(o.sw + 1.4) + "px");
+      var swc = SC.kind === "chain" && conf(e) === 1 ? o.sw * 0.8 : o.sw;
+      g.setAttribute("style", "--eo:" + (o.perm ? 1 : eo) + ";--sw:" + r1(swc) + "px;--sw2:" + r1(swc + 1.4) + "px");
       var d = pathD(p), line = sv("path", { "class": "line", d: d, "marker-end": "url(#mk" + UID + "-" + (con ? "bar" : eff) + (o.size || e.s) + ")" });
       var tt = sv("title"); tt.textContent = N[e.f].l + " to " + N[e.t].l + ": " + (e.label || ""); line.appendChild(tt);
       g.appendChild(line); g.appendChild(sv("path", { "class": "hit", d: d }));
-      var lb = o.lab, lines = wrap(e.label || "", lb.w, lb.ln), t = sv("text", null, "elabel");
+      var lb = o.lab, ptxt = SC.kind === "chain" && !o.ghosted ? (con ? "≠ contradicts · " : eff === "up" ? "▲ raises · " : eff === "down" ? "▼ lowers · " : eff === "mixed" ? "◆ mixed · " : "") : "";
+      var lines = wrap(ptxt + (e.label || ""), lb.w + ptxt.length, lb.ln), t = sv("text", null, "elabel");
       var pos = lb.mid ? bez(p, 0.5) : [lb.x, lb.y], lh = 14.5, y0;
       if (lb.vert) { y0 = pos[1] - (lines.length * lh) / 2 + 11; }
       else if (lb.mid) { y0 = pos[1] - 8 - (lines.length - 1) * lh; }
@@ -554,6 +586,8 @@ SCRIPT = r"""
     function render() {
       gScene.textContent = ""; nodeEl = {}; edgeEl = {}; laneEl = {};
       svg.setAttribute("class", "scn-" + SC.kind + (SC.vertical ? " vert" : ""));
+      if (!svg.getAttribute("data-al")) svg.setAttribute("data-al", svg.getAttribute("aria-label") || "");
+      if (SC.kind === "chain") { var cc = CH[S.chain]; svg.setAttribute("aria-label", cc.title + ": " + cc.n.map(function (id) { return N[id].l; }).join(", then ") + ". Select a node for details."); } else svg.setAttribute("aria-label", svg.getAttribute("data-al"));
       var gl = sv("g", null, "lanes"), ge = sv("g", null, "edges"), gn = sv("g", null, "nodes");
       if (SC.lanes) {
         var cnt = {}; ids.forEach(function (id) { var d = N[id].d; cnt[d] = (cnt[d] || 0) + 1; });
@@ -562,21 +596,27 @@ SCRIPT = r"""
           g.appendChild(sv("rect", { "class": "lane " + c, x: 6, y: top, width: SC.W - 12, height: h, rx: 8 }));
           g.appendChild(sv("rect", { "class": "ltag " + c, x: 6, y: top, width: 5, height: h, rx: 2 }));
           var name = d >= 0 ? data.doms[d] : "Other", t = sv("text", null, "lanelabel");
+          if (SC.narrow) {   /* phone: short topic names in a bigger font so the lane is readable at fit */
+            var lf = Math.round(SC.fsU * 1.02), nm = d >= 0 ? NARROW_LANE[d] : "Other";
+            t.setAttribute("style", "font-size:" + lf + "px"); var ts1 = sv("tspan", { x: 16, y: top + 10 + lf }); ts1.textContent = nm; t.appendChild(ts1); g.appendChild(t);
+            var tc1 = sv("text", { "class": "lanecount", x: 16, y: top + 14 + lf * 2, style: "font-size:" + Math.round(lf * 0.85) + "px" }); tc1.textContent = cnt[d]; g.appendChild(tc1);
+          } else {
           wrap(name, 13, 3).forEach(function (s, i) { var ts = sv("tspan", { x: 22, y: top + 24 + i * 15.5 }); ts.textContent = s; t.appendChild(ts); });
           g.appendChild(t);
           var tc = sv("text", { "class": "lanecount", x: 22, y: top + 24 + wrap(name, 13, 3).length * 15.5 + 2 }); tc.textContent = cnt[d] + (cnt[d] === 1 ? " node" : " nodes"); g.appendChild(tc);
+          }
           gl.appendChild(g); laneEl[d] = g;
         });
-        var ax = sv("g", null, "axisg"), x1 = 168, x2 = SC.W - 20;
-        var t1 = sv("text", { "class": "axis", x: x1 - 20, y: 18 }); t1.textContent = "Causes"; ax.appendChild(t1);
-        var t2 = sv("text", { "class": "axis", x: x2, y: 18, "text-anchor": "end" }); t2.textContent = "Outcomes"; ax.appendChild(t2);
+        var ax = sv("g", null, "axisg"), x1 = SC.gut + 48, x2 = SC.W - 20, axs = SC.narrow ? "font-size:" + Math.round(SC.fsU * 0.8) + "px" : null;
+        var t1 = sv("text", { "class": "axis", x: x1 - 20, y: 18 }); t1.textContent = "Causes"; if (axs) t1.setAttribute("style", axs); ax.appendChild(t1);
+        var t2 = sv("text", { "class": "axis", x: x2, y: 18, "text-anchor": "end" }); t2.textContent = "Outcomes"; if (axs) t2.setAttribute("style", axs); ax.appendChild(t2);
         ax.appendChild(sv("path", { "class": "axisln", d: "M" + (x1 + 44) + " 14H" + (x2 - 70) + "M" + (x2 - 76) + " 10L" + (x2 - 68) + " 14L" + (x2 - 76) + " 18", fill: "none" }));
         gl.appendChild(ax);
       }
       SC.edges.slice().sort(function (a, b) { return E[a.i].s - E[b.i].s; }).forEach(function (o) { var g = mkEdge(o); ge.appendChild(g); edgeEl[o.i] = g; });
       Object.keys(SC.nodes).forEach(function (id) {
         var o = SC.nodes[id]; o.id = id;
-        o.lo = false; o.short = SC.kind === "all";
+        o.lo = false; o.short = SC.kind === "all" && !o.hub;
         var g = mkNode(id, o); gn.appendChild(g); nodeEl[id] = g; wireNode(g, id);
       });
       gScene.appendChild(gl); gScene.appendChild(ge); gScene.appendChild(gn);
@@ -591,7 +631,7 @@ SCRIPT = r"""
       svg.setAttribute("viewBox", vb.x.toFixed(1) + " " + vb.y.toFixed(1) + " " + vb.w.toFixed(1) + " " + vb.h.toFixed(1));
       var s = r.w / vb.w;
       svg.classList.toggle("zl", s >= 0.9);
-      if (SC && SC.kind !== "chain") { var f = Math.min(19, Math.max(13, 13 / s)); svg.style.setProperty("--nfs", f.toFixed(1) + "px"); svg.style.setProperty("--efs", f.toFixed(1) + "px"); } else { svg.style.removeProperty("--nfs"); svg.style.removeProperty("--efs"); }
+      if (SC && SC.kind !== "chain") { var f = Math.min(28, Math.max(13, (SC.narrow ? 10.5 : 12.5) / s)); svg.style.setProperty("--nfs", f.toFixed(1) + "px"); svg.style.setProperty("--efs", f.toFixed(1) + "px"); } else { svg.style.removeProperty("--nfs"); svg.style.removeProperty("--efs"); }
     }
     function clampVB() {
       var m = 90;
@@ -601,10 +641,8 @@ SCRIPT = r"""
     function fit(top) {
       var r = box2(), pad = SC.kind === "chain" ? 8 : 12, s = Math.min(r.w / (SC.W + 2 * pad), r.h / (SC.H + 2 * pad));
       if (SC.kind === "chain") s = Math.min(s, 1.15);
-      var narrow = r.w < 600 && SC.kind !== "chain";
-      if (narrow && !top && s < 0.62) {  /* phones: start readable, anchored at the first columns; "Fit" shows the whole map */
-        s = 0.62; vb.w = r.w / s; vb.h = r.h / s; vb.x = -pad; vb.y = -pad;
-      } else { vb.w = r.w / s; vb.h = r.h / s; vb.x = SC.W / 2 - vb.w / 2; vb.y = SC.H / 2 - vb.h / 2; }
+      vb.w = r.w / s; vb.h = r.h / s; vb.x = SC.W / 2 - vb.w / 2; vb.y = SC.H / 2 - vb.h / 2;
+      if (SC.narrow && SC.kind !== "chain" && vb.h > SC.H + 2 * pad) vb.y = -pad;   /* phone: map hugs the top, free space below keeps the zoom buttons clear */
       fitS = s; setVB();
     }
     function zoomAt(k, cx, cy) {
@@ -670,7 +708,11 @@ SCRIPT = r"""
       var w = view.clientWidth; if (!w) return;
       if (S.view === "chains" && CH.length && SC && SC.kind === "chain") {
         if (Math.abs(w - lastW) > 8) { lastW = w; var keep = S.sel; SC = buildScene(); sizeView(); render(); applyAll(); fit(); if (keep && nodeEl[keep]) { } }
-      } else { lastW = w; if (SC) setVB(); }
+      } else {
+        lastW = w;
+        if (SC && SC.kind !== "chain" && (w < 600) !== !!SC.narrow && LAY[(SC.kind === "all" ? "all" : "t:" + S.topic) + ":m"]) { rebuild(); return; }
+        if (SC) setVB();
+      }
     }
     if (window.ResizeObserver) new ResizeObserver(onResize).observe(view); else window.addEventListener("resize", onResize);
 
@@ -771,7 +813,7 @@ SCRIPT = r"""
 
     /* ---------- panel ---------- */
     function fxGlyph(e) { if (e.kind === "contradicts") return ["≠", "con"]; var f = FX[e.effect] || FX.none; return [f[0], f[1]]; }
-    function badge(st) { return el("span", "bdg " + st, st === "mixed" ? "Part predicted" : st === "predicted" ? "Predicted" : "Reported"); }
+    function badge(st) { var b = el("span", "bdg " + st, st === "mixed" ? "Reported + predicted" : st === "predicted" ? "Predicted" : "Reported"); if (st !== "reported") b.title = "Dashed = forecast, not yet reported"; return b; }
     function item(otherId, i, arrow) {
       var e = E[i], o = N[otherId], b = el("button", "pitem"); b.type = "button";
       var g = fxGlyph(e), fx = el("span", "fx " + g[1], g[0]); fx.setAttribute("aria-hidden", "true");
@@ -941,15 +983,17 @@ SCRIPT = r"""
       var wrapEl = el("div", "rail-in");
       if (S.view === "chains") {
         wrapEl.appendChild(el("div", "rh", "Key causal chains"));
+        var cul = el("ul", "cl"); wrapEl.appendChild(cul);
         CH.forEach(function (c, i) {
           var b = el("button", "ccard"); b.type = "button"; b.setAttribute("aria-pressed", i === S.chain ? "true" : "false"); b.setAttribute("data-c", i);
+          if (i === S.chain) b.setAttribute("aria-current", "true");
           b.appendChild(el("span", "ct", c.title)); b.appendChild(el("span", "cs", c.sum));
           var m = el("span", "cm"); m.appendChild(badge(c.st));
           c.d.slice(0, 3).forEach(function (d) { m.appendChild(el("span", "dchip " + dcls(d), d >= 0 ? data.short[d] : "Other")); });
           if (c.d.length > 3) m.appendChild(el("span", "dchip", "+" + (c.d.length - 3)));
           b.appendChild(m);
           b.addEventListener("click", function () { S.chain = i; S.sel = null; rebuild(); });
-          wrapEl.appendChild(b);
+          var cli = el("li"); cli.appendChild(b); cul.appendChild(cli);
         });
       } else {
         wrapEl.appendChild(el("div", "rh", "Pick a topic"));
@@ -970,6 +1014,7 @@ SCRIPT = r"""
       if (S.view === "chains") {
         var c = CH[S.chain]; mt.appendChild(document.createTextNode(c.title + " ")); mt.appendChild(badge(c.st));
         mh.textContent = SC.vertical ? "Top to bottom, one step per arrow. Tap any node for details." : "Left to right, one step per arrow. Faint nodes link to the chain: click one to follow it.";
+        mh.appendChild(el("span", "mkey", " ▲ raises  ▼ lowers  dashed = predicted"));
       } else if (S.view === "topic") {
         var t = TOP.filter(function (x) { return x.k === S.topic; })[0];
         mt.textContent = (t ? t.l : "Topic") + (t ? " · " + t.n + " nodes" : "");
@@ -980,13 +1025,15 @@ SCRIPT = r"""
       }
     }
     function sizeView() {
-      if (SC.kind === "chain" && SC.vertical) view.style.height = Math.min(SC.H + 16, 820) + "px"; else view.style.height = "";
+      if (SC.kind === "chain" && SC.vertical) view.style.height = Math.min(SC.H + 16, 820) + "px";
+      else if (SC.narrow && view.clientWidth > 0) view.style.height = Math.round(Math.min(720, Math.max(380, SC.H * view.clientWidth / (SC.W + 24) + 110))) + "px";
+      else view.style.height = "";
     }
     function rebuild() {
       hideTip(); clearHover();
       SC = buildScene(); sizeView(); box.setAttribute("data-view", S.view);
       var fl = box.querySelector(".cflt"); if (fl) fl.hidden = S.view !== "all";
-      [].forEach.call(box.querySelectorAll(".seg button"), function (b) { b.setAttribute("aria-checked", b.getAttribute("data-view") === S.view ? "true" : "false"); });
+      [].forEach.call(box.querySelectorAll(".seg button"), function (b) { var on = b.getAttribute("data-view") === S.view; b.setAttribute("aria-checked", on ? "true" : "false"); b.tabIndex = on ? 0 : -1; });
       buildRail(); headers(); render();
       if (S.sel && !nodeEl[S.sel]) S.sel = null;
       lastW = view.clientWidth; fit(); applyAll();
@@ -1002,9 +1049,9 @@ SCRIPT = r"""
       if (b.getAttribute("data-view") === "topic" && !TOP.length) b.hidden = true;
       b.addEventListener("click", function () { setView(b.getAttribute("data-view")); });
       b.addEventListener("keydown", function (ev) {
-        var k = ev.key; if (k !== "ArrowRight" && k !== "ArrowLeft") return;
+        var k = ev.key; if (["ArrowRight", "ArrowLeft", "ArrowDown", "ArrowUp", "Home", "End"].indexOf(k) < 0) return;
         var bs = [].filter.call(box.querySelectorAll(".seg button"), function (x) { return !x.hidden; }), i = bs.indexOf(b);
-        var nb = bs[(i + (k === "ArrowRight" ? 1 : bs.length - 1)) % bs.length]; ev.preventDefault(); nb.focus(); setView(nb.getAttribute("data-view"));
+        var nb = k === "Home" ? bs[0] : k === "End" ? bs[bs.length - 1] : bs[(i + (k === "ArrowRight" || k === "ArrowDown" ? 1 : bs.length - 1)) % bs.length]; ev.preventDefault(); nb.focus(); setView(nb.getAttribute("data-view"));
       });
     });
 
@@ -1376,7 +1423,7 @@ def _seg_cross(a, b, c, d):
     return o(a, b, c) * o(a, b, d) < 0 and o(c, d, a) * o(c, d, b) < 0
 
 
-def _flow_layout(nodes, edges, lane_of, cap=3, layers=None, ghosts=(), ghost_cap=5, row_h=ROW_H, col_w=COL_W):
+def _flow_layout(nodes, edges, lane_of, cap=3, layers=None, ghosts=(), ghost_cap=5, row_h=ROW_H, col_w=COL_W, gutter=GUTTER, tail=LANE_TAIL):
     """Columns = causal depth (causes left, outcomes right); rows = topic lanes; inside a lane the
     nodes of one column stack in slots ordered by barycentre sweeps to cut crossings. A column
     holding more than `cap` nodes of one lane splits into sub-columns to its left, so lanes stay short.
@@ -1440,7 +1487,7 @@ def _flow_layout(nodes, edges, lane_of, cap=3, layers=None, ghosts=(), ghost_cap
     for i in ids:
         groups.setdefault((lane[i], col[i]), []).append(i)
     R = {l: max([len(g) for (ln, c), g in groups.items() if ln == l] or [1]) for l in best}
-    heights = {l: SLOT_PAD + (R[l] - 1) * row_h + LANE_TAIL for l in best}
+    heights = {l: SLOT_PAD + (R[l] - 1) * row_h + tail for l in best}
     tops, y = {}, PAD_TOP
     for l in best:
         tops[l] = y
@@ -1455,7 +1502,7 @@ def _flow_layout(nodes, edges, lane_of, cap=3, layers=None, ghosts=(), ghost_cap
     def ypos(i, sl=None):
         return tops[lane[i]] + SLOT_PAD + (slot[i] if sl is None else sl[i]) * row_h
 
-    X0 = GUTTER + 56
+    X0 = gutter + 56
 
     def xpos(i):
         return X0 + col[i] * col_w
@@ -1525,6 +1572,12 @@ def _spread(k, n, step):
     return (k - (n - 1) / 2) * min(step, 20 / max(n, 1))
 
 
+def _fan(k, n):
+    """Angle in degrees for port k of n: evenly spread, wider for busier nodes (capped so ports stay clear of the label)."""
+    half = min(64.0, 13.0 * (n - 1) / 2 + 8)
+    return -half + 2 * half * k / (n - 1)
+
+
 def _route_edges(edge_ids, edges, pos, byid):
     """One cubic per edge from the right side of the source to the left side of the target. Links that
     would run through other nodes (or their labels) bow above/below them; the cheapest clean candidate
@@ -1542,14 +1595,21 @@ def _route_edges(edge_ids, edges, pos, byid):
         outp.setdefault(e["from"], []).append(k)
         inp.setdefault(e["to"], []).append(k)
     off_o, off_i = {}, {}
+    ang_o, ang_i = {}, {}   # fan angles (radians) for busy nodes: ports spread around the shape, not stacked
     for nid, lst in outp.items():
         lst.sort(key=lambda k: (pos[edges[k]["to"]][1], k))
         for j, k in enumerate(lst):
-            off_o[k] = _spread(j, len(lst), 6)
+            if len(lst) >= 3:
+                ang_o[k] = math.radians(_fan(j, len(lst)))
+            else:
+                off_o[k] = _spread(j, len(lst), 6)
     for nid, lst in inp.items():
         lst.sort(key=lambda k: (pos[edges[k]["from"]][1], k))
         for j, k in enumerate(lst):
-            off_i[k] = _spread(j, len(lst), 6)
+            if len(lst) >= 3:
+                ang_i[k] = math.radians(_fan(j, len(lst)))
+            else:
+                off_i[k] = _spread(j, len(lst), 6)
     out = {}
     order = sorted(edge_ids, key=lambda k: (-edges[k]["strength"], k))
     for k in order:
@@ -1558,8 +1618,17 @@ def _route_edges(edge_ids, edges, pos, byid):
         (xa, ya), (xb, yb) = pos[a], pos[b]
         hwa = _EXT[byid[a]["type"]][0]
         hwb = _EXT[byid[b]["type"]][0]
-        p0 = (xa + hwa + 2, ya + off_o.get(k, 0))
-        p3 = (xb - hwb - 3, yb + off_i.get(k, 0))
+        hha = _EXT[byid[a]["type"]][1]
+        hhb = _EXT[byid[b]["type"]][1]
+        ta, tb = ang_o.get(k), ang_i.get(k)
+        if ta is not None:
+            p0 = (xa + (hwa + 2) * math.cos(ta), ya + (hha + 3) * math.sin(ta))
+        else:
+            p0 = (xa + hwa + 2, ya + off_o.get(k, 0))
+        if tb is not None:
+            p3 = (xb - (hwb + 3) * math.cos(tb), yb + (hhb + 3) * math.sin(tb))
+        else:
+            p3 = (xb - hwb - 3, yb + off_i.get(k, 0))
         dx = p3[0] - p0[0]
         fwd = dx > 24
         ax = max(34.0, 0.42 * dx) if fwd else 64.0 + 0.1 * abs(ya - yb)
@@ -1571,8 +1640,8 @@ def _route_edges(edge_ids, edges, pos, byid):
             for b1, b2 in ((bw, bw), (bw, 0), (0, bw)):
                 if bw == 0 and (b1, b2) != (0, 0):
                     continue
-                c1 = (p0[0] + ax, p0[1] + b1)
-                c2 = (p3[0] - ax, p3[1] + b2)
+                c1 = (p0[0] + ax, p0[1] + b1 + (ax * 0.55 * math.sin(ta) if ta is not None else 0))
+                c2 = (p3[0] - ax, p3[1] + b2 + (ax * 0.55 * math.sin(tb) if tb is not None else 0))
                 pts = [p0, c1, c2, p3]
                 xs = [q[0] for q in pts]
                 ys = [q[1] for q in pts]
@@ -1630,7 +1699,7 @@ def _legend(types_used, has):
     items.append(f'<span>{lk("down", "M1 6 H27", W24)}<span>lowers</span></span>')
     items.append(f'<span>{lk("mixed", "M1 6 H27", W24)}<span>mixed</span></span>')
     items.append(f'<span>{lk("", "M1 6 H27", W24)}<span>reported</span></span>')
-    items.append(f'<span>{lk("", "M1 6 H27", WD)}<span>predicted</span></span>')
+    items.append(f'<span>{lk("", "M1 6 H27", WD)}<span>predicted (dashed = forecast, not yet reported)</span></span>')
     if has.get("feedback"):
         items.append(f'<span><svg class="lk" viewBox="0 0 36 12" aria-hidden="true"><path d="M3 11 C3 -4 31 -4 31 8" stroke-width="2"/><path class="hd" d="M31 11 L27.5 6 L34.5 6Z"/></svg><span>feedback loop</span></span>')
     if has.get("contradicts"):
@@ -1656,10 +1725,14 @@ def _pick_layout(nodes, edges, lane_of, caps, tw, th, **kw):
     return best
 
 
-def _scene_json(res, routes, ghosts=(), with_lanes=False):
+def _scene_json(res, routes, ghosts=(), with_lanes=False, cw=None, gut=None):
     out = {"W": round(res["W"]), "H": round(res["H"]),
            "p": {i: [round(x, 1), round(y, 1)] for i, (x, y) in res["pos"].items()},
            "e": {str(k): v for k, v in routes.items()}}
+    if cw:
+        out["cw"] = cw
+    if gut:
+        out["gut"] = gut
     if ghosts:
         out["g"] = sorted(ghosts)
     if with_lanes:
@@ -1667,7 +1740,7 @@ def _scene_json(res, routes, ghosts=(), with_lanes=False):
     return out
 
 
-def _topic_scene(members, edges, byid, order_ix, ghost_cap=10):
+def _topic_scene(members, edges, byid, order_ix, ghost_cap=10, tw=740, th=560, col_w=COL_W, row_h=ROW_H, gutter=GUTTER):
     """Nodes of one topic laid out by causal depth, plus the strongest outside neighbours as ghosts
     (causes in a column on the left, effects in a column on the right)."""
     mids = [m["id"] for m in members]
@@ -1693,10 +1766,10 @@ def _topic_scene(members, edges, byid, order_ix, ghost_cap=10):
     ekeys = inner + sorted(k for g in ranked for k in gs[g][2])
     ekeys = list(dict.fromkeys(ekeys))
     sub_nodes = [byid[i] for i in mids] + [byid[g] for g in ranked]
-    res = _pick_layout(sub_nodes, [edges[k] for k in ekeys], {n["id"]: 0 for n in sub_nodes}, (3, 4, 5, 6, 8, 11), 740, 560,
-                       layers=layers, ghosts=gset, ghost_cap=6)
+    res = _pick_layout(sub_nodes, [edges[k] for k in ekeys], {n["id"]: 0 for n in sub_nodes}, (3, 4, 5, 6, 8, 11), tw, th,
+                       layers=layers, ghosts=gset, ghost_cap=6, col_w=col_w, row_h=row_h, gutter=gutter)
     routes = _route_edges(ekeys, edges, res["pos"], byid)
-    return _scene_json(res, routes, gset)
+    return _scene_json(res, routes, gset, cw=col_w)
 
 
 # ---------------------------------------------------------------- connection map
@@ -1736,8 +1809,11 @@ def _connection_map(graph, note=""):
     lane_of = {n["id"]: _lane_of(n) for n in nodes}
 
     # everything: layered layout with topic rows
-    res = _pick_layout(nodes, edges, lane_of, (2, 3, 4, 5), 1000, 860, row_h=70, col_w=124)
-    lay = {"all": _scene_json(res, _route_edges(range(len(edges)), edges, res["pos"], byid), (), True)}
+    res = _pick_layout(nodes, edges, lane_of, (2, 3, 4, 5), 1000, 860, row_h=96, col_w=132, tail=72)
+    lay = {"all": _scene_json(res, _route_edges(range(len(edges)), edges, res["pos"], byid), (), True, cw=132)}
+    # phone variants (key ":m"): chosen for a tall, narrow viewport so the whole map fits at a readable scale
+    resm = _pick_layout(nodes, edges, lane_of, (2, 3, 4, 5, 6, 8), 366, 720, row_h=90, col_w=150, gutter=150, tail=82)
+    lay["all:m"] = _scene_json(resm, _route_edges(range(len(edges)), edges, resm["pos"], byid), (), True, cw=150, gut=150)
 
     # topics: one per domain (and per region with at least two nodes)
     members_by = {}
@@ -1748,6 +1824,7 @@ def _connection_map(graph, note=""):
         key = f"d{l}" if l < 7 else "dx"
         topics.append({"k": key, "t": "d", "d": l if l < 7 else -1, "l": DOMAINS[l] if l < 7 else "Other", "n": len(members_by[l])})
         lay["t:" + key] = _topic_scene(members_by[l], edges, byid, order_ix)
+        lay["t:" + key + ":m"] = _topic_scene(members_by[l], edges, byid, order_ix, tw=366, th=720, col_w=148, row_h=118, gutter=34)
     regions = {}
     for n in nodes:
         if n["region"]:
@@ -1757,6 +1834,7 @@ def _connection_map(graph, note=""):
             continue
         topics.append({"k": "r:" + r, "t": "r", "d": -2, "l": r, "n": len(regions[r])})
         lay["t:r:" + r] = _topic_scene(regions[r], edges, byid, order_ix)
+        lay["t:r:" + r + ":m"] = _topic_scene(regions[r], edges, byid, order_ix, tw=366, th=720, col_w=148, row_h=118, gutter=34)
 
     chains = _find_chains(nodes, edges)
 
@@ -1829,7 +1907,7 @@ def _connection_map(graph, note=""):
     if chains:
         nos = ('<noscript><ol class="nos">' + "".join(f'<li>{_e(c["title"])}: {_e(c["sum"])}</li>' for c in chains) + "</ol></noscript>")
     note_html = f'<p class="vnote">{_e(note)}</p>' if note else ""
-    return (f'<h4>Connection map</h4>{note_html}<div class="cmapwrap">'
+    return (f'<h4>How the news moves markets, step by step</h4><p class="vnote">Each arrow is one cause-and-effect step. Green raises, red lowers.</p>{note_html}<div class="cmapwrap">'
             f'<div class="cmap" id="cmap{uid}" data-view="chains"><div class="ctop">{seg}{search}</div>{filters}{nos}<div class="cbody">'
             f'<nav class="crail" aria-label="Chooser"></nav>'
             f'<div class="cmain"><div class="mhead"><div class="mt"></div><div class="mh"></div></div>'
