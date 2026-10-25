@@ -234,7 +234,14 @@ def generate_json(prompt: str, label: str = "LLM", require: str = None,
             continue
         result = _extract_json(text, require)
         if result is None:
-            print(f"[{label}] {model} gave no usable JSON; starts: {text[:160]!r}")
+            print(f"[{label}] {model} gave no usable JSON ({len(text)} chars); starts: {text[:100]!r} ends: {text[-120:]!r}")
+            if os.environ.get("DRY_RUN", "").lower() == "true":
+                try:  # keep the raw reply in the preview artifact so the failure can be inspected
+                    os.makedirs("preview", exist_ok=True)
+                    with open(f"preview/llm_fail_{label}_{model.split('/')[-1]}.txt", "w", encoding="utf-8") as f:
+                        f.write(text)
+                except OSError:
+                    pass
             continue
         last_model = model
         print(f"[{label}] ok via {model} in {time.time() - started:.0f}s ({len(text)} chars)")
