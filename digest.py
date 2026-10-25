@@ -562,14 +562,28 @@ Today is {today}. Write an analytical brief grounded ONLY in these headlines and
   "second_order": [{{"event": "headline-level fact", "effect": "non-obvious knock-on effect", "who_is_affected": "..."}}],
   "scenarios": [{{"if": "trigger to watch in the next 1-2 weeks", "then": "likely consequence", "likelihood": "low|medium|high", "signpost": "what would confirm it"}}],
   "contrarian": [{{"signal": "evidence in today's news", "mainstream_view": "what most coverage assumes", "why_it_matters": "..."}}],
-  "bottom_line": "two sentences on what matters most tonight",
+  "bottom_line": "two sentences on what matters most tonight"
+}}
+Give 3-4 causal chains, 3-5 second-order effects, 3-4 scenarios and 2-3 contrarian signals.
+"""
+
+
+GRAPH_PROMPT = """You are an intelligence analyst. Today's headlines (id | topic | region | sources | headline):
+{lines}
+
+Market snapshot (price, daily change):
+{market}
+
+Today is {today}. The evening brief already found these main themes: {themes}
+
+Return JSON only:
+{{
   "graph": {{
     "nodes": [{{"id": "n1", "label": "short name, max 28 chars", "type": "event|country|company|sector|commodity|index|institution", "domain": "one of: {domains}, or empty", "region": "India|US|Canada|China|Global", "detail": "1-2 sentences: what happened, with numbers, names and dates from the headlines", "why_it_matters": "one sentence on why a reader should care", "direction": "up|down|flat|none", "market": "exact label from the market snapshot if this node is that ticker/commodity/index, else empty", "ids": [3, 17]}}],
     "edges": [{{"from": "n1", "to": "n2", "label": "the mechanism, max 30 chars, e.g. raises shipping costs", "effect": "up|down|mixed", "strength": 1, "confidence": "low|medium|high", "status": "reported|predicted", "order": 1, "kind": "causal|feedback|contradicts", "why": "one sentence explaining the mechanism", "lag": "hours|days|weeks"}}]
   }}
 }}
-Give 3-4 causal chains, 3-5 second-order effects, 3-4 scenarios and 2-3 contrarian signals.
-For "graph": a detailed connection map of tonight's news with 30-45 nodes and 40-65 edges. Node types: event (something that happened), country, company, sector, commodity, index (stock index, currency, crypto), institution (central bank, regulator, policy, alliance). Cover EVERY domain and give every node a concrete detail and why_it_matters. Every edge is a cause->effect arrow (from causes to) whose label states the MECHANISM (not just "affects"), with effect = whether the target goes up or down (or mixed). status "reported" = the headlines directly report this link; "predicted" = your inference. order 1 = direct effect, 2 = second-order, 3 = third-order: build multi-step chains (A->B->C->D) and mark them with order. Use kind "feedback" for an edge that loops back to an earlier cause and "contradicts" where one development cuts against another. Make hub nodes (one cause with 3+ effects) where the news supports it; include India, US, Canada and China angles. strength 3 = strong/direct, 2 = moderate, 1 = weak spillover; confidence is how sure you are of the link. Put the headline ids that support a node in its ids list (the number at the start of each headline line). Every edge endpoint must be a node id; ids are n1, n2, ...
+Build a detailed connection map of tonight's news with 28-40 nodes and 36-55 edges. Node types: event (something that happened), country, company, sector, commodity, index (stock index, currency, crypto), institution (central bank, regulator, policy, alliance). Cover EVERY domain and give every node a concrete detail and why_it_matters. Every edge is a cause->effect arrow (from causes to) whose label states the MECHANISM (not just "affects"), with effect = whether the target goes up or down (or mixed). status "reported" = the headlines directly report this link; "predicted" = your inference. order 1 = direct effect, 2 = second-order, 3 = third-order: build multi-step chains (A->B->C->D) and mark them with order. Use kind "feedback" for an edge that loops back to an earlier cause and "contradicts" where one development cuts against another. Make hub nodes (one cause with 3+ effects) where the news supports it; include India, US, Canada and China angles. strength 3 = strong/direct, 2 = moderate, 1 = weak spillover; confidence is how sure you are of the link. Put the headline ids that support a node in its ids list (the number at the start of each headline line). Every edge endpoint must be a node id; ids are n1, n2, ...
 """
 
 
@@ -587,8 +601,13 @@ def build_intelligence(stories, articles_today, snapshot):
                               temperature=0.4, budget_s=300)
     if not result or not any(result.get(k) for k in ("causal_chains", "scenarios", "second_order")):
         return None
+    g = None
     try:
-        g = sanitize_graph(result.get("graph"))
+        themes = "; ".join(c.get("title", "") for c in (result.get("causal_chains") or []) if isinstance(c, dict))[:600]
+        gres = llm.generate_json(GRAPH_PROMPT.format(lines=lines, market=mkt, today=NOW.strftime("%A, %B %d, %Y"),
+                                                     themes=themes or "n/a", domains="; ".join(DOMAIN_ORDER)),
+                                 label="GRAPH", require="graph", temperature=0.3, budget_s=240)
+        g = sanitize_graph((gres or {}).get("graph"))
     except Exception as e:
         print(f"[INTEL] graph validation error: {e}")
         g = None
@@ -730,11 +749,9 @@ def build_fallback_graph(stories, thread_store, snapshot=None):
     Edges join threads that share keywords, and movers to threads about them.
     Returns {"graph":..., "source":"threads"} or None."""
     threads = [t for t in (thread_store or {}).get("threads", [])
-               if len(t.get("stories", [])) >= 3 or (len(t.get("stories", [])) >= 2 and len(t.get("domains", [])) >= 2)]
+               if len(t.get("stories", [])) >= 2]
     threads.sort(key=lambda t: (len(t["domains"]) > 1, len(t["stories"]), t.get("last_seen", "")), reverse=True)
     threads = threads[:30]
-    if len(threads) < 2:
-        return None
     nodes = []
     for i, t in enumerate(threads, 1):
         latest = sorted(t["stories"], key=lambda x: x["date"], reverse=True)
@@ -759,14 +776,40 @@ def build_fallback_graph(stories, thread_store, snapshot=None):
                 edges.append({"from": f"n{a+1}", "to": f"n{b+1}", "label": _clean("shares: " + ", ".join(sorted(shared)[:3]), 32),
                               "strength": 3 if len(shared) >= 4 else 2 if len(shared) == 3 else 1,
                               "status": "reported", "confidence": "low", "order": 1, "kind": "causal", "effect": "mixed"})
+    # Few threads yet (early days, quiet news): add today's top stories as nodes, linked by shared words
+    if len(nodes) < 14:
+        known = {x["link"] for t in threads for x in t["stories"]}
+        extra = [x for x in sorted(stories, key=lambda x: -x["score"]) if x["link"] not in known][:14 - len(nodes)]
+        base = len(nodes)
+        toks = [archive.tokens(x["title"]) for x in extra]
+        for k, x in enumerate(extra):
+            nodes.append({"id": f"n{base + k + 1}", "label": _clean(x["title"], 28), "type": "event",
+                          "domain": x["domain"] if x["domain"] in DOMAIN_ORDER else "",
+                          "region": x["region"] if x["region"] in REGION_WEIGHT else "Global",
+                          "detail": _clean(x.get("summary") or x["title"], 260),
+                          "sources": [{"title": x["title"], "link": x["link"]}]})
+        for a in range(len(extra)):
+            for b in range(a + 1, len(extra)):
+                shared = toks[a] & toks[b]
+                if len(shared) >= 2:
+                    edges.append({"from": f"n{base + a + 1}", "to": f"n{base + b + 1}",
+                                  "label": _clean("shares: " + ", ".join(sorted(shared)[:3]), 32), "strength": 1,
+                                  "status": "reported", "confidence": "low", "order": 1, "kind": "causal", "effect": "mixed"})
+        # link new story nodes to the nearest thread by shared words, so the map joins up
+        for a, x in enumerate(extra):
+            for i, t in enumerate(threads):
+                if len(toks[a] & set(t.get("keywords", []))) >= 2:
+                    edges.append({"from": f"n{i + 1}", "to": f"n{base + a + 1}", "label": "same story line", "strength": 1,
+                                  "status": "reported", "confidence": "low", "order": 1, "kind": "causal", "effect": "mixed"})
+                    break
     # market movers (>= 1% either way) linked to threads that talk about them
-    n_id = len(threads)
+    n_id = len(nodes)
     for m in snapshot or []:
         pct = m.get("change_pct")
         if m.get("price") is None or pct is None or abs(pct) < 1:
             continue
         words = MARKET_WORDS.get(m["label"], set())
-        hits = [i for i, t in enumerate(threads) if words & set(t.get("keywords", [])) or words & archive.tokens(t["title"])]
+        hits = [i for i, n in enumerate(nodes) if words & archive.tokens(n["label"] + " " + n.get("detail", ""))]
         if not hits:
             continue
         n_id += 1

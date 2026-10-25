@@ -77,6 +77,11 @@ def _tint(hexc, k=0.84):
     return "#%02x%02x%02x" % tuple(int(c + (255 - c) * k) for c in (r, g, b))
 
 
+def _chg(mk, pct):
+    c = str(mk.get("change") or "").strip().lstrip("▲▼△▽ ").strip() if mk else ""
+    return c or ("%+.2f%%" % pct)
+
+
 def _int(v, lo, hi, default):
     try:
         return max(lo, min(hi, int(v)))
@@ -159,16 +164,25 @@ def _parse(graph, meas):
         elif direction in ("up", "down"):
             glyph = "▲" if direction == "up" else "▼"
         shape = TYPES[typ][0]
-        lines = meas.wrap((glyph + " " if glyph and pct is None else "") + label, FONT_NODE, 380, 3)
+        small = len(raw_nodes) < 8
+        maxw = 640 if small else 470
+        ltxt = (glyph + " " if glyph and pct is None else "") + label
+        if len(ltxt) > 72:
+            ltxt = ltxt[:71].rstrip() + "…"
+        fs = FONT_NODE + (6 if small else 0)
+        for fs in ((56, 50, 46, 42) if small else (50, 46, 42, 38)):
+            if len(meas.wrap(ltxt, fs, maxw, 99)) <= 3:
+                break
+        lines = meas.wrap(ltxt, fs, maxw, 3)
         mline = ""
         if pct is not None:
-            mline = f"{glyph} {mk.get('change') or ('%+.2f%%' % pct)}"
-        tag = f"{dom[1]} · {typ}"
-        tw = max([meas.w(l, FONT_NODE) for l in lines] + [meas.w(tag, FONT_TAG), meas.w(mline, 44) if mline else 0])
-        h = 22 + FONT_TAG * 1.25 + len(lines) * FONT_NODE * 1.2 + (50 if mline else 0) + 22
+            mline = f"{glyph} {_chg(mk, pct)}".strip()
+        tag = f"{dom[1]} · {typ}" if dom is not OTHER else typ
+        tw = max([meas.w(l, fs) for l in lines] + [meas.w(tag, FONT_TAG), meas.w(mline, 44) if mline else 0])
+        h = 22 + FONT_TAG * 1.25 + len(lines) * fs * 1.2 + (50 if mline else 0) + 22
         extra = {"hex": 0.32 * h, "para": 0.5 * h, "pill": 0.42 * h, "snip": 0.1 * h, "double": 26, "round": 10}.get(shape, 0)
         nodes.append(dict(id=nd["id"], label=label, typ=typ, shape=shape, dom=dom, lines=lines, tag=tag,
-                          mline=mline, pct=pct, mk=mk, w=tw + 2 * 26 + extra, h=h, glyph=glyph))
+                          mline=mline, pct=pct, mk=mk, w=tw + 2 * 26 + extra, h=h, glyph=glyph, fs=fs))
     edges = {}
     for e in (graph or {}).get("edges", []) or []:
         if not isinstance(e, dict):
@@ -401,6 +415,13 @@ def _order_and_place(nodes, st, rowlimit):
                 it = items[i]
                 lim = hi - wd(it) / 2 if i == len(items) - 1 else x[items[i + 1]] - (wd(items[i + 1]) + wd(it)) / 2 - GAPX
                 x[it] = min(x[it], lim)
+    items = [it for l in rows for it in rows[l]]
+    if items:
+        lo_x = min(x[it] - wd(it) / 2 for it in items)
+        hi_x = max(x[it] + wd(it) / 2 for it in items)
+        sh = W / 2 - (lo_x + hi_x) / 2
+        for it in items:
+            x[it] += sh
     return x
 
 
@@ -659,10 +680,10 @@ def _draw(graph, title, G, meas, nodes, edges, sel, plot=True):
         _shape(ax, nd["shape"], cx, cy, r[2], r[3], _tint(col), col, 8)
         yy = r[1] + 22 + FONT_TAG * 0.62
         T(cx, yy, nd["tag"], FONT_TAG, MUTED, "center")
-        yy += FONT_TAG * 0.62 + FONT_NODE * 0.62
+        yy += FONT_TAG * 0.62 + nd["fs"] * 0.62
         for ln in nd["lines"]:
-            T(cx, yy, ln, FONT_NODE, INK, "center")
-            yy += FONT_NODE * 1.2
+            T(cx, yy, ln, nd["fs"], INK, "center")
+            yy += nd["fs"] * 1.2
         if nd["mline"]:
             T(cx, yy - FONT_NODE * 0.2 + 12, nd["mline"], 44, INK, "center", weight="bold")
     # edge labels
@@ -697,7 +718,7 @@ def _draw(graph, title, G, meas, nodes, edges, sel, plot=True):
         return yy + 76
 
     def dom_item(d):
-        s = f"{d[1]} {d[0]}"
+        s = d[0] if d is OTHER else f"{d[1]} {d[0]}"
         def fn(xp, yp):
             ax.add_patch(__import__("matplotlib.patches", fromlist=["Rectangle"]).Rectangle((xp, yp - 19), 38, 38, fc=d[2], ec=INK, lw=0.8, zorder=3))
             T(xp + 52, yp, s, FONT_LEG, INK)
@@ -743,7 +764,7 @@ def _draw(graph, title, G, meas, nodes, edges, sel, plot=True):
         for k, nd in enumerate(shown):
             mk = nd["mk"] or {}
             price = str(mk.get("price") or "").strip()
-            s = f"{nd['glyph']} {nd['label']}  {price}  ({mk.get('change') or ('%+.2f%%' % nd['pct'])})"
+            s = f"{nd['glyph']} {nd['label']}  {price}  ({_chg(mk, nd['pct'])})"
             s = " ".join(s.split())
             while len(s) > 8 and meas.w(s, 40) > colw - 30:
                 s = s[:-2] + "…"
@@ -774,7 +795,7 @@ def render_graph_png(graph, title=""):
         if not sel[0] or sel[2] is None:
             return None
         best = None
-        for G in (260, 290, 320, 360, 400, 480):
+        for G in ((170, 210, 260, 320, 400) if len(nodes) < 8 else (260, 290, 320, 360, 400, 480)):
             _, tail, hard = _draw(graph, title, G, meas, nodes, edges, sel, plot=False)
             if tail + 930 > MAX_H and best is not None:
                 break
