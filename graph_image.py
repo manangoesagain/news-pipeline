@@ -1,13 +1,16 @@
 """Static PNG rendering of the connection-map graph (for Telegram / email).
 
 The web page holds the full interactive map.  A PNG cannot show 40+ nodes and 80
-labelled links legibly on a phone, so this renders the strongest multi-step causal
-chains as a layered top-down diagram (causes at the top), domain-tagged nodes with a
-shape per type, labelled arrows (solid = reported, dashed = predicted, red dotted =
-contradicts, curved = feedback loop), a legend and a "Biggest movers" caption.
+labelled links legibly on a phone, so this renders the 3-4 strongest causal chains as
+numbered "story" cards stacked top to bottom.  Each story reads left to right (a chain
+of 4-5 items wraps onto a second line): big nodes (shape = type, colour = domain,
+market change on market nodes) joined by arrows that each carry the mechanism
+(solid = reported, dashed = predicted, red dotted = contradicts, thicker = stronger,
+triangle = effect on the next item).  Below the stories: a compact legend, the
+"Biggest movers" and a pointer to the web page.
 
-All geometry is in pixels on a 2400px-wide canvas (dpi 100, so 1px = 0.72pt).
-Telegram shrinks photos to ~1080px, so main text is ~50px (about 22px on a phone).
+Geometry is in pixels on a 2400px-wide canvas (dpi 100, so 1px = 0.72pt).  Telegram
+shrinks photos to ~1080px (x0.45), so 50px text lands at ~22px on a phone.
 Output is deterministic (no randomness).
 """
 import base64
@@ -16,14 +19,17 @@ import math
 import re
 
 W = 2400
-MARGIN = 150
-GAPX = 56
-MAX_H = 3650
+MARGIN = 80
+CARD_PAD = 40
+MAX_H = 3400
 MAX_BYTES = 2_500_000
+MAX_STORIES = 4
 DEBUG = False  # tests: re-raise instead of returning None
 INK, MUTED, SURFACE, LINE = "#1b1f27", "#4b5260", "#fbfaf7", "#394150"
+CARD, CARD_EDGE = "#ffffff", "#d6d2c8"
 CONTRA = "#d03b3b"
-FONT_NODE, FONT_TAG, FONT_EDGE, FONT_LEG = 50, 30, 40, 36
+FONT_NODE, FONT_TAG, FONT_EDGE, FONT_LEG = 50, 36, 48, 40
+NODE_W, GAP3, GAP2 = 490, 350, 500
 
 # (name, tag, colour) - colour-blind-checked categorical slots (validate_palette.js,
 # light surface #fbfaf7: all checks pass, contrast WARN relieved by tag + legend labels).
@@ -37,6 +43,9 @@ DOMAINS = [
     ("Commodities & Prices", "CMD", "#6250d6"),
 ]
 OTHER = ("Other", "OTH", "#6b7280")
+SHORT = {"Technology & Semiconductors": "Tech & Chips", "Finance & Banking": "Finance",
+         "Stock Markets & Trading": "Markets", "Geopolitics & Diplomacy": "Geopolitics",
+         "Wars & Conflicts": "Wars", "Commodities & Prices": "Commodities"}
 _DOMAIN_KEYS = [
     ("ai", 0), ("machine", 0), ("tech", 1), ("semi", 1), ("financ", 2), ("bank", 2),
     ("stock", 3), ("market", 3), ("trad", 3), ("geopol", 4), ("diplom", 4),
@@ -77,16 +86,35 @@ def _tint(hexc, k=0.84):
     return "#%02x%02x%02x" % tuple(int(c + (255 - c) * k) for c in (r, g, b))
 
 
-def _chg(mk, pct):
-    c = str(mk.get("change") or "").strip().lstrip("▲▼△▽ ").strip() if mk else ""
-    return c or ("%+.2f%%" % pct)
-
-
 def _int(v, lo, hi, default):
     try:
         return max(lo, min(hi, int(v)))
     except Exception:
         return default
+
+
+def _pct(mk):
+    """Signed percentage change of a market dict, or None."""
+    if not isinstance(mk, dict):
+        return None
+    for key in ("change_pct", "cp"):
+        try:
+            v = float(mk.get(key))
+            if v == v:
+                return v
+        except Exception:
+            pass
+    txt = str(mk.get("change") or "")
+    m = re.search(r"\d+(?:\.\d+)?", txt)
+    if not m:
+        return None
+    v = float(m.group())
+    return -v if re.search(r"[-−▼▽]", txt) else v
+
+
+def _chg(mk, pct):
+    c = str(mk.get("change") or "").strip().lstrip("▲▼△▽ ").strip() if mk else ""
+    return c or ("%+.2f%%" % pct)
 
 
 class _Meas:
@@ -106,9 +134,19 @@ class _Meas:
         return self.cache[key]
 
     def wrap(self, text, px, maxw, maxlines, weight="normal"):
-        words = text.split()
+        words = str(text).split()
         lines, cur = [], ""
         for wd in words:
+            if self.w(wd, px, weight) > maxw and "-" in wd.strip("-"):  # break at existing hyphens
+                parts = re.findall(r"[^-]+-?|-", wd)
+                for pi, part in enumerate(parts):
+                    t = (cur + part) if (cur and pi) else ((cur + " " + part).strip() if cur else part)
+                    if cur and self.w(t, px, weight) > maxw:
+                        lines.append(cur)
+                        cur = part
+                    else:
+                        cur = t
+                continue
             while self.w(wd, px, weight) > maxw and len(wd) > 3:  # break overlong word
                 k = len(wd)
                 while k > 1 and self.w(wd[:k] + "-", px, weight) > maxw:
@@ -135,9 +173,15 @@ class _Meas:
         return lines or [""]
 
 
+def _fit(meas, text, px, maxw, weight="normal"):
+    while len(text) > 4 and meas.w(text, px, weight) > maxw:
+        text = text[:-2].rstrip() + "…"
+    return text
+
+
 # ------------------------------------------------------------------ model
-def _parse(graph, meas):
-    raw_nodes = [x for x in (graph or {}).get("nodes", []) if isinstance(x, dict) and x.get("id") is not None][:200]
+def _parse(graph):
+    raw_nodes = [x for x in (graph or {}).get("nodes", []) or [] if isinstance(x, dict) and x.get("id") is not None][:300]
     idx, nodes = {}, []
     for nd in raw_nodes:
         if nd["id"] in idx:
@@ -150,39 +194,15 @@ def _parse(graph, meas):
         dom = DOMAINS[di] if di >= 0 else OTHER
         label = _clean(nd.get("label") or nd["id"]) or str(nd["id"])
         mk = nd.get("market") if isinstance(nd.get("market"), dict) else None
-        pct = None
-        if mk:
-            try:
-                pct = float(mk.get("change_pct"))
-            except Exception:
-                m = re.search(r"-?\d+(?:\.\d+)?", str(mk.get("change") or ""))
-                pct = float(m.group()) * (-1 if str(mk.get("change")).strip().startswith("-") and m and float(m.group()) > 0 else 1) if m else None
+        pct = _pct(mk)
         direction = str(nd.get("direction") or "").lower()
         glyph = ""
         if pct is not None:
             glyph = "▲" if pct > 0 else "▼" if pct < 0 else "–"
         elif direction in ("up", "down"):
             glyph = "▲" if direction == "up" else "▼"
-        shape = TYPES[typ][0]
-        small = len(raw_nodes) < 8
-        maxw = 640 if small else 470
-        ltxt = (glyph + " " if glyph and pct is None else "") + label
-        if len(ltxt) > 72:
-            ltxt = ltxt[:71].rstrip() + "…"
-        fs = FONT_NODE + (6 if small else 0)
-        for fs in ((56, 50, 46, 42) if small else (50, 46, 42, 38)):
-            if len(meas.wrap(ltxt, fs, maxw, 99)) <= 3:
-                break
-        lines = meas.wrap(ltxt, fs, maxw, 3)
-        mline = ""
-        if pct is not None:
-            mline = f"{glyph} {_chg(mk, pct)}".strip()
-        tag = f"{dom[1]} · {typ}" if dom is not OTHER else typ
-        tw = max([meas.w(l, fs) for l in lines] + [meas.w(tag, FONT_TAG), meas.w(mline, 44) if mline else 0])
-        h = 22 + FONT_TAG * 1.25 + len(lines) * fs * 1.2 + (50 if mline else 0) + 22
-        extra = {"hex": 0.32 * h, "para": 0.5 * h, "pill": 0.42 * h, "snip": 0.1 * h, "double": 26, "round": 10}.get(shape, 0)
-        nodes.append(dict(id=nd["id"], label=label, typ=typ, shape=shape, dom=dom, lines=lines, tag=tag,
-                          mline=mline, pct=pct, mk=mk, w=tw + 2 * 26 + extra, h=h, glyph=glyph, fs=fs))
+        nodes.append(dict(id=nd["id"], label=label, typ=typ, shape=TYPES[typ][0], dom=dom, pct=pct,
+                          mk=mk if pct is not None else None, glyph=glyph))
     edges = {}
     for e in (graph or {}).get("edges", []) or []:
         if not isinstance(e, dict):
@@ -194,99 +214,44 @@ def _parse(graph, meas):
         if kind not in ("causal", "feedback", "contradicts"):
             kind = "causal"
         conf = {"low": 0, "medium": 1, "high": 2}.get(str(e.get("confidence") or "medium").lower(), 1)
-        st = 1 if str(e.get("status") or "reported").lower() == "reported" else 0
+        rep = str(e.get("status") or "reported").lower() == "reported"
         s = _int(e.get("strength"), 1, 3, 1)
         eff = str(e.get("effect") or "").lower()
         rec = dict(a=a, b=b, label=_clean(e.get("label")), effect=eff if eff in ("up", "down", "mixed") else "",
-                   strength=s, conf=conf, reported=bool(st), kind=kind, score=3 * s + conf + st,
-                   order=_int(e.get("order"), 1, 3, 1))
+                   strength=s, conf=conf, reported=rep, kind=kind, score=3 * s + conf + (1 if rep else 0))
         if (a, b) not in edges or edges[(a, b)]["score"] < rec["score"]:
             edges[(a, b)] = rec
     return nodes, edges
 
 
-def _struct(nodes, N, E, maxL, rowlimit):
-    """Layer the chosen causal edges E over node set N. None if it does not fit."""
-    N = sorted(N)
-    succ = {i: [] for i in N}
-    for a, b in sorted(E):
-        succ[a].append(b)
-    state, back = {}, set()
-
-    def dfs(u):
-        state[u] = 1
-        for v in succ[u]:
-            if state.get(v) == 1:
-                back.add((u, v))
-            elif v not in state:
-                dfs(v)
-        state[u] = 2
-
-    for u in N:
-        if u not in state:
-            dfs(u)
-    fwd = [e for e in sorted(E) if e not in back]
-    pred = {i: [] for i in N}
-    sc = {i: [] for i in N}
-    for a, b in fwd:
-        pred[b].append(a)
-        sc[a].append(b)
-    layer = {}
-
-    def lay(u):
-        if u not in layer:
-            layer[u] = 0 if not pred[u] else 1 + max(lay(p) for p in pred[u])
-        return layer[u]
-
-    for u in N:
-        lay(u)
-    for u in N:  # pull pure sources down next to their effects
-        if not pred[u] and sc[u]:
-            layer[u] = min(layer[v] for v in sc[u]) - 1
-    lo = min(layer.values()) if layer else 0
-    for u in layer:
-        layer[u] -= lo
-    nl = max(layer.values()) + 1 if layer else 1
-    if nl > maxL:
-        return None
-    rows = {l: [("n", i) for i in N if layer[i] == l] for l in range(nl)}
-    chains = {}
-    for a, b in fwd:
-        ch = [("n", a)] + [("d", (a, b), l) for l in range(layer[a] + 1, layer[b])] + [("n", b)]
-        chains[(a, b)] = ch
-        for it in ch[1:-1]:
-            rows[it[2]].append(it)
-    for l, items in rows.items():
-        wsum = sum(nodes[it[1]]["w"] if it[0] == "n" else 70 for it in items) + GAPX * (len(items) - 1)
-        if wsum > rowlimit:
-            return None
-    return dict(layer=layer, nl=nl, rows=rows, chains=chains, fwd=fwd, back=back)
-
-
-def _select(nodes, edges, rowlimit):
+def _chains(nodes, edges, minlen):
+    """Top causal chains (3-5 nodes), scored, overlapping by at most half."""
     n = len(nodes)
     deg = [0] * n
+    has_in = set()
     for (a, b) in edges:
         deg[a] += 1
         deg[b] += 1
-    causal = {k: v for k, v in edges.items() if v["kind"] == "causal"}
+        has_in.add(b)
+    use = {k: v for k, v in edges.items() if v["kind"] in ("causal", "contradicts")}
     out = {}
-    for (a, b), v in causal.items():
-        out.setdefault(a, []).append((v["score"], b))
+    for (a, b), v in use.items():
+        out.setdefault(a, []).append((-v["score"], b))
     for a in out:
-        out[a].sort(key=lambda t: (-t[0], t[1]))
-        out[a] = [b for _, b in out[a][:4]]
-
-    def nscore(i):
-        return 0.6 * deg[i] + (2.0 if nodes[i]["mk"] else 0)
-
-    cands, budget = [], [30000]
+        out[a] = [b for _, b in sorted(out[a])[:5]]
+    cands, budget = [], [40000]
 
     def walk(path):
-        if len(path) >= 2:
+        if len(path) >= minlen:
             es = list(zip(path, path[1:]))
-            sc = sum(causal[e]["score"] for e in es) + sum(nscore(i) for i in path)
-            cands.append((sc, tuple(path), tuple(es)))
+            doms = {nodes[i]["dom"][0] for i in path}
+            sc = (sum(use[e]["score"] for e in es)
+                  + 0.8 * sum(deg[i] for i in path)
+                  + 3.0 * sum(1 for i in path if nodes[i]["mk"])
+                  + 2.5 * (len(doms) - 1)
+                  + (1.0 if path[0] not in has_in else 0.0)
+                  + 1.5 * len(path))
+            cands.append((sc, tuple(path)))
         if len(path) >= 5:
             return
         for v in out.get(path[-1], []):
@@ -297,195 +262,28 @@ def _select(nodes, edges, rowlimit):
     for s in range(n):
         walk([s])
     cands.sort(key=lambda c: (-c[0], c[1]))
-    cands = cands[:500]
-
-    for maxL in (5, 4, 3, 2):
-        N, E, chosen = set(), set(), 0
-        while chosen < 8 and len(N) < 18:
-            best, tests = None, 0
-            ranked = []
-            for sc, path, es in cands:
-                newe = [e for e in es if e not in E]
-                if not newe:
-                    continue
-                newn = [i for i in path if i not in N]
-                gain = (sum(causal[e]["score"] for e in newe) + sum(nscore(i) for i in newn)) / (1 + 0.12 * len(newn))
-                ranked.append((-gain, path, es))
-            ranked.sort(key=lambda r: (r[0], r[1]))
-            for _, path, es in ranked:
-                tests += 1
-                if tests > 60:
-                    break
-                st = _struct(nodes, N | set(path), E | set(es), maxL, rowlimit)
-                if st:
-                    best = (path, es)
-                    break
-            if not best:
+    chosen = []
+    for sc, path in cands:
+        ok = True
+        for _, other in chosen:
+            shared = len(set(path) & set(other))
+            if shared > min(len(path), len(other)) // 2 or set(zip(path, path[1:])) & set(zip(other, other[1:])):
+                ok = False
                 break
-            N |= set(best[0])
-            E |= set(best[1])
-            chosen += 1
-        if N:
-            break
-    if not N:  # no usable chains: isolated nodes (tiny / edge-less graphs)
-        order = sorted(range(n), key=lambda i: (-deg[i], i))
-        for i in order:
-            if len(N) < 8 and _struct(nodes, N | {i}, set(), 5, rowlimit):
-                N.add(i)
-    else:
-        # extra links between chosen nodes, strongest first
-        extra = sorted((v["score"], k) for k, v in causal.items() if k[0] in N and k[1] in N and k not in E)
-        for _, k in sorted(extra, key=lambda t: (-t[0], t[1])):
-            if len(E) >= 26:
+        if ok:
+            chosen.append((sc, path))
+            if len(chosen) >= 8:
                 break
-            if _struct(nodes, N, E | {k}, 5, rowlimit):
-                E.add(k)
-        if len(N) <= 8:  # tiny graph: also show unconnected nodes
-            for i in range(n):
-                if i not in N and deg[i] == 0 and len(N) < 8 and _struct(nodes, N | {i}, E, 5, rowlimit):
-                    N.add(i)
-    st = _struct(nodes, N, E, 5, rowlimit) if N else None
-    if st is None and N:
-        st = _struct(nodes, N, E, 9, rowlimit * 3)
-    # annotation edges (feedback / contradicts) + causal back-edges
-    ann = []
-    pool = [v for k, v in edges.items() if k[0] in N and k[1] in N and (v["kind"] != "causal" or k in (st or {}).get("back", ()))]
-    pool.sort(key=lambda v: (-v["score"], v["a"], v["b"]))
-    cnt = {"fb": 0, "ct": 0}
-    for v in pool:
-        key = "ct" if v["kind"] == "contradicts" else "fb"
-        if cnt[key] < (3 if key == "ct" else 2):
-            cnt[key] += 1
-            ann.append(dict(v, kind="contradicts" if key == "ct" else "feedback"))
-    return sorted(N), E, st, ann
+    return chosen, use
 
 
-# ------------------------------------------------------------------ geometry
-def _order_and_place(nodes, st, rowlimit):
-    rows, chains, nl = st["rows"], st["chains"], st["nl"]
-    nb_up, nb_dn = {}, {}
-    for ch in chains.values():
-        for p, q in zip(ch, ch[1:]):
-            nb_dn.setdefault(p, []).append(q)
-            nb_up.setdefault(q, []).append(p)
-
-    def key0(it):
-        if it[0] == "n":
-            nd = nodes[it[1]]
-            return (0, DOMAINS.index(nd["dom"]) if nd["dom"] in DOMAINS else 9, nd["label"])
-        return (1, it[1], it[2])
-
-    for l in rows:
-        rows[l].sort(key=key0)
-    pos = {l: {it: i for i, it in enumerate(rows[l])} for l in rows}
-
-    def sweep(ls, nbr, off):
-        for l in ls:
-            def bary(it):
-                ns = [pos[l + off][q] for q in nbr.get(it, []) if q in pos.get(l + off, {})]
-                return sum(ns) / len(ns) if ns else pos[l][it]
-            rows[l].sort(key=lambda it: (bary(it), key0(it)))
-            pos[l] = {it: i for i, it in enumerate(rows[l])}
-
-    for _ in range(8):
-        sweep(range(1, nl), nb_up, -1)
-        sweep(range(nl - 2, -1, -1), nb_dn, 1)
-
-    def wd(it):
-        return nodes[it[1]]["w"] if it[0] == "n" else 70
-
-    x = {}
-    for l in rows:
-        tot = sum(wd(i) for i in rows[l]) + GAPX * (len(rows[l]) - 1)
-        cur = W / 2 - tot / 2
-        for it in rows[l]:
-            x[it] = cur + wd(it) / 2
-            cur += wd(it) + GAPX
-    lo, hi = MARGIN, W - MARGIN
-    for _ in range(14):
-        for l in list(range(nl)) + list(range(nl - 2, -1, -1)):
-            des = {}
-            for it in rows[l]:
-                ns = [x[q] for q in nb_up.get(it, []) + nb_dn.get(it, []) if q in x]
-                des[it] = sum(ns) / len(ns) if ns else x[it]
-            items = rows[l]
-            for i, it in enumerate(items):
-                x[it] = max(des[it], lo + wd(it) / 2) if i == 0 else max(des[it], x[items[i - 1]] + (wd(items[i - 1]) + wd(it)) / 2 + GAPX)
-            for i in range(len(items) - 1, -1, -1):
-                it = items[i]
-                lim = hi - wd(it) / 2 if i == len(items) - 1 else x[items[i + 1]] - (wd(items[i + 1]) + wd(it)) / 2 - GAPX
-                x[it] = min(x[it], lim)
-    items = [it for l in rows for it in rows[l]]
-    if items:
-        lo_x = min(x[it] - wd(it) / 2 for it in items)
-        hi_x = max(x[it] + wd(it) / 2 for it in items)
-        sh = W / 2 - (lo_x + hi_x) / 2
-        for it in items:
-            x[it] += sh
-    return x
-
-
-def _bez(p0, p1, p2, p3, n=40):
-    import numpy as np
-    t = np.linspace(0, 1, n)[:, None]
-    p0, p1, p2, p3 = (np.array(p, float) for p in (p0, p1, p2, p3))
-    return (1 - t) ** 3 * p0 + 3 * (1 - t) ** 2 * t * p1 + 3 * (1 - t) * t ** 2 * p2 + t ** 3 * p3
-
-
-def _clip(c, w, h, toward):
-    dx, dy = toward[0] - c[0], toward[1] - c[1]
-    if abs(dx) < 1e-6 and abs(dy) < 1e-6:
-        return c
-    t = min((w / 2) / abs(dx) if dx else 1e9, (h / 2) / abs(dy) if dy else 1e9)
-    return (c[0] + dx * t, c[1] + dy * t)
-
-
-def _inside(pts, rect, pad=6):
-    return (pts[:, 0] > rect[0] - pad) & (pts[:, 0] < rect[0] + rect[2] + pad) & \
-           (pts[:, 1] > rect[1] - pad) & (pts[:, 1] < rect[1] + rect[3] + pad)
-
-
-def _free_route(sr, dr, obstacles, feedback, xmin, xmax):
-    """Pick the least-colliding curve between two node rects (x, y, w, h)."""
-    import numpy as np
-    sc = (sr[0] + sr[2] / 2, sr[1] + sr[3] / 2)
-    dc = (dr[0] + dr[2] / 2, dr[1] + dr[3] / 2)
-    dist = math.hypot(dc[0] - sc[0], dc[1] - sc[1]) + 1e-6
-    nx, ny = -(dc[1] - sc[1]) / dist, (dc[0] - sc[0]) / dist
-    cands = []
-    rads = [0.35, -0.35, 0.7, -0.7, 1.0, -1.0] if feedback else [0.0, 0.3, -0.3, 0.6, -0.6, 1.0, -1.0]
-    for rad in rads:
-        bulge = rad * min(dist, 520)
-        c = ((sc[0] + dc[0]) / 2 + nx * bulge, (sc[1] + dc[1]) / 2 + ny * bulge)
-        p0, p2 = _clip(sc, sr[2], sr[3], c), _clip(dc, dr[2], dr[3], c)
-        p1 = (c[0] * 2 - (p0[0] + p2[0]) / 2, c[1] * 2 - (p0[1] + p2[1]) / 2)  # quad control -> cubic
-        pts = _bez(p0, ((p0[0] + 2 * p1[0]) / 3, (p0[1] + 2 * p1[1]) / 3), ((p2[0] + 2 * p1[0]) / 3, (p2[1] + 2 * p1[1]) / 3), p2)
-        cands.append((abs(rad) * 0.1 + (0 if rad else -0.01), pts))
-    for sd in (-1, 1):
-        p0 = (sr[0] + (0 if sd < 0 else sr[2]), sc[1])
-        p2 = (dr[0] + (0 if sd < 0 else dr[2]), dc[1])
-        xo = max(50, xmin - 60) if sd < 0 else min(W - 50, xmax + 60)
-        cands.append((0.3, _bez(p0, (xo, p0[1]), (xo, p2[1]), p2)))
-    best = None
-    for pen, pts in cands:
-        bad = 0
-        for ob in obstacles:
-            if ob is sr or ob is dr:
-                continue
-            bad += int(_inside(pts, ob, 8).sum())
-        cost = bad * 10 + pen + len(pts) * 0
-        if best is None or cost < best[0]:
-            best = (cost, pts)
-    return best[1]
-
-
-# ------------------------------------------------------------------ drawing
+# ------------------------------------------------------------------ drawing primitives
 def _shape(ax, kind, cx, cy, w, h, fc, ec, lw, z=2):
     from matplotlib.patches import FancyBboxPatch, Polygon, Rectangle
     x0, y0 = cx - w / 2, cy - h / 2
     kw = dict(fc=fc, ec=ec, lw=lw * 0.72, zorder=z, joinstyle="round")
     if kind in ("round", "pill"):
-        r = min(h / 2, 18 if kind == "round" else h / 2)
+        r = min(h / 2, 20 if kind == "round" else 64)
         ax.add_patch(FancyBboxPatch((x0 + r, y0 + r), w - 2 * r, h - 2 * r, boxstyle=f"round,pad={r}", **kw))
         return
     if kind in ("rect", "double"):
@@ -494,13 +292,13 @@ def _shape(ax, kind, cx, cy, w, h, fc, ec, lw, z=2):
             ax.add_patch(Rectangle((x0 + 12, y0 + 12), w - 24, h - 24, fc="none", ec=ec, lw=lw * 0.72 * 0.45, zorder=z))
         return
     if kind == "hex":
-        c = 0.3 * h
+        c = min(0.3 * h, 60)
         pts = [(x0, cy), (x0 + c, y0), (x0 + w - c, y0), (x0 + w, cy), (x0 + w - c, y0 + h), (x0 + c, y0 + h)]
     elif kind == "para":
-        s = 0.25 * h
+        s = min(0.25 * h, 50)
         pts = [(x0 + s, y0), (x0 + w, y0), (x0 + w - s, y0 + h), (x0, y0 + h)]
     else:  # snip: top corners cut
-        s = 0.2 * h
+        s = min(0.2 * h, 44)
         pts = [(x0 + s, y0), (x0 + w - s, y0), (x0 + w, y0 + s), (x0 + w, y0 + h), (x0, y0 + h), (x0, y0 + s)]
     ax.add_patch(Polygon(pts, closed=True, **kw))
 
@@ -509,7 +307,7 @@ def _arrow_head(ax, pts, size, color):
     from matplotlib.patches import Polygon
     import numpy as np
     tip = pts[-1]
-    k = len(pts) - 1
+    k = len(pts) - 2
     while k > 0 and np.hypot(*(pts[k] - tip)) < 8:
         k -= 1
     d = tip - pts[k]
@@ -518,7 +316,7 @@ def _arrow_head(ax, pts, size, color):
     nrm = np.array([-d[1], d[0]])
     base = tip - d * size
     ax.add_patch(Polygon([tip, base + nrm * size * 0.46, base - nrm * size * 0.46], closed=True,
-                         fc=color, ec=color, lw=1, zorder=1.5, joinstyle="round"))
+                         fc=color, ec=color, lw=1, zorder=3, joinstyle="round"))
     return base
 
 
@@ -530,255 +328,365 @@ def _line_style(e):
     return "-", "butt"
 
 
-def _draw(graph, title, G, meas, nodes, edges, sel, plot=True):
-    """Lay out and (optionally) draw. Returns (fig/None, height, hard_overlaps)."""
-    import numpy as np
-    N, E, st, ann = sel
-    rowlimit = W - 2 * MARGIN
-    x = _order_and_place(nodes, st, rowlimit)
-    layer, rows, chains = st["layer"], st["rows"], st["chains"]
-    nl = st["nl"]
-    top = 250
-    rowh = [max([nodes[it[1]]["h"] for it in rows[l] if it[0] == "n"] + [120]) for l in range(nl)]
-    ycen, cur = {}, top
-    for l in range(nl):
-        ycen[l] = cur + rowh[l] / 2
-        cur += rowh[l] + G
-    diag_bottom = cur - G
-    pos = {}
-    rects = {}
-    for l in range(nl):
-        for it in rows[l]:
-            if it[0] == "n":
-                nd = nodes[it[1]]
-                pos[it] = (x[it], ycen[l])
-                rects[it[1]] = (x[it] - nd["w"] / 2, ycen[l] - nd["h"] / 2, nd["w"], nd["h"])
-            else:
-                pos[it] = (x[it], ycen[l])
-    obstacles = list(rects.values())
-    xs = [r[0] for r in obstacles] or [MARGIN]
-    xe = [r[0] + r[2] for r in obstacles] or [W - MARGIN]
-    xmin, xmax = max(min(xs), 90), min(max(xe), W - 90)
+class _Ctx:
+    """Replays queued drawing ops on a matplotlib axes."""
 
-    # ports
-    outs, ins = {}, {}
-    for ed, ch in chains.items():
-        outs.setdefault(ch[0], []).append((x[ch[1]], ed))
-        ins.setdefault(ch[-1], []).append((x[ch[-2]], ed))
-    port_out, port_in = {}, {}
-    for table, store in ((outs, port_out), (ins, port_in)):
-        for it, lst in table.items():
-            lst.sort()
-            nd = nodes[it[1]]
-            step = min(80, 0.7 * nd["w"] / max(1, len(lst)))
-            for i, (_, ed) in enumerate(lst):
-                store[(it, ed)] = x[it] + (i - (len(lst) - 1) / 2) * step
+    def __init__(self, ax):
+        self.ax = ax
 
-    paths = []  # (rec, pts)
-    for ed, ch in chains.items():
-        rec = edges[ed]
-        a, b = ch[0], ch[-1]
-        wp = [(port_out[(a, ed)], rects[a[1]][1] + rects[a[1]][3])]
-        for it in ch[1:-1]:
-            wp.append((x[it], ycen[it[2]]))
-        wp.append((port_in[(b, ed)], rects[b[1]][1]))
-        segs = []
-        for p, q in zip(wp, wp[1:]):
-            k = 0.5 * (q[1] - p[1])
-            seg = _bez(p, (p[0], p[1] + k), (q[0], q[1] - k), q)
-            segs.append(seg if not segs else seg[1:])
-        paths.append((rec, np.vstack(segs)))
-    for rec in ann:
-        sr, dr = rects[rec["a"]], rects[rec["b"]]
-        paths.append((rec, _free_route(sr, dr, obstacles, rec["kind"] == "feedback", xmin, xmax)))
+    def text(self, x, y, s, px, color=INK, ha="left", weight="normal", z=6):
+        self.ax.text(x, y, s, fontsize=px * 0.72, color=color, ha=ha, va="center", fontweight=weight,
+                     zorder=z, parse_math=False)
 
-    # edge labels with collision avoidance
-    elab = []
-    lh = FONT_EDGE * 1.18
-    allpts = [p for _, p in paths]
-    order = sorted(range(len(paths)), key=lambda i: (-paths[i][0]["strength"], -paths[i][0]["score"], i))
-    placed, hard = {}, 0
-    for i in order:
-        rec, pts = paths[i]
-        pre = {"contradicts": "✕ ", "feedback": "↻ "}.get(rec["kind"], "")
-        eff = {"up": "↑ ", "down": "↓ ", "mixed": "↕ "}.get(rec["effect"], "")
-        txt = (pre + eff + rec["label"]).strip()
-        if not rec["label"]:
-            continue
-        lines = meas.wrap(txt, FONT_EDGE, 440, 3)
-        bw = max(meas.w(l, FONT_EDGE) for l in lines) + 28
-        bh = len(lines) * lh + 14
-        n = len(pts)
-        fr = sorted([0.5 + 0.04 * k for k in range(-10, 11)], key=lambda f: (abs(f - 0.5), f))
-        others = np.vstack([p for j, p in enumerate(allpts) if j != i]) if len(allpts) > 1 else np.zeros((0, 2))
-        best = None
-        cl = [(f, d, v) for v in (0, 0.9, -0.9) for d in (0, 0.55, -0.55, 1.1, -1.1) for f in fr]
-        for f, d, v in cl:
-            c = pts[min(n - 1, int(f * n))]
-            r = (c[0] - bw / 2 + d * bw, c[1] - bh / 2 + v * bh, bw, bh)
-            cost = abs(f - 0.5) * 30 + abs(d) * 60 + abs(v) * 50
-            if r[0] < 20 or r[0] + bw > W - 20:
-                cost += 5000
-            for ob in obstacles:
-                if r[0] < ob[0] + ob[2] + 10 and ob[0] < r[0] + bw + 10 and r[1] < ob[1] + ob[3] + 10 and ob[1] < r[1] + bh + 10:
-                    cost += 5000
-            for pr in placed.values():
-                if r[0] < pr[0] + pr[2] + 10 and pr[0] < r[0] + bw + 10 and r[1] < pr[1] + pr[3] + 8 and pr[1] < r[1] + bh + 8:
-                    cost += 5000
-            if len(others):
-                cost += 10 * min(40, int(_inside(others, r, 0).sum()))
-            if best is None or cost < best[0]:
-                best = (cost, r)
-        if best[0] >= 5000:  # no clean spot: omit this label rather than overlap
-            hard += 1
-            continue
-        placed[i] = best[1]
-        elab.append((i, lines, best[1]))
+    def rrect(self, x, y, w, h, r, fc, ec, lw=2, z=1):
+        from matplotlib.patches import FancyBboxPatch
+        self.ax.add_patch(FancyBboxPatch((x + r, y + r), w - 2 * r, h - 2 * r, boxstyle=f"round,pad={r}",
+                                         fc=fc, ec=ec, lw=lw * 0.72, zorder=z))
 
-    tail_y = diag_bottom + 90
-    if not plot:
-        return None, tail_y, hard
+    def circle(self, x, y, r, fc):
+        from matplotlib.patches import Circle
+        self.ax.add_patch(Circle((x, y), r, fc=fc, ec=fc, zorder=4))
 
-    import matplotlib.pyplot as plt
-    fig = plt.figure(figsize=(W / 100, 34), dpi=100, facecolor=SURFACE)
-    ax = fig.add_axes([0, 0, 1, 1])
-    ax.set_xlim(0, W)
-    ax.axis("off")
+    def rect(self, x, y, w, h, fc, ec=INK, lw=1.2):
+        from matplotlib.patches import Rectangle
+        self.ax.add_patch(Rectangle((x, y), w, h, fc=fc, ec=ec, lw=lw * 0.72, zorder=3))
 
-    def T(xp, yp, s, px, color=INK, ha="left", va="center", weight="normal", z=6):
-        return ax.text(xp, yp, s, fontsize=px * 0.72, color=color, ha=ha, va=va, fontweight=weight,
-                       zorder=z, parse_math=False, linespacing=1.15)
+    def shape(self, *a, **k):
+        _shape(self.ax, *a, **k)
 
-    title = _clean(title) or "Connection map"
-    while len(title) > 8 and meas.w(title, 66, "bold") > W - 2 * MARGIN + 60:
-        title = title[:-2].rstrip() + "…"
-    T(MARGIN - 60, 85, title, 66, weight="bold")
-    T(MARGIN - 60, 160, f"Strongest cause-and-effect chains · causes at top, effects below · {len(N)} of {len(nodes)} items", 36, MUTED)
-
-    # edges
-    for rec, pts in paths:
+    def arrow(self, pts, rec, head=None):
+        import numpy as np
+        pts = np.array(pts, float)
         ls, cap = _line_style(rec)
         col = CONTRA if rec["kind"] == "contradicts" else LINE
-        lw = (4, 7, 11)[rec["strength"] - 1]
-        alpha = (0.7, 0.88, 1.0)[rec["conf"]]
-        head = 30 + 7 * rec["strength"]
-        end = _arrow_head(ax, pts, head, col)
-        body = pts.copy()
-        # trim the line so it does not poke through the arrow head
-        k = len(body) - 1
-        while k > 0 and math.hypot(*(body[k] - end)) > 2 and math.hypot(*(body[k] - pts[-1])) < head * 0.9:
-            k -= 1
-        body = body[:k + 1]
-        ax.plot(body[:, 0], body[:, 1], color=col, lw=lw * 0.72, ls=ls, dash_capstyle=cap, solid_capstyle="butt",
-                alpha=alpha, zorder=1)
-    # nodes
-    for i in N:
-        nd = nodes[i]
-        r = rects[i]
-        cx, cy = r[0] + r[2] / 2, r[1] + r[3] / 2
-        col = nd["dom"][2]
-        _shape(ax, nd["shape"], cx, cy, r[2], r[3], _tint(col), col, 8)
-        yy = r[1] + 22 + FONT_TAG * 0.62
-        T(cx, yy, nd["tag"], FONT_TAG, MUTED, "center")
-        yy += FONT_TAG * 0.62 + nd["fs"] * 0.62
-        for ln in nd["lines"]:
-            T(cx, yy, ln, nd["fs"], INK, "center")
-            yy += nd["fs"] * 1.2
-        if nd["mline"]:
-            T(cx, yy - FONT_NODE * 0.2 + 12, nd["mline"], 44, INK, "center", weight="bold")
-    # edge labels
-    from matplotlib.patches import FancyBboxPatch
-    for i, lines, r in elab:
-        rec = paths[i][0]
-        ec = CONTRA if rec["kind"] == "contradicts" else "#c9c6bd"
-        ax.add_patch(FancyBboxPatch((r[0] + 8, r[1] + 8), r[2] - 16, r[3] - 16, boxstyle="round,pad=8",
-                                    fc=SURFACE, ec=ec, lw=1.2, alpha=0.97, zorder=5))
-        T(r[0] + r[2] / 2, r[1] + r[3] / 2, "\n".join(lines), FONT_EDGE, INK, "center", z=6)
+        lw = (6, 9, 13)[rec["strength"] - 1]
+        head = head or 34 + 6 * rec["strength"]
+        base = _arrow_head(self.ax, pts, head, col)
+        body = np.vstack([pts[:-1], base])
+        self.ax.plot(body[:, 0], body[:, 1], color=col, lw=lw * 0.72, ls=ls, dash_capstyle=cap,
+                     solid_capstyle="butt", alpha=(0.75, 0.9, 1.0)[rec["conf"]], zorder=2)
+
+
+# ------------------------------------------------------------------ layout
+def _node_box(meas, nd, w):
+    """Text lines and height for node nd drawn w pixels wide."""
+    inset = {"hex": 56, "para": 36, "pill": 30, "snip": 12, "double": 24}.get(nd["shape"], 8)
+    maxw = w - 2 * 20 - inset
+    g = nd["glyph"] if nd["glyph"] and nd["pct"] is None else ""
+    ltxt = g + nd["label"]  # glyph glued to the first word so it never wraps alone
+    fs, lines = FONT_NODE, None
+    for fs in (FONT_NODE, 46, 42):
+        lines = meas.wrap(ltxt, fs, maxw - 24, 99)
+        if len(lines) <= 3 and all(meas.w(wd, fs) <= maxw - 24 for wd in ltxt.split()):
+            break
+    lines = meas.wrap(ltxt, fs, maxw - 24, 3)
+    if g:
+        lines[0] = g + " " + lines[0][len(g):]
+    mline = ""
+    if nd["pct"] is not None:
+        mline = _fit(meas, f"{nd['glyph']} {_chg(nd['mk'], nd['pct'])}".strip(), 46, maxw, "bold")
+    tag = nd["dom"][1] + " · " + nd["typ"] if nd["dom"] is not OTHER else nd["typ"]
+    h = 18 + FONT_TAG * 1.3 + len(lines) * fs * 1.2 + (56 if mline else 0) + 20
+    return dict(lines=lines, fs=fs, mline=mline, tag=tag, h=max(h, 190))
+
+
+def _draw_node(ops, nd, box, cx, cy, w, h):
+    col = nd["dom"][2]
+    ops.append(("shape", (nd["shape"], cx, cy, w, h, _tint(col), col, 8), {}))
+    y = cy - h / 2 + 16 + FONT_TAG * 0.62
+    ops.append(("text", (cx, y, box["tag"], FONT_TAG, MUTED, "center"), {}))
+    y += FONT_TAG * 0.62 + box["fs"] * 0.66
+    for ln in box["lines"]:
+        ops.append(("text", (cx, y, ln, box["fs"], INK, "center"), {}))
+        y += box["fs"] * 1.2
+    if box["mline"]:
+        ops.append(("text", (cx, y - box["fs"] * 0.2 + 18, box["mline"], 46, INK, "center", "bold"), {}))
+
+
+def _edge_text(rec):
+    pre = {"contradicts": "✕ "}.get(rec["kind"], "")
+    eff = {"up": "▲ ", "down": "▼ ", "mixed": "↕ "}.get(rec["effect"], "")
+    return (pre + eff + (rec["label"] or "leads to")).strip()
+
+
+def _rows_for(k):
+    return [k] if k <= 3 else [2, 2] if k == 4 else [3, 2]
+
+
+def _story(meas, nodes, path, use, num, y0, x0, cw):
+    """Lay out one chain as a numbered card. Returns (height, ops)."""
+    ops = []
+    plan = _rows_for(len(path))
+    first, last = nodes[path[0]], nodes[path[-1]]
+    t = f"{first['label']} → {last['label']}"
+    tlines = meas.wrap(t, 54, cw - 2 * CARD_PAD - 130, 2, "bold")
+    nsteps = len(path) - 1
+    rep = sum(1 for a, b in zip(path, path[1:]) if use[(a, b)]["reported"])
+    domains = []
+    for i in path:
+        if nodes[i]["dom"][1] not in domains and nodes[i]["dom"] is not OTHER:
+            domains.append(nodes[i]["dom"][1])
+    meta = f"{nsteps} steps · {rep} reported" + (f" · {' > '.join(domains[:4])}" if len(domains) > 1 else "")
+    hdr_h = 12 + len(tlines) * 64 + 46 + 14
+    y = y0 + CARD_PAD * 0.6
+    cxm = x0 + cw / 2
+    ops.append(("circle", (x0 + CARD_PAD + 44, y + 20 + 32, 44, INK), {}))
+    ops.append(("text", (x0 + CARD_PAD + 44, y + 20 + 32, str(num), 54, "#ffffff", "center", "bold", 7), {}))
+    ty = y + 20 + 32
+    for ln in tlines:
+        ops.append(("text", (x0 + CARD_PAD + 112, ty, ln, 54, INK, "left", "bold"), {}))
+        ty += 64
+    ops.append(("text", (x0 + CARD_PAD + 112, ty - 6 + 22, meta, FONT_TAG, MUTED), {}))
+    y += hdr_h
+    # rows
+    pos = []  # per path index: (cx, cy, w, h, box)
+    ptr = 0
+    row_y = y
+    rowinfo = []
+    for ri, cnt in enumerate(plan):
+        idxs = list(range(ptr, ptr + cnt))
+        ptr += cnt
+        boxes = [_node_box(meas, nodes[path[i]], NODE_W) for i in idxs]
+        nh = max(b["h"] for b in boxes)
+        gap = GAP3 if cnt == 3 else GAP2
+        # label heights for in-row arrows
+        lab = []
+        for i in idxs[:-1]:
+            rec = use[(path[i], path[i + 1])]
+            lines = meas.wrap(_edge_text(rec), FONT_EDGE, gap - 34, 4)
+            lab.append(lines)
+        lab_h = max([len(l) * FONT_EDGE * 1.18 + 16 for l in lab] + [0])
+        arrow_y_off = nh * 0.62  # arrow below centre so label fits above it
+        up = max(arrow_y_off - 16 - 0, 0)
+        top_pad = max(0, lab_h + 34 - arrow_y_off)
+        total = cnt * NODE_W + (cnt - 1) * gap
+        sx = x0 + (cw - total) / 2
+        top = row_y + top_pad
+        for j, i in enumerate(idxs):
+            cx = sx + j * (NODE_W + gap) + NODE_W / 2
+            cy = top + nh / 2
+            pos.append((cx, cy, NODE_W, nh, boxes[j]))
+            _draw_node(ops, nodes[path[i]], boxes[j], cx, cy, NODE_W, nh)
+        for j, i in enumerate(idxs[:-1]):
+            rec = use[(path[i], path[i + 1])]
+            ax_ = pos[i][0] + NODE_W / 2 + 10
+            bx_ = pos[i + 1][0] - NODE_W / 2 - 10
+            ay = top + arrow_y_off
+            ops.append(("arrow", ([(ax_, ay), (bx_, ay)], rec), {}))
+            gx = (ax_ + bx_) / 2
+            ly = ay - 18 - len(lab[j]) * FONT_EDGE * 1.18 + FONT_EDGE * 0.59
+            for ln in lab[j]:
+                ops.append(("text", (gx, ly, ln, FONT_EDGE, INK, "center"), {}))
+                ly += FONT_EDGE * 1.18
+        rowinfo.append((top, nh))
+        row_y = top + nh
+        if ri < len(plan) - 1:
+            # wrap gutter: elbow arrow from last node of this row to first node of next
+            rec = use[(path[ptr - 1], path[ptr])]
+            lines = meas.wrap(_edge_text(rec), FONT_EDGE, 1500, 2)
+            lh = len(lines) * FONT_EDGE * 1.18 + 16
+            gut = max(lh + 44, 112)
+            row_y += gut
+            rowinfo.append(("gut", row_y - gut, gut, rec, lines))
+    # elbows (need next row geometry, so place after)
+    gi = 0
+    for item in rowinfo:
+        pass
+    # recompute elbows from stored info
+    ptr = 0
+    for ri, cnt in enumerate(plan[:-1]):
+        ptr += cnt
+        a, b = pos[ptr - 1], pos[ptr]
+        rec = use[(path[ptr - 1], path[ptr])]
+        g = [r for r in rowinfo if r[0] == "gut"][ri]
+        gy0, gut, lines = g[1], g[2], g[4]
+        ya = a[1] + a[3] / 2 + 8
+        yb = b[1] - b[3] / 2 - 10
+        ym = (ya + yb) / 2
+        ops.append(("arrow", ([(a[0], ya), (a[0], ym), (b[0], ym), (b[0], yb)], rec), {}))
+        lw_ = max(meas.w(l, FONT_EDGE) for l in lines) + 36
+        lh = len(lines) * FONT_EDGE * 1.18 + 16
+        mx = (a[0] + b[0]) / 2
+        ops.append(("rrect", (mx - lw_ / 2, ym - lh / 2, lw_, lh, 14, CARD, CARD), {"z": 5}))
+        ly = ym - lh / 2 + 8 + FONT_EDGE * 0.59
+        for ln in lines:
+            ops.append(("text", (mx, ly, ln, FONT_EDGE, INK, "center"), {}))
+            ly += FONT_EDGE * 1.18
+    bottom = row_y + CARD_PAD * 0.7
+    h = bottom - y0
+    ops.insert(0, ("rrect", (x0, y0, cw, h, 30, CARD, CARD_EDGE, 3), {"z": 0.5}))
+    return h, ops
+
+
+def _items_card(meas, nodes, idxs, y0, x0, cw, heading):
+    """A card of loose nodes (no links), up to 3 per row, centred."""
+    ops = []
+    y = y0 + CARD_PAD * 0.6
+    ops.append(("text", (x0 + CARD_PAD + 10, y + 36, heading, 54, INK, "left", "bold"), {}))
+    y += 90
+    for r in range(0, len(idxs), 3):
+        grp = idxs[r:r + 3]
+        boxes = [_node_box(meas, nodes[i], NODE_W) for i in grp]
+        nh = max(b["h"] for b in boxes)
+        total = len(grp) * NODE_W + (len(grp) - 1) * 80
+        sx = x0 + (cw - total) / 2
+        for j, i in enumerate(grp):
+            _draw_node(ops, nodes[i], boxes[j], sx + j * (NODE_W + 80) + NODE_W / 2, y + nh / 2, NODE_W, nh)
+        y += nh + 40
+    h = y - y0 + CARD_PAD * 0.2
+    ops.insert(0, ("rrect", (x0, y0, cw, h, 30, CARD, CARD_EDGE, 3), {"z": 0.5}))
+    return h, ops
+
+
+def _layout(meas, nodes, edges, title):
+    chosen, use = _chains(nodes, edges, 3)
+    if not chosen:
+        chosen, use = _chains(nodes, edges, 2)
+    x0, cw = MARGIN, W - 2 * MARGIN
+    top, reserve = 250, 900
+    budget = MAX_H - reserve - top
+    hs = [_story(meas, nodes, path, use, 1, 0, x0, cw)[0] + 28 for _, path in chosen]
+    sel, used = [], 0
+    for k in range(len(chosen)):
+        if len(sel) < MAX_STORIES and used + hs[k] <= budget:
+            sel.append(k)
+            used += hs[k]
+    for k in sorted(range(len(chosen)), key=lambda k: (hs[k], k)):  # keep >= 3 stories if available
+        if len(sel) >= min(3, len(chosen)):
+            break
+        if k not in sel and used + hs[k] <= budget + 500:
+            sel.append(k)
+            used += hs[k]
+    if not sel and chosen:
+        sel = [0]
+    sel.sort()
+    ops, y, shown_edges, used_nodes = [], top, 0, []
+    for num, k in enumerate(sel, 1):
+        path = chosen[k][1]
+        h, o = _story(meas, nodes, path, use, num, y, x0, cw)
+        ops += o
+        y += h + 28
+        shown_edges += len(path) - 1
+        used_nodes += [i for i in path if i not in used_nodes]
+    if not sel and nodes:  # nothing chained: show loose items
+        idxs = list(range(min(len(nodes), 6)))
+        h, o = _items_card(meas, nodes, idxs, y, x0, cw, "In the news")
+        ops += o
+        y += h + 28
+        used_nodes = idxs
+    elif len(nodes) <= 8 and len(sel) < 3:  # tiny graph: unconnected items too
+        linked = {i for k in edges for i in k}
+        rest = [i for i in range(len(nodes)) if i not in used_nodes and i not in linked][:3]
+        if rest:
+            h, o = _items_card(meas, nodes, rest, y, x0, cw, "Also in the news")
+            ops += o
+            y += h + 28
+            used_nodes += rest
+    return y, ops, shown_edges, used_nodes, len(sel)
+
+
+def _draw(graph, title, meas, nodes, edges):
+    import matplotlib.pyplot as plt
+    import numpy as np
+    y, ops, shown_edges, used_nodes, nstories = _layout(meas, nodes, edges, title)
+    x0 = MARGIN
+    items = []  # footer ops, y-relative handled below
 
     # ---- legend
-    y = tail_y + 40
-    used_dom = []
-    for i in N:
+    used_dom, used_typ = [], []
+    for i in used_nodes:
         if nodes[i]["dom"] not in used_dom:
             used_dom.append(nodes[i]["dom"])
-    used_typ = []
-    for i in N:
         if nodes[i]["typ"] not in used_typ:
             used_typ.append(nodes[i]["typ"])
     used_dom.sort(key=lambda d: DOMAINS.index(d) if d in DOMAINS else 99)
+    foot = []
 
-    def flow(items, y0, label):
-        T(MARGIN - 60, y0, label, FONT_LEG, MUTED, weight="bold")
-        xx, yy = MARGIN - 60 + meas.w(label, FONT_LEG, "bold") + 40, y0
-        for wdt, fn in items:
-            if xx + wdt > W - MARGIN + 60:
-                xx, yy = MARGIN - 60, yy + 76
+    def T(xp, yp, s, px, color=INK, ha="left", weight="normal"):
+        foot.append(("text", (xp, yp, s, px, color, ha, weight), {}))
+
+    def flow(items_, y0, label):
+        T(x0 + 30, y0, label, FONT_LEG, MUTED, weight="bold")
+        xx, yy = x0 + 30 + meas.w(label, FONT_LEG, "bold") + 36, y0
+        for wdt, fn in items_:
+            if xx + wdt > W - MARGIN - 20:
+                xx, yy = x0 + 30, yy + 70
             fn(xx, yy)
-            xx += wdt + 44
-        return yy + 76
+            xx += wdt + 30
+        return yy + 70
 
     def dom_item(d):
-        s = d[0] if d is OTHER else f"{d[1]} {d[0]}"
+        s = SHORT.get(d[0], d[0])
+
         def fn(xp, yp):
-            ax.add_patch(__import__("matplotlib.patches", fromlist=["Rectangle"]).Rectangle((xp, yp - 19), 38, 38, fc=d[2], ec=INK, lw=0.8, zorder=3))
-            T(xp + 52, yp, s, FONT_LEG, INK)
-        return 52 + meas.w(s, FONT_LEG), fn
+            foot.append(("rect", (xp, yp - 17, 34, 34, d[2]), {}))
+            T(xp + 46, yp, s, FONT_LEG)
+        return 46 + meas.w(s, FONT_LEG), fn
 
     def typ_item(t):
         shp, nm = TYPES[t]
+
         def fn(xp, yp):
-            _shape(ax, shp, xp + 45, yp, 90, 64, "#e8e6df", INK, 3)
-            T(xp + 110, yp, nm, FONT_LEG, INK)
-        return 110 + meas.w(nm, FONT_LEG), fn
+            foot.append(("shape", (shp, xp + 40, yp, 80, 56, "#e8e6df", INK, 3), {}))
+            T(xp + 98, yp, nm, FONT_LEG)
+        return 98 + meas.w(nm, FONT_LEG), fn
 
     def link_item(txt, kind):
         def fn(xp, yp):
-            col = CONTRA if kind == "contra" else LINE
-            ls = {"rep": "-", "pred": (0, (2.6, 1.6)), "contra": (0, (0.1, 2.3)), "fb": "-"}[kind]
-            if kind == "fb":
-                pts = _bez((xp, yp + 14), (xp + 30, yp - 34), (xp + 80, yp - 34), (xp + 110, yp + 14), 20)
-            else:
-                pts = np.array([[xp, yp], [xp + 110, yp]], float)
-            ax.plot(pts[:, 0], pts[:, 1], color=col, lw=6 * 0.72, ls=ls, dash_capstyle="round", zorder=3)
-            _arrow_head(ax, pts, 24, col)
-            T(xp + 128, yp, txt, FONT_LEG, INK)
-        return 128 + meas.w(txt, FONT_LEG), fn
+            rec = dict(kind="contradicts" if kind == "contra" else "causal", reported=kind != "pred",
+                       strength=2, conf=2)
+            foot.append(("arrow", ([(xp, yp), (xp + 100, yp)], rec, 26), {}))
+            T(xp + 116, yp, txt, FONT_LEG)
+        return 116 + meas.w(txt, FONT_LEG), fn
 
     def text_item(txt):
-        return meas.w(txt, FONT_LEG), (lambda xp, yp: T(xp, yp, txt, FONT_LEG, INK))
+        return meas.w(txt, FONT_LEG), (lambda xp, yp: T(xp, yp, txt, FONT_LEG))
 
-    y = flow([dom_item(d) for d in used_dom], y + 20, "Domain")
-    y = flow([typ_item(t) for t in LEGEND_TYPES if t in used_typ or (t == "index" and "market" in used_typ)], y + 6, "Shape")
-    y = flow([link_item("reported", "rep"), link_item("predicted", "pred"), link_item("contradicts", "contra"),
-              link_item("feedback loop", "fb"), text_item("↑ ↓ ↕ effect on target · thicker = stronger")], y + 6, "Links")
+    ly = y + 20
+    panel_top = ly
+    ly += 44
+    ly = flow([dom_item(d) for d in used_dom], ly, "Colour")
+    tl = [t for t in LEGEND_TYPES if t in used_typ or (t == "index" and "market" in used_typ)]
+    ly = flow([typ_item(t) for t in tl], ly + 4, "Shape")
+    ly = flow([link_item("reported", "rep"), link_item("predicted", "pred"), link_item("contradicts", "contra"),
+               text_item("▲ ▼ effect · thicker = stronger")], ly + 4, "Links")
+    foot.insert(0, ("rrect", (x0, panel_top, W - 2 * MARGIN, ly - panel_top - 16, 26, "#f1efe8", CARD_EDGE, 2), {"z": 0.5}))
+    y = ly + 24
 
     # ---- biggest movers
     mv = [nd for nd in nodes if nd["pct"] is not None]
     mv.sort(key=lambda nd: (-abs(nd["pct"]), nd["label"]))
-    y += 30
     if mv:
-        T(MARGIN - 60, y, "Biggest movers", 46, INK, weight="bold")
-        y += 66
-        colw = (W - 2 * MARGIN + 120) / 2
-        shown = mv[:6]
-        for k, nd in enumerate(shown):
+        T(x0 + 10, y + 24, "Biggest movers", 54, INK, weight="bold")
+        y += 84
+        colw = (W - 2 * MARGIN) / 2
+        for k, nd in enumerate(mv[:6]):
             mk = nd["mk"] or {}
             price = str(mk.get("price") or "").strip()
-            s = f"{nd['glyph']} {nd['label']}  {price}  ({_chg(mk, nd['pct'])})"
-            s = " ".join(s.split())
-            while len(s) > 8 and meas.w(s, 40) > colw - 30:
-                s = s[:-2] + "…"
-            T(MARGIN - 60 + (k % 2) * colw, y + (k // 2) * 62, s, 40, INK)
-        y += ((len(shown) + 1) // 2) * 62 + 10
-    hidden_e = len(edges) - len(E) - len(ann)
-    note = f"Showing {len(E) + len(ann)} of {len(edges)} links; {hidden_e} more on the web page." if hidden_e > 0 else f"Showing all {len(edges)} links."
-    T(MARGIN - 60, y + 20, note, 34, MUTED)
-    y += 90
-    T(W / 2, y, "Full interactive map on the web page", 44, INK, "center", weight="bold")
-    H = y + 80
-    fig.set_size_inches(W / 100, H / 100)
+            tail = f"  {price}" if price else ""
+            chg = f"  {_chg(mk, nd['pct'])}"
+            name = _fit(meas, nd["label"], 46, colw - 40 - meas.w(f"{nd['glyph']} " + tail + chg, 46, "bold") - 10)
+            T(x0 + 10 + (k % 2) * colw, y + (k // 2) * 62 + 24, f"{nd['glyph']} {name}{tail}{chg}", 46)
+        y += ((min(6, len(mv)) + 1) // 2) * 62 + 14
+    hidden = len(edges) - shown_edges
+    msg = f"{hidden} more link{'s' if hidden != 1 else ''} on the web page" if hidden > 0 else "Full interactive map on the web page"
+    T(W / 2, y + 40, msg, 50, INK, "center", "bold")
+    H = y + 96
+
+    fig = plt.figure(figsize=(W / 100, H / 100), dpi=100, facecolor=SURFACE)
+    ax = fig.add_axes([0, 0, 1, 1])
+    ax.set_xlim(0, W)
     ax.set_ylim(H, 0)
-    return fig, H, hard
+    ax.axis("off")
+    ctx = _Ctx(ax)
+    ttl = _fit(meas, _clean(title) or "Connection map", 72, W - 2 * MARGIN, "bold")
+    ctx.text(MARGIN + 10, 90, ttl, 72, INK, weight="bold")
+    n_s = max(nstories, 1)
+    sub = f"{n_s} key cause-and-effect {'story' if n_s == 1 else 'stories'} · read top to bottom" if nstories else "Key items"
+    ctx.text(MARGIN + 10, 170, sub, 42, MUTED)
+    for name, args, kw in ops + foot:
+        getattr(ctx, name)(*args, **kw)
+    return fig, H
 
 
 def render_graph_png(graph, title=""):
@@ -788,22 +696,10 @@ def render_graph_png(graph, title=""):
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
         meas = _Meas()
-        nodes, edges = _parse(graph, meas)
+        nodes, edges = _parse(graph)
         if not nodes:
             return None
-        sel = _select(nodes, edges, W - 2 * MARGIN)
-        if not sel[0] or sel[2] is None:
-            return None
-        best = None
-        for G in ((170, 210, 260, 320, 400) if len(nodes) < 8 else (260, 290, 320, 360, 400, 480)):
-            _, tail, hard = _draw(graph, title, G, meas, nodes, edges, sel, plot=False)
-            if tail + 930 > MAX_H and best is not None:
-                break
-            if best is None or hard < best[1]:
-                best = (G, hard)
-            if hard == 0:
-                break
-        fig, H, _ = _draw(graph, title, best[0], meas, nodes, edges, sel)
+        fig, H = _draw(graph, title, meas, nodes, edges)
         out = None
         for dpi in (100, 80, 64, 50):
             buf = io.BytesIO()

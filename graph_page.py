@@ -78,135 +78,229 @@ def _dcls(name):
 
 CSS = """
     .viz { --d0:#6250d6; --d1:#008300; --d2:#1baf7a; --d3:#e87ba4; --d4:#2a78d6; --d5:#eb6834; --d6:#eda100; --dx:#64748b;
-           --ln:#64748b; --halo:var(--card);
+           --ln:#64748b; --halo:var(--card); --soft:rgba(100,116,139,.12); --soft2:rgba(100,116,139,.2);
            --up:#1a7f37; --down:#cf222e; --mix:#9a6700; --con:#b4236f; --ink2:#475569; --focus:#2563eb; --lane:.075; }
     @media (prefers-color-scheme: dark) {
       .viz { --d0:#9085e9; --d1:#008300; --d2:#199e70; --d3:#d55181; --d4:#3987e5; --d5:#d95926; --d6:#c98500; --dx:#94a3b8; --ln:#94a3b8;
-             --up:#3fb950; --down:#f85149; --mix:#d29922; --con:#f778ba; --ink2:#cbd5e1; --focus:#79c0ff; --lane:.11; }
+             --up:#3fb950; --down:#f85149; --mix:#d29922; --con:#f778ba; --ink2:#cbd5e1; --focus:#79c0ff; --lane:.12;
+             --soft:rgba(148,163,184,.14); --soft2:rgba(148,163,184,.24); }
     }
     .viz h4 { font-size: 14px; margin: 18px 0 6px; }
     .viz .vnote { font-size: 12px; color: var(--muted); margin: 0 0 8px; }
 
     .cmapwrap { margin: 0; }
     @media (min-width: 900px) {
-      .cmapwrap { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+      .cmapwrap { width: min(1320px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
     }
-    .cmap { position: relative; border: 1px solid var(--border); border-radius: 10px; background: var(--card); overflow: hidden; }
+    .cmap { position: relative; border: 1px solid var(--border); border-radius: 10px; background: var(--card); }
     .cmap button, .cmap select, .cmap input { font: inherit; color: var(--text); }
-    .cfilters { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; padding: 6px 10px 8px; }
-    .cfdet { border-bottom: 1px solid var(--border); }
+    .cmap :focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+    .cmap .muted { color: var(--muted); }
+
+    /* top bar: view switch + search */
+    .ctop { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+    .seg { display: inline-flex; padding: 3px; border-radius: 999px; background: var(--soft); gap: 2px; max-width: 100%; }
+    .seg button { font-size: 14px; font-weight: 600; line-height: 1; padding: 8px 15px; border: 0; border-radius: 999px; background: transparent; color: var(--ink2); cursor: pointer; white-space: nowrap; min-height: 34px; }
+    .seg button[aria-checked="true"] { background: var(--text); color: var(--card); }
+    .seg button:hover:not([aria-checked="true"]) { background: var(--soft2); }
+    .csw { position: relative; flex: 1 1 180px; max-width: 340px; margin-left: auto; }
+    .cmap .csearch { width: 100%; font-size: 14px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); min-height: 36px; }
+    .sres { position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 4px); margin: 0; padding: 4px; list-style: none; background: var(--card);
+            border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.22); max-height: 320px; overflow: auto; min-width: 250px; }
+    .sres[hidden] { display: none; }
+    .sres li { margin: 0; }
+    .sres button { display: flex; width: 100%; text-align: left; gap: 8px; align-items: center; justify-content: space-between; padding: 7px 9px; border: 0; background: none; border-radius: 7px; cursor: pointer; font-size: 14px; line-height: 1.25; }
+    .sres button:hover, .sres button.on { background: var(--soft2); }
+    .sres .sno { padding: 8px 10px; font-size: 13px; color: var(--muted); }
+    .dchip { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--ink2); white-space: nowrap; }
+    .dchip::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--dx); flex: none; }
+    .dchip.d0::before { background: var(--d0); } .dchip.d1::before { background: var(--d1); } .dchip.d2::before { background: var(--d2); } .dchip.d3::before { background: var(--d3); }
+    .dchip.d4::before { background: var(--d4); } .dchip.d5::before { background: var(--d5); } .dchip.d6::before { background: var(--d6); }
+
+    /* everything-view filters */
+    .cflt { border-bottom: 1px solid var(--border); }
+    .cflt[hidden] { display: none; }
+    .cflt > summary { cursor: pointer; font-size: 13px; font-weight: 600; padding: 8px 12px; list-style: none; display: flex; gap: 8px; align-items: baseline; }
+    .cflt > summary::-webkit-details-marker { display: none; }
+    .cflt > summary::before { content: "\\25B8"; color: var(--muted); }
+    .cflt[open] > summary::before { content: "\\25BE"; }
+    .cfilters { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; padding: 2px 12px 10px; }
     .cfilters .grp { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
-    .cmap .chip { font-size: 12px; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; line-height: 1.2; padding: 3px 9px 3px 7px; border: 1px solid var(--border);
-            border-radius: 999px; background: transparent; cursor: pointer; min-height: 26px; }
+    .cmap .chip { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; line-height: 1.2; padding: 4px 10px 4px 8px; border: 1px solid var(--border);
+            border-radius: 999px; background: transparent; cursor: pointer; min-height: 28px; }
     .chip i { width: 9px; height: 9px; border-radius: 50%; background: var(--dx); flex: none; }
     .chip[aria-pressed="false"] { color: var(--muted); text-decoration: line-through; }
-    .chip[aria-pressed="false"] i { background: transparent; box-shadow: inset 0 0 0 1.5px var(--dx); }
+    .chip[aria-pressed="false"] i { background: transparent !important; box-shadow: inset 0 0 0 1.5px var(--dx); }
     .chip.d0 i { background: var(--d0); } .chip.d1 i { background: var(--d1); } .chip.d2 i { background: var(--d2); } .chip.d3 i { background: var(--d3); }
     .chip.d4 i { background: var(--d4); } .chip.d5 i { background: var(--d5); } .chip.d6 i { background: var(--d6); }
-    .chip[aria-pressed="false"].d0 i { box-shadow: inset 0 0 0 1.5px var(--d0); background: transparent; } .chip[aria-pressed="false"].d1 i { box-shadow: inset 0 0 0 1.5px var(--d1); background: transparent; }
-    .chip[aria-pressed="false"].d2 i { box-shadow: inset 0 0 0 1.5px var(--d2); background: transparent; } .chip[aria-pressed="false"].d3 i { box-shadow: inset 0 0 0 1.5px var(--d3); background: transparent; }
-    .chip[aria-pressed="false"].d4 i { box-shadow: inset 0 0 0 1.5px var(--d4); background: transparent; } .chip[aria-pressed="false"].d5 i { box-shadow: inset 0 0 0 1.5px var(--d5); background: transparent; }
-    .chip[aria-pressed="false"].d6 i { box-shadow: inset 0 0 0 1.5px var(--d6); background: transparent; }
-    .cmap select, .cmap .csearch { font-size: 12px; padding: 3px 6px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); min-height: 26px; }
-    .cmap .csearch { min-width: 120px; flex: 1 1 120px; max-width: 220px; }
+    .cmap select { font-size: 12px; padding: 4px 6px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); min-height: 28px; }
     .cmap .clink { font-size: 12px; background: none; border: 0; color: var(--accent); cursor: pointer; padding: 3px 4px; text-decoration: underline; }
-    .cfdet > summary { cursor: pointer; font-size: 12px; font-weight: 600; padding: 7px 10px; list-style: none; display: flex; gap: 10px; align-items: baseline; }
-    .cfdet > summary::-webkit-details-marker { display: none; }
-    .cfdet > summary::before { content: "\\25B8"; color: var(--muted); }
-    .cfdet[open] > summary::before { content: "\\25BE"; }
-    .cfdet .cfilters { padding-top: 2px; }
-    .cmap .ccount { font-size: 11px; font-weight: 400; color: var(--muted); margin-left: auto; text-align: right; }
-    @media (max-width: 600px) { .cfilters .grp { flex-wrap: nowrap; overflow-x: auto; width: 100%; padding-bottom: 3px; } .chip { white-space: nowrap; flex: none; } }
-    .cmap :focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+    .cmap .ccount { font-size: 12px; font-weight: 400; color: var(--muted); margin-left: auto; }
 
+    /* body: chooser rail | map | panel */
     .cbody { display: grid; grid-template-columns: minmax(0, 1fr); }
-    @media (min-width: 900px) { .cbody { grid-template-columns: minmax(0, 1fr) 290px; } .cpanel { border-left: 1px solid var(--border); border-top: 0 !important; max-height: 680px; } }
-    .cview { position: relative; height: min(68vh, 470px); background: var(--card); outline-offset: -2px; }
-    @media (min-width: 900px) { .cview { height: 680px; } }
+    .crail { min-width: 0; border-bottom: 1px solid var(--border); }
+    .cpanel { padding: 14px 16px 16px; font-size: 14px; line-height: 1.45; overflow: auto; border-top: 1px solid var(--border); min-height: 120px; }
+    .cmain { min-width: 0; }
+    @media (min-width: 900px) {
+      .cbody { grid-template-columns: minmax(0, 1fr) 300px; grid-template-areas: "rail rail" "main panel"; }
+      .crail { grid-area: rail; } .cmain { grid-area: main; }
+      .cpanel { grid-area: panel; border-top: 0; border-left: 1px solid var(--border); max-height: 700px; }
+    }
+    @media (min-width: 1280px) {
+      .cbody { grid-template-columns: 276px minmax(0, 1fr) 316px; grid-template-areas: "rail main panel"; }
+      .crail { border-bottom: 0; border-right: 1px solid var(--border); overflow-y: auto; max-height: 700px; }
+      .cmap[data-view="all"] .cbody { grid-template-columns: minmax(0, 1fr) 316px; grid-template-areas: "main panel"; }
+    }
+    .cmap[data-view="all"] .crail { display: none; }
+
+    /* chooser: key chains */
+    .rail-in { display: flex; gap: 8px; overflow-x: auto; padding: 10px 12px; scroll-snap-type: x proximity; }
+    .rail-in .rh { display: none; }
+    @media (min-width: 1280px) { .rail-in { flex-direction: column; overflow: visible; padding: 12px; } .rail-in .rh { display: block; } }
+    .rh { font-size: 13px; font-weight: 600; color: var(--ink2); margin: 0 2px 2px; }
+    .ccard { flex: 0 0 min(260px, 78vw); scroll-snap-align: start; display: flex; flex-direction: column; gap: 5px; text-align: left; padding: 10px 12px; border: 1px solid var(--border);
+             border-radius: 10px; background: transparent; cursor: pointer; line-height: 1.3; }
+    .ccard:hover { background: var(--soft); }
+    .ccard[aria-pressed="true"] { border-color: var(--text); background: var(--soft); box-shadow: inset 4px 0 0 var(--focus); padding-left: 14px; }
+    @media (min-width: 1280px) { .ccard { flex: none; } }
+    .ccard .ct { font-size: 14px; font-weight: 600; color: var(--text); }
+    .ccard .cs { font-size: 12.5px; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .ccard .cm { display: flex; flex-wrap: wrap; gap: 3px 10px; align-items: center; }
+    .bdg { font-size: 11.5px; font-weight: 600; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--ink2); color: var(--text); white-space: nowrap; }
+    .bdg.predicted { border-style: dashed; }
+    .bdg.mixed { border-style: dashed; color: var(--ink2); }
+    @media (max-width: 899px) {
+      .ccard { flex-basis: auto; width: max-content; max-width: 78vw; padding: 8px 12px; }
+      .ccard .cs, .ccard .cm .dchip { display: none; }
+      .ccard .ct { font-size: 13.5px; }
+    }
+    /* chooser: topics */
+    .tbtn { display: flex; align-items: center; gap: 8px; text-align: left; padding: 7px 10px; border: 1px solid var(--border); border-radius: 999px; background: transparent; cursor: pointer; font-size: 13.5px; white-space: nowrap; flex: none; }
+    .tbtn:hover { background: var(--soft); }
+    .tbtn[aria-pressed="true"] { background: var(--text); color: var(--card); border-color: var(--text); }
+    .tbtn[aria-pressed="true"] .tn { color: inherit; opacity: .8; }
+    .tbtn i { width: 10px; height: 10px; border-radius: 50%; background: var(--dx); flex: none; }
+    .tbtn[aria-pressed="true"] i { box-shadow: 0 0 0 2px var(--card); }
+    .tbtn.d0 i { background: var(--d0); } .tbtn.d1 i { background: var(--d1); } .tbtn.d2 i { background: var(--d2); } .tbtn.d3 i { background: var(--d3); }
+    .tbtn.d4 i { background: var(--d4); } .tbtn.d5 i { background: var(--d5); } .tbtn.d6 i { background: var(--d6); }
+    .tbtn .tl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+    .tbtn .tn { margin-left: auto; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .tgrp { display: contents; }
+    @media (min-width: 1280px) { .tbtn { border-radius: 8px; width: 100%; } .tgrp { display: flex; flex-direction: column; gap: 4px; } }
+
+    /* map header + view */
+    .mhead { display: flex; flex-wrap: wrap; gap: 2px 14px; align-items: baseline; padding: 9px 14px 8px; border-bottom: 1px solid var(--border); min-height: 42px; }
+    .mhead .mt { font-size: 15px; font-weight: 600; }
+    .mhead .mh { font-size: 13px; color: var(--muted); }
+    .cview { position: relative; height: min(66vh, 480px); background: var(--card); outline-offset: -2px; overflow: hidden; }
+    @media (min-width: 900px) { .cview { height: 600px; } .cmap[data-view="all"] .cview { height: 860px; } }
     .cview svg { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; font-family: inherit; user-select: none; -webkit-user-select: none; }
     .cview.drag svg { cursor: grabbing; }
-    .cmap .lane { fill: var(--dx); fill-opacity: var(--lane); stroke: var(--dx); stroke-opacity: .3; stroke-width: 1; }
-    .cmap .lane.d0 { fill: var(--d0); stroke: var(--d0); } .cmap .lane.d1 { fill: var(--d1); stroke: var(--d1); } .cmap .lane.d2 { fill: var(--d2); stroke: var(--d2); }
-    .cmap .lane.d3 { fill: var(--d3); stroke: var(--d3); } .cmap .lane.d4 { fill: var(--d4); stroke: var(--d4); } .cmap .lane.d5 { fill: var(--d5); stroke: var(--d5); }
-    .cmap .lane.d6 { fill: var(--d6); stroke: var(--d6); }
-    .cmap .lanecount { font-size: 10px; fill: var(--muted); pointer-events: none; }
-    .cmap .lanelabel { font-size: 11px; font-weight: 600; fill: var(--ink2); pointer-events: none; }
-    .cmap .lanedot.d0 { fill: var(--d0); } .cmap .lanedot.d1 { fill: var(--d1); } .cmap .lanedot.d2 { fill: var(--d2); } .cmap .lanedot.d3 { fill: var(--d3); }
-    .cmap .lanedot.d4 { fill: var(--d4); } .cmap .lanedot.d5 { fill: var(--d5); } .cmap .lanedot.d6 { fill: var(--d6); } .cmap .lanedot.dx { fill: var(--dx); }
+
+    .cmap .lane { fill: var(--dx); fill-opacity: var(--lane); stroke: none; }
+    .cmap .lane.d0 { fill: var(--d0); } .cmap .lane.d1 { fill: var(--d1); } .cmap .lane.d2 { fill: var(--d2); }
+    .cmap .lane.d3 { fill: var(--d3); } .cmap .lane.d4 { fill: var(--d4); } .cmap .lane.d5 { fill: var(--d5); } .cmap .lane.d6 { fill: var(--d6); }
+    .cmap .ltag { fill: var(--dx); }
+    .cmap .ltag.d0 { fill: var(--d0); } .cmap .ltag.d1 { fill: var(--d1); } .cmap .ltag.d2 { fill: var(--d2); } .cmap .ltag.d3 { fill: var(--d3); }
+    .cmap .ltag.d4 { fill: var(--d4); } .cmap .ltag.d5 { fill: var(--d5); } .cmap .ltag.d6 { fill: var(--d6); }
+    .cmap .lanelabel { font-size: 16px; font-weight: 700; fill: var(--text); pointer-events: none; }
+    .cmap .lanecount { font-size: 14px; fill: var(--muted); pointer-events: none; }
+    .cmap .axis { font-size: 14px; fill: var(--muted); pointer-events: none; }
+    .cmap .axisln { stroke: var(--muted); stroke-width: 1; opacity: .5; }
     .cmap .lg.hid { opacity: .22; }
 
     .cmap .nd { cursor: pointer; outline: none; }
     .cmap .nd .tap { fill: transparent; }
-    .cmap .nd .shape { stroke: var(--card); stroke-width: 1.5; }
+    .cmap .nd .shape { stroke: var(--card); stroke-width: 1.5; fill: var(--dx); }
     .cmap .nd .shape.d0 { fill: var(--d0); } .cmap .nd .shape.d1 { fill: var(--d1); } .cmap .nd .shape.d2 { fill: var(--d2); } .cmap .nd .shape.d3 { fill: var(--d3); }
     .cmap .nd .shape.d4 { fill: var(--d4); } .cmap .nd .shape.d5 { fill: var(--d5); } .cmap .nd .shape.d6 { fill: var(--d6); } .cmap .nd .shape.dx { fill: var(--dx); }
     .cmap .nd .ring { fill: none; stroke: transparent; stroke-width: 3; pointer-events: none; }
     .cmap .nd:focus-visible .ring { stroke: var(--focus); }
     .cmap .nd.sel .ring { stroke: var(--text); }
     .cmap .nd.m .ring { stroke: var(--focus); stroke-dasharray: 3 2; }
-    .cmap .nlabel { font-size: 12px; fill: var(--text); text-anchor: middle; paint-order: stroke; stroke: var(--halo); stroke-width: 4px; stroke-linejoin: round; pointer-events: none; }
+    .cmap .nlabel { font-size: var(--nfs, 13px); fill: var(--text); paint-order: stroke; stroke: var(--halo); stroke-width: 4px; stroke-linejoin: round; pointer-events: none; }
+    .cmap .nlabel.mid { text-anchor: middle; }
+    .cmap svg.scn-all:not(.zl) .nlabel.ln { display: none; }
+    .cmap svg.scn-all.zl .nlabel.sh { display: none; }
+    .cmap .nlabel.start { text-anchor: start; }
+    .cmap .scn-chain .nlabel { font-weight: 600; }
     .cmap .dirb { stroke: var(--card); stroke-width: 1.5; pointer-events: none; }
     .cmap .dirb.up { fill: var(--up); } .cmap .dirb.down { fill: var(--down); } .cmap .dirb.flat { fill: var(--dx); }
+    .cmap .nd.ghost { opacity: .55; }
+    .cmap .nd.ghost:hover, .cmap .nd.ghost:focus-visible, .cmap .nd.ghost.sel, .cmap .nd.ghost.open { opacity: 1; }
+    .cmap .nd.lo .nlabel { opacity: 0; }
+    .cmap .zl .nd.lo .nlabel, .cmap .nd.lo:hover .nlabel, .cmap .nd.lo:focus .nlabel, .cmap .nd.lo.m .nlabel, .cmap .nd.lo.sel .nlabel, .cmap .nd.lo.hl .nlabel, .cmap .nd.lo.hh .nlabel { opacity: 1; }
 
-    .cmap .ed { opacity: var(--eo, .8); }
-    .cmap .ed path.line { fill: none; stroke: var(--ec); stroke-linecap: butt; }
+    .cmap .ed { opacity: var(--eo, .5); }
+    .cmap .ed path.line { fill: none; stroke: var(--ec); stroke-width: var(--sw, 1.4); stroke-linecap: butt; }
     .cmap .ed.e-up { --ec: var(--up); } .cmap .ed.e-down { --ec: var(--down); } .cmap .ed.e-mixed { --ec: var(--mix); } .cmap .ed.e-none { --ec: var(--ln); }
     .cmap .ed.k-contradicts { --ec: var(--con); }
     .cmap .ed.k-contradicts path.line { stroke-dasharray: 1.5 4; stroke-linecap: round; }
     .cmap .ed.st-predicted:not(.k-contradicts) path.line { stroke-dasharray: 7 4.5; }
-    .cmap .ed path.hit { fill: none; stroke: transparent; stroke-width: 13; cursor: help; }
+    .cmap .ed path.hit { fill: none; stroke: transparent; stroke-width: 12; cursor: help; }
     .cmap .mk { stroke: none; }
     .cmap .mk.e-up { fill: var(--up); } .cmap .mk.e-down { fill: var(--down); } .cmap .mk.e-mixed { fill: var(--mix); } .cmap .mk.e-none { fill: var(--ln); }
     .cmap .mk.bar { fill: none; stroke: var(--con); stroke-width: 2.4; stroke-linecap: round; }
-    .cmap .chip2 { fill: var(--card); stroke: var(--ec); stroke-width: 1.3; }
-    .cmap .glyph { fill: var(--ec); stroke: none; }
-    .cmap .glyphtx { font-size: 10px; font-weight: 700; fill: var(--ec); text-anchor: middle; pointer-events: none; }
-    .cmap .elabel { font-size: 10.5px; fill: var(--text); text-anchor: middle; paint-order: stroke; stroke: var(--halo); stroke-width: 3.5px; stroke-linejoin: round; opacity: 0; pointer-events: none; }
-    .cmap .ed.perm .elabel, .cmap .ed.hv .elabel, .cmap .ed.hl .elabel, .cmap .zl .ed .elabel { opacity: 1; }
-    .cmap .ed.hv, .cmap .ed.hl { opacity: 1; }
-    .cmap .ed.hv path.line, .cmap .ed.hl path.line { stroke-width: var(--sw2); }
-    .cmap.focus .ed:not(.hl) { opacity: .07; }
-    .cmap.focus .nd:not(.hl) { opacity: .25; }
-    .cmap.focus .lg { opacity: .55; }
-    .cmap.focus .ed:not(.hl) .elabel { opacity: 0; }
-    .cmap.searching .nd:not(.m) { opacity: .25; }
-    .cmap.searching .ed { opacity: .15; }
+    .cmap .elabel { font-size: var(--efs, 12.5px); fill: var(--text); paint-order: stroke; stroke: var(--halo); stroke-width: 4px; stroke-linejoin: round; pointer-events: none; display: none; }
+    .cmap .elabel.sub { font-size: 11.5px; fill: var(--muted); }
+    .cmap .ed.perm .elabel, .cmap .ed.hv .elabel { display: inline; }
+    .cmap .ed.hh, .cmap .ed.hl, .cmap .ed.hv, .cmap .ed.perm { opacity: 1; }
+    .cmap .ed.hh path.line, .cmap .ed.hl path.line, .cmap .ed.hv path.line { stroke-width: var(--sw2, 2.6); }
+    .cmap .ed.ghosted { opacity: .55; }
+    .cmap .ed.ghosted.hl, .cmap .ed.ghosted.hh { opacity: 1; }
+    .cmap svg.focus .ed:not(.hl):not(.perm) { opacity: .04; }
+    .cmap svg.focus .nd:not(.hl):not(.ghost) { opacity: .22; }
+    .cmap svg.scn-chain.focus .nd:not(.hl) { opacity: 1; }
+    .cmap svg.scn-chain.focus .nd.ghost:not(.hl) { opacity: .5; }
+    .cmap svg.scn-chain.focus .ed.perm { opacity: 1; }
+    .cmap svg.hov .ed:not(.hh):not(.perm):not(.hv) { opacity: .04; }
+    .cmap svg.hov .nd:not(.hh):not(.hov1) { opacity: .28; }
+    .cmap svg.scn-chain.hov .nd { opacity: 1; }
+    .cmap svg.scn-chain.hov .nd.ghost:not(.hh):not(.hov1) { opacity: .5; }
+    .cmap svg.searching .nd:not(.m) { opacity: .25; }
     .cmap .hid { display: none; }
 
-    .czoom { position: absolute; top: 8px; right: 8px; display: flex; flex-direction: column; gap: 4px; }
-    .czoom button { width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); cursor: pointer; font-size: 17px; line-height: 1; padding: 0; opacity: .94; }
-    .czoom button.fit { font-size: 11px; }
-    .czoom button:hover { background: var(--code-bg); }
-    .cbar { position: absolute; left: 8px; right: 52px; bottom: 8px; padding: 7px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); text-align: left; font-size: 13px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.18); }
+    .czoom { position: absolute; bottom: 10px; right: 10px; display: flex; flex-direction: column; gap: 4px; }
+    .czoom button { width: 34px; height: 34px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); cursor: pointer; font-size: 18px; line-height: 1; padding: 0; opacity: .95; }
+    .czoom button.fit { font-size: 12px; }
+    .czoom button:hover { background: var(--soft2); }
+    .cbar { position: absolute; left: 8px; right: 52px; bottom: 8px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); text-align: left; font-size: 14px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.18); }
     .cbar[hidden] { display: none; }
     @media (min-width: 900px) { .cbar { display: none !important; } }
-    .chint { position: absolute; left: 10px; bottom: 6px; font-size: 11px; color: var(--muted); pointer-events: none; background: var(--card); padding: 1px 6px; border-radius: 6px; opacity: .9; }
-    .ctip { position: absolute; z-index: 5; pointer-events: none; background: var(--text); color: var(--card); font-size: 12px;
-            padding: 6px 9px; border-radius: 6px; max-width: 250px; line-height: 1.35; display: none; }
-    .ctip b { font-weight: 600; } .ctip .tm { opacity: .8; font-size: 11px; display: block; margin-top: 2px; }
+    .chint { position: absolute; left: 10px; bottom: 6px; font-size: 12px; color: var(--muted); pointer-events: none; background: var(--card); padding: 1px 6px; border-radius: 6px; opacity: .92; }
+    .ctip { position: absolute; z-index: 5; pointer-events: none; background: var(--text); color: var(--card); font-size: 13px;
+            padding: 7px 10px; border-radius: 6px; max-width: 270px; line-height: 1.35; display: none; }
+    .ctip b { font-weight: 600; } .ctip .tm { opacity: .85; font-size: 12px; display: block; margin-top: 2px; }
 
-    .cpanel { padding: 12px 14px 14px; font-size: 13px; line-height: 1.45; overflow: auto; border-top: 1px solid var(--border); min-height: 120px; }
-    .cpanel h5 { font-size: 15px; line-height: 1.25; margin: 0 0 3px; }
-    .cpanel .pmeta { font-size: 12px; color: var(--muted); margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: center; }
-    .cpanel .pmeta svg { width: 14px; height: 14px; vertical-align: -2px; fill: var(--dx); }
+    /* panel */
+    .cpanel h5 { font-size: 16px; line-height: 1.25; margin: 0 0 3px; }
+    .cpanel .pmeta { font-size: 13px; color: var(--muted); margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: center; }
     .cpanel p { margin: 0 0 8px; }
     .cpanel .pl { font-weight: 600; color: var(--text); }
-    .cpanel h6 { font-size: 12px; font-weight: 600; margin: 12px 0 4px; color: var(--ink2); }
+    .cpanel h6 { font-size: 13px; font-weight: 600; margin: 14px 0 4px; color: var(--ink2); }
     .cpanel ul { list-style: none; margin: 0; padding: 0; }
     .cpanel li { margin: 0 0 2px; }
-    .cpanel .pitem { display: block; width: 100%; text-align: left; background: none; border: 0; border-radius: 6px; padding: 4px 6px; cursor: pointer; line-height: 1.35; }
-    .cpanel .pitem:hover { background: var(--code-bg); }
-    .cpanel .pitem .mech { color: var(--muted); display: block; font-size: 12px; }
+    .cpanel .pitem { display: block; width: 100%; text-align: left; background: none; border: 0; border-radius: 6px; padding: 5px 6px; cursor: pointer; line-height: 1.35; font-size: 14px; }
+    .cpanel .pitem:hover { background: var(--soft); }
+    .cpanel .pitem .mech { color: var(--muted); display: block; font-size: 12.5px; }
     .cpanel .pitem .fx { display: inline-block; width: 1.1em; text-align: center; font-weight: 700; }
     .cpanel .fx.up { color: var(--up); } .cpanel .fx.down { color: var(--down); } .cpanel .fx.mixed { color: var(--mix); } .cpanel .fx.con { color: var(--con); }
-    .cpanel .mkt { display: inline-block; background: var(--code-bg); border-radius: 6px; padding: 2px 8px; font-variant-numeric: tabular-nums; }
+    .cpanel .mkt { display: inline-block; background: var(--soft); border-radius: 6px; padding: 2px 8px; font-variant-numeric: tabular-nums; }
     .cpanel .mkt.up { color: var(--up); } .cpanel .mkt.down { color: var(--down); }
     .cpanel .thr { color: var(--ink2); }
     .cpanel .src a { color: var(--accent); word-break: break-word; }
     .cpanel .empty { color: var(--muted); }
-    .cpanel .clear { float: right; font-size: 12px; background: none; border: 0; color: var(--accent); cursor: pointer; text-decoration: underline; padding: 0; }
+    .cpanel .clear { float: right; font-size: 13px; background: none; border: 0; color: var(--accent); cursor: pointer; text-decoration: underline; padding: 0; }
+    .cpanel .step { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 7px 6px; border-radius: 6px; cursor: pointer; font-size: 14px; line-height: 1.35; }
+    .cpanel .step:hover { background: var(--soft); }
+    .cpanel .step .sn { font-weight: 600; display: block; }
+    .cpanel .step .how { display: block; color: var(--ink2); font-size: 13px; }
+    .cpanel .step .sm { display: block; color: var(--muted); font-size: 12.5px; }
+    .cpanel .gobtn { margin: 6px 0 2px; font-size: 13px; padding: 5px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); cursor: pointer; }
+    .cpanel .gobtn:hover { background: var(--soft2); }
 
-    .legend { display: flex; flex-wrap: wrap; gap: 5px 14px; font-size: 12px; color: var(--muted); padding: 8px 12px 10px; border-top: 1px solid var(--border); align-items: center; }
+    .legend { display: flex; flex-wrap: wrap; gap: 5px 14px; font-size: 12px; color: var(--muted); padding: 8px 14px 10px; border-top: 1px solid var(--border); align-items: center; }
     .legend > span { display: inline-flex; align-items: center; gap: 5px; }
     .legend svg { flex: none; }
     .legend .shp { width: 16px; height: 16px; fill: var(--muted); }
@@ -216,9 +310,9 @@ CSS = """
     .legend .lk .hd { fill: var(--ink2); stroke: none; } .legend .lk .hd.up { fill: var(--up); } .legend .lk .hd.down { fill: var(--down); } .legend .lk .hd.mixed { fill: var(--mix); }
     .legend .sep { flex-basis: 100%; height: 0; }
     .legend b { color: var(--text); font-weight: 600; }
+    .nos { font-size: 13px; padding: 8px 12px 8px 30px; margin: 0; }
 
 """
-
 CSS += """
     .flows { display: flex; flex-direction: column; gap: 12px; }
     .flow-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
@@ -263,74 +357,279 @@ CSS += """
 SCRIPT = r"""
 (function () {
   "use strict";
+  var NS = "http://www.w3.org/2000/svg";
   var CR = { low: 1, medium: 2, high: 3 };
+  var FX = { up: ["▲", "up", "raises"], down: ["▼", "down", "lowers"], mixed: ["±", "mixed", "mixed effect"], none: ["→", "", "leads to"] };
   function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
+  function sv(tag, attrs, cls) {
+    var e = document.createElementNS(NS, tag); if (cls) e.setAttribute("class", cls);
+    if (attrs) Object.keys(attrs).forEach(function (k) { e.setAttribute(k, attrs[k]); });
+    return e;
+  }
   function safeUrl(u) { u = String(u == null ? "" : u).trim(); return /^https?:\/\/[^\s]+$/i.test(u) ? u : null; }
   function conf(e) { return CR[e.conf] || 2; }
-  var FX = { up: ["▲", "up", "raises"], down: ["▼", "down", "lowers"], mixed: ["±", "mixed", "mixed effect"], none: ["→", "", "leads to"] };
+  function r1(v) { return Math.round(v * 10) / 10; }
+  function wrap(s, width, lines) {
+    var words = String(s || "").split(/\s+/).filter(Boolean), out = [], cur = "";
+    words.forEach(function (w) { if (cur && cur.length + 1 + w.length > width) { out.push(cur); cur = w; } else cur = (cur ? cur + " " : "") + w; });
+    if (cur) out.push(cur);
+    if (out.length > lines) { out = out.slice(0, lines); var l = out[lines - 1]; out[lines - 1] = l.slice(0, Math.max(1, width - 1)).replace(/\s+$/, "") + "…"; }
+    return out.length ? out : [""];
+  }
+  function bez(p, t) {
+    var u = 1 - t;
+    return [u * u * u * p[0] + 3 * u * u * t * p[2] + 3 * u * t * t * p[4] + t * t * t * p[6],
+            u * u * u * p[1] + 3 * u * u * t * p[3] + 3 * u * t * t * p[5] + t * t * t * p[7]];
+  }
+  function pathD(p) { return "M" + p[0] + " " + p[1] + "C" + p[2] + " " + p[3] + " " + p[4] + " " + p[5] + " " + p[6] + " " + p[7]; }
+  function dcls(d) { return d >= 0 && d < 7 ? "d" + d : "dx"; }
 
   function init(box) {
     var data;
     try { data = JSON.parse(box.querySelector("script.cdata").textContent); } catch (x) { return; }
-    var view = box.querySelector(".cview"), svg = view.querySelector("svg"), tip = box.querySelector(".ctip"), panel = box.querySelector(".cpanel");
-    var N = data.nodes || {}, E = data.edges || [], W = data.W, H = data.H, hub = data.hub;
-    var nodeEl = {}, edgeEl = [], laneEl = {}, outE = {}, inE = {};
-    [].forEach.call(svg.querySelectorAll(".nd"), function (n) { nodeEl[n.getAttribute("data-id")] = n; });
-    [].forEach.call(svg.querySelectorAll(".ed"), function (g) { edgeEl[+g.getAttribute("data-i")] = g; });
-    [].forEach.call(svg.querySelectorAll(".lg"), function (g) { laneEl[g.getAttribute("data-d")] = g; });
-    Object.keys(N).forEach(function (k) { outE[k] = []; inE[k] = []; });
+    var view = box.querySelector(".cview"), svg = view.querySelector("svg"), gScene = svg.querySelector(".scene"), tip = box.querySelector(".ctip");
+    var panel = box.querySelector(".cpanel"), rail = box.querySelector(".crail"), mt = box.querySelector(".mt"), mh = box.querySelector(".mh");
+    var N = data.nodes || {}, E = data.edges || [], CH = data.chains || [], TOP = data.topics || [], LAY = data.lay || {}, SH = data.shapes, EXT = data.ext, UID = data.uid;
+    var ids = Object.keys(N), outE = {}, inE = {};
+    ids.forEach(function (k) { outE[k] = []; inE[k] = []; });
     E.forEach(function (e, i) { if (outE[e.f]) outE[e.f].push(i); if (inE[e.t]) inE[e.t].push(i); });
 
+    function defaultTopic() {
+      if (CH.length) { var d = N[CH[0].n[0]].d; var k = d >= 0 ? "d" + d : "dx"; if (LAY["t:" + k]) return k; }
+      return TOP.length ? TOP[0].k : "";
+    }
+    var S = { view: CH.length ? "chains" : "all", chain: 0, topic: defaultTopic(), sel: null };
     var F = { hideDom: {}, region: "", conf: 1, order: 3, status: "", q: "" };
-    var sel = null, chain = null, tipTimer = null;
+    var SC = null, nodeEl = {}, edgeEl = {}, laneEl = {}, tipTimer = null, hoverId = null;
 
-    /* ---------- viewport (viewBox zoom + pan) ---------- */
-    var vb = { x: 0, y: 0, w: W, h: H }, MARGIN = 22;
+    /* ---------- scene: chain (laid out in the browser so it can use the width it has) ---------- */
+    function ghostPick(chainIds) {
+      var inChain = {}; chainIds.forEach(function (i) { inChain[i] = true; });
+      var rec = {};
+      chainIds.forEach(function (id) {
+        outE[id].concat(inE[id]).forEach(function (k) {
+          var e = E[k], other = e.f === id ? e.t : e.f; if (inChain[other]) return;
+          var r = rec[other] || (rec[other] = { s: 0, cause: false, anchors: {}, edges: [] });
+          r.s += e.s; if (e.t === id) r.cause = true; r.anchors[id] = true; r.edges.push(k);
+        });
+      });
+      var all = Object.keys(rec).sort(function (a, b) { return rec[b].s - rec[a].s || (a < b ? -1 : 1); });
+      var up = all.filter(function (g) { return rec[g].cause; }), dn = all.filter(function (g) { return !rec[g].cause; });
+      return { rec: rec, up: up.slice(0, 4), dn: dn.slice(0, 4), more: Math.max(0, up.length - 4) + Math.max(0, dn.length - 4), total: all.length };
+    }
+    function buildChain() {
+      var c = CH[S.chain], r = box2(), n = c.n.length, K = 1.15, sc = { kind: "chain", nodes: {}, edges: [], lanes: null, ghostList: [] };
+      var gp = ghostPick(c.n); sc.gp = gp;
+      var m = 64, step = (r.w - 2 * m) / Math.max(1, n - 1), vertical = r.w < 520 || (n > 1 && step < 138);
+      sc.vertical = vertical;
+      function gedge(g, ids2, from) { return gp.rec[g].edges.filter(function (k) { return ids2.indexOf(E[k].f === g ? E[k].t : E[k].f) >= 0; }); }
+      if (!vertical) {
+        step = Math.max(150, Math.min(290, step));
+        var x0 = m, W = 2 * m + (n - 1) * step, hasUp = gp.up.length > 0, hasDn = gp.dn.length > 0;
+        var Y0 = hasUp ? 205 : 90, GAP = 128;
+        function slots(list) {
+          var want = list.map(function (g) { var a = Object.keys(gp.rec[g].anchors).map(function (id) { return x0 + c.n.indexOf(id) * step; }); return { g: g, x: a.reduce(function (s, v) { return s + v; }, 0) / a.length }; });
+          want.sort(function (a, b) { return a.x - b.x; });
+          for (var i = 0; i < want.length; i++) if (i && want[i].x < want[i - 1].x + GAP) want[i].x = want[i - 1].x + GAP;
+          if (want.length) { var over = want[want.length - 1].x - (W - 60); if (over > 0) { want.forEach(function (w) { w.x -= over; }); for (var j = want.length - 1; j >= 0; j--) if (j < want.length - 1 && want[j].x > want[j + 1].x - GAP) want[j].x = want[j + 1].x - GAP; var lo = 60 - want[0].x; if (lo > 0) { want.forEach(function (w) { w.x += lo; }); W = Math.max(W, want[want.length - 1].x + 60); } } }
+          return want;
+        }
+        var upS = slots(gp.up), dnS = slots(gp.dn);
+        c.n.forEach(function (id, i) { sc.nodes[id] = { x: x0 + i * step, y: Y0, k: K, chain: true, lab: "below", w: Math.floor((step - 26) / 8.2), ln: 3, fs: 15 }; });
+        upS.forEach(function (w) { sc.nodes[w.g] = { x: w.x, y: Y0 - 168, k: 0.8, ghost: true, lab: "above", w: 17, ln: 2, fs: 12.5 }; });
+        dnS.forEach(function (w) { sc.nodes[w.g] = { x: w.x, y: Y0 + 172, k: 0.8, ghost: true, lab: "below", w: 17, ln: 2, fs: 12.5 }; });
+        sc.W = W; sc.H = hasDn ? Y0 + 172 + 84 : Y0 + 120;
+        if (!hasUp) sc.H = Math.max(sc.H, Y0 + 120);
+        c.e.forEach(function (k, i) {
+          var a = sc.nodes[c.n[i]], b = sc.nodes[c.n[i + 1]], ea = EXT[N[c.n[i]].t], eb = EXT[N[c.n[i + 1]].t];
+          var p0 = [a.x + ea[0] * K + 6, Y0], p3 = [b.x - eb[0] * K - 9, Y0], d = p3[0] - p0[0];
+          var s = E[k].s;
+          sc.edges.push({ i: k, pts: [p0[0], Y0, p0[0] + d / 3, Y0, p0[0] + 2 * d / 3, Y0, p3[0], Y0], perm: true, sw: 2.4 + s * 0.9, size: s >= 2 ? 4 : 3,
+                          lab: { x: (p0[0] + p3[0]) / 2, y: Y0, w: Math.max(14, Math.floor(d / 6.4)), ln: 3, anchor: "middle" } });
+        });
+        function link(g, up) {
+          var gn = sc.nodes[g], eg = EXT[N[g].t];
+          var bestK = null, bestV = -1;
+          gp.rec[g].edges.forEach(function (k) { var o2 = E[k].f === g ? E[k].t : E[k].f; if (sc.nodes[o2] && sc.nodes[o2].chain && E[k].s > bestV) { bestV = E[k].s; bestK = k; } });
+          (bestK == null ? [] : [bestK]).forEach(function (k) {
+            var e = E[k], other = e.f === g ? e.t : e.f, an = sc.nodes[other]; if (!an || !an.chain) return;
+            var ea2 = EXT[N[other].t], p;
+            if (up) p = [gn.x, gn.y + eg[1] * gn.k + 3, gn.x, (gn.y + Y0) / 2 + 4, an.x, (gn.y + Y0) / 2 - 8, an.x, Y0 - ea2[1] * K - 8];
+            else p = [an.x + ea2[0] * K * 0.55, Y0 + ea2[1] * K * 0.85, an.x + ea2[0] * K * 0.55 + (gn.x - an.x) * 0.1, Y0 + 70, gn.x, Y0 + 100, gn.x, gn.y - eg[1] * gn.k - 9];
+            sc.edges.push({ i: k, pts: p, ghosted: true, sw: 1.4 + e.s * 0.3, size: 2, lab: { x: 0, y: 0, w: 22, ln: 2, anchor: "middle", mid: true } });
+          });
+        }
+        gp.up.forEach(function (g) { link(g, true); }); gp.dn.forEach(function (g) { link(g, false); });
+      } else {
+        var STEP = 132, xc = 56, H = 56 * 2 + (n - 1) * STEP, W2 = Math.max(r.w, 300), lw = Math.floor((W2 - xc - 56) / 8.4), ew = Math.floor((W2 - xc - 40) / 6.9);
+        c.n.forEach(function (id, i) { sc.nodes[id] = { x: xc, y: 56 + i * STEP, k: K, chain: true, lab: "right", w: Math.max(14, lw), ln: 3, fs: 15 }; });
+        sc.W = W2; sc.H = H;
+        c.e.forEach(function (k, i) {
+          var a = sc.nodes[c.n[i]], b = sc.nodes[c.n[i + 1]], ea = EXT[N[c.n[i]].t], eb = EXT[N[c.n[i + 1]].t];
+          var y0 = a.y + ea[1] * K + 6, y1 = b.y - eb[1] * K - 10, d = y1 - y0, s = E[k].s;
+          sc.edges.push({ i: k, pts: [xc, y0, xc, y0 + d / 3, xc, y0 + 2 * d / 3, xc, y1], perm: true, sw: 2.4 + s * 0.9, size: s >= 2 ? 4 : 3,
+                          lab: { x: xc + 16, y: (y0 + y1) / 2, w: Math.max(14, ew), ln: 3, anchor: "start", vert: true } });
+        });
+      }
+      return sc;
+    }
+    /* ---------- scene: topic / everything (positions precomputed in Python) ---------- */
+    function buildLayout(key, kind) {
+      var L = LAY[key]; if (!L) return null;
+      var sc = { kind: kind, W: L.W, H: L.H, nodes: {}, edges: [], lanes: L.lanes || null }, gh = {};
+      (L.g || []).forEach(function (g) { gh[g] = true; });
+      Object.keys(L.p).forEach(function (id) {
+        if (!N[id]) return;
+        var q = L.p[id]; sc.nodes[id] = { x: q[0], y: q[1], k: gh[id] ? 0.8 : 1, ghost: !!gh[id], lab: "below", w: kind === "all" ? 13 : 17, ln: 2, fs: 0, lo: false };
+      });
+      Object.keys(L.e || {}).forEach(function (k) {
+        var e = E[+k]; if (!e || !sc.nodes[e.f] || !sc.nodes[e.t]) return;
+        var gs = sc.nodes[e.f].ghost || sc.nodes[e.t].ghost;
+        sc.edges.push({ i: +k, pts: L.e[k], ghosted: gs, sw: kind === "all" ? 0.9 + e.s * 0.45 : 1.3 + e.s * 0.6, size: e.s, lab: { x: 0, y: 0, w: 24, ln: 3, anchor: "middle", mid: true } });
+      });
+      return sc;
+    }
+    function buildScene() {
+      if (S.view === "chains" && CH.length) return buildChain();
+      if (S.view === "topic" && LAY["t:" + S.topic]) return buildLayout("t:" + S.topic, "topic");
+      S.view = "all"; return buildLayout("all", "all");
+    }
+
+    /* ---------- rendering ---------- */
+    function mkNode(id, o) {
+      var n = N[id], ext = EXT[n.t], k = o.k, hh = ext[1] * k, hw = ext[0] * k, dc = dcls(n.d);
+      var g = sv("g", { "class": "nd" + (o.ghost ? " ghost" : "") + (o.lo ? " lo" : ""), tabindex: "0", role: "button", "data-id": id, transform: "translate(" + r1(o.x) + " " + r1(o.y) + ")" });
+      var meta = (data.typeLabel[n.t] || n.t) + (n.dn ? ", " + n.dn : "") + (n.r ? ", " + n.r : "");
+      g.setAttribute("aria-label", n.l + ", " + meta + (o.ghost ? ". Linked node outside this view." : "") + ". Show connections.");
+      var lines = wrap(n.l, o.w, o.ln), fsz = o.fs ? o.fs : 13;
+      g.appendChild(sv("rect", { "class": "tap", x: -Math.max(hw + 8, 58), y: -hh - 8, width: Math.max(hw + 8, 58) * 2, height: hh * 2 + 16 + (o.lab === "right" ? 0 : lines.length * fsz * 1.2 + 6) }));
+      g.appendChild(sv("path", { "class": "shape " + dc, d: SH[n.t], transform: "scale(" + k + ")" }));
+      g.appendChild(sv("path", { "class": "ring", d: SH[n.t], transform: "scale(" + r1(k * 1.3) + ")" }));
+      if (n.dir === "up" || n.dir === "down" || n.dir === "flat") {
+        var bx = hw * 0.8, by = -hh * 0.8, d = n.dir === "up" ? "M" + bx + " " + (by - 5.5) + "L" + (bx + 5) + " " + (by + 4) + "L" + (bx - 5) + " " + (by + 4) + "Z"
+          : n.dir === "down" ? "M" + bx + " " + (by + 5.5) + "L" + (bx + 5) + " " + (by - 4) + "L" + (bx - 5) + " " + (by - 4) + "Z" : "M" + (bx - 5) + " " + (by - 2.2) + "H" + (bx + 5) + "V" + (by + 2.2) + "H" + (bx - 5) + "Z";
+        g.appendChild(sv("path", { "class": "dirb " + n.dir, d: d }));
+      }
+      var t = sv("text", null, "nlabel " + (o.lab === "right" ? "start" : "mid"));
+      if (o.fs) t.setAttribute("style", "font-size:" + o.fs + "px");
+      var emH = o.lab === "above" ? -(hh + 6 + (lines.length - 1) * 1.12 * fsz) : o.lab === "right" ? -((lines.length - 1) * 0.56 * fsz) - fsz * 0.35 : hh + 3;
+      var x = o.lab === "right" ? hw + 12 : 0;
+      lines.forEach(function (s, i) {
+        var ts = sv("tspan", { x: x, dy: i ? "1.12em" : (o.lab === "above" ? "0" : "1em") }); ts.textContent = s; t.appendChild(ts);
+      });
+      t.setAttribute("y", r1(o.lab === "above" ? emH : o.lab === "right" ? emH + fsz * 0.9 : emH));
+      g.appendChild(t);
+      if (o.short) {
+        t.setAttribute("class", t.getAttribute("class") + " ln");
+        var t0 = sv("text", { "class": "nlabel mid sh", y: r1(hh + 3) }), ts0 = sv("tspan", { x: 0, dy: "1em" }); ts0.textContent = n.l.length > 12 ? n.l.slice(0, 11).replace(/\s+$/, "") + "…" : n.l; t0.appendChild(ts0); g.appendChild(t0);
+      }
+      return g;
+    }
+    function mkEdge(o) {
+      var e = E[o.i], eff = e.effect, con = e.kind === "contradicts", p = o.pts;
+      var eo = { 3: 0.5, 2: 0.34, 1: 0.2 }[conf(e)];
+      if (SC.kind !== "all") eo = { 3: 0.9, 2: 0.7, 1: 0.5 }[conf(e)];
+      var g = sv("g", { "class": "ed e-" + eff + " k-" + e.kind + " st-" + e.status + (o.perm ? " perm" : "") + (o.ghosted ? " ghosted" : ""), "data-i": o.i });
+      g.setAttribute("style", "--eo:" + (o.perm ? 1 : eo) + ";--sw:" + r1(o.sw) + "px;--sw2:" + r1(o.sw + 1.4) + "px");
+      var d = pathD(p), line = sv("path", { "class": "line", d: d, "marker-end": "url(#mk" + UID + "-" + (con ? "bar" : eff) + (o.size || e.s) + ")" });
+      var tt = sv("title"); tt.textContent = N[e.f].l + " to " + N[e.t].l + ": " + (e.label || ""); line.appendChild(tt);
+      g.appendChild(line); g.appendChild(sv("path", { "class": "hit", d: d }));
+      var lb = o.lab, lines = wrap(e.label || "", lb.w, lb.ln), t = sv("text", null, "elabel");
+      var pos = lb.mid ? bez(p, 0.5) : [lb.x, lb.y], lh = 14.5, y0;
+      if (lb.vert) { y0 = pos[1] - (lines.length * lh) / 2 + 11; }
+      else if (lb.mid) { y0 = pos[1] - 8 - (lines.length - 1) * lh; }
+      else { y0 = pos[1] - 13 - (lines.length - 1) * lh; }
+      t.setAttribute("text-anchor", lb.anchor); t.setAttribute("y", r1(y0)); t.setAttribute("x", r1(pos[0]));
+      lines.forEach(function (s, i) { var ts = sv("tspan", { x: r1(pos[0]), dy: i ? lh : 0 }); ts.textContent = s; t.appendChild(ts); });
+      g.appendChild(t);
+      if (o.perm && (lb.vert || SC.kind !== 'chain')) {
+        var sub = [FX[eff] && eff !== "none" ? FX[eff][2] : "", e.status, e.conf ? e.conf + " confidence" : "", e.lag].filter(Boolean).join(" · ");
+        var t2 = sv("text", null, "elabel sub"); t2.setAttribute("text-anchor", lb.anchor);
+        if (lb.vert) { t2.setAttribute("x", r1(pos[0])); t2.setAttribute("y", r1(y0 + lines.length * lh + 1)); t2.textContent = wrap(sub, lb.w, 2).join(" "); }
+        else { t2.setAttribute("x", r1(pos[0])); t2.setAttribute("y", r1(pos[1] + 20)); t2.textContent = sub; }
+        g.appendChild(t2);
+      }
+      return g;
+    }
+    function render() {
+      gScene.textContent = ""; nodeEl = {}; edgeEl = {}; laneEl = {};
+      svg.setAttribute("class", "scn-" + SC.kind + (SC.vertical ? " vert" : ""));
+      var gl = sv("g", null, "lanes"), ge = sv("g", null, "edges"), gn = sv("g", null, "nodes");
+      if (SC.lanes) {
+        var cnt = {}; ids.forEach(function (id) { var d = N[id].d; cnt[d] = (cnt[d] || 0) + 1; });
+        SC.lanes.forEach(function (ln) {
+          var d = ln[0], top = ln[1], h = ln[2], c = dcls(d), g = sv("g", { "class": "lg", "data-d": d });
+          g.appendChild(sv("rect", { "class": "lane " + c, x: 6, y: top, width: SC.W - 12, height: h, rx: 8 }));
+          g.appendChild(sv("rect", { "class": "ltag " + c, x: 6, y: top, width: 5, height: h, rx: 2 }));
+          var name = d >= 0 ? data.doms[d] : "Other", t = sv("text", null, "lanelabel");
+          wrap(name, 13, 3).forEach(function (s, i) { var ts = sv("tspan", { x: 22, y: top + 24 + i * 15.5 }); ts.textContent = s; t.appendChild(ts); });
+          g.appendChild(t);
+          var tc = sv("text", { "class": "lanecount", x: 22, y: top + 24 + wrap(name, 13, 3).length * 15.5 + 2 }); tc.textContent = cnt[d] + (cnt[d] === 1 ? " node" : " nodes"); g.appendChild(tc);
+          gl.appendChild(g); laneEl[d] = g;
+        });
+        var ax = sv("g", null, "axisg"), x1 = 168, x2 = SC.W - 20;
+        var t1 = sv("text", { "class": "axis", x: x1 - 20, y: 18 }); t1.textContent = "Causes"; ax.appendChild(t1);
+        var t2 = sv("text", { "class": "axis", x: x2, y: 18, "text-anchor": "end" }); t2.textContent = "Outcomes"; ax.appendChild(t2);
+        ax.appendChild(sv("path", { "class": "axisln", d: "M" + (x1 + 44) + " 14H" + (x2 - 70) + "M" + (x2 - 76) + " 10L" + (x2 - 68) + " 14L" + (x2 - 76) + " 18", fill: "none" }));
+        gl.appendChild(ax);
+      }
+      SC.edges.slice().sort(function (a, b) { return E[a.i].s - E[b.i].s; }).forEach(function (o) { var g = mkEdge(o); ge.appendChild(g); edgeEl[o.i] = g; });
+      Object.keys(SC.nodes).forEach(function (id) {
+        var o = SC.nodes[id]; o.id = id;
+        o.lo = false; o.short = SC.kind === "all";
+        var g = mkNode(id, o); gn.appendChild(g); nodeEl[id] = g; wireNode(g, id);
+      });
+      gScene.appendChild(gl); gScene.appendChild(ge); gScene.appendChild(gn);
+      Object.keys(edgeEl).forEach(function (i) { wireEdge(edgeEl[i], +i); });
+    }
+
+    /* ---------- viewport ---------- */
+    var vb = { x: 0, y: 0, w: 800, h: 400 }, fitS = 1;
     function box2() { var r = view.getBoundingClientRect(); return { w: Math.max(r.width, 50), h: Math.max(r.height, 50), l: r.left, t: r.top }; }
-    function fitW() { var r = box2(); return Math.max(W + 2 * MARGIN, (H + 2 * MARGIN) * r.w / r.h); }
     function setVB() {
       var r = box2(); vb.h = vb.w * r.h / r.w;
       svg.setAttribute("viewBox", vb.x.toFixed(1) + " " + vb.y.toFixed(1) + " " + vb.w.toFixed(1) + " " + vb.h.toFixed(1));
-      svg.classList.toggle("zl", r.w / vb.w >= 1.05);
+      var s = r.w / vb.w;
+      svg.classList.toggle("zl", s >= 0.9);
+      if (SC && SC.kind !== "chain") { var f = Math.min(19, Math.max(13, 13 / s)); svg.style.setProperty("--nfs", f.toFixed(1) + "px"); svg.style.setProperty("--efs", f.toFixed(1) + "px"); } else { svg.style.removeProperty("--nfs"); svg.style.removeProperty("--efs"); }
     }
     function clampVB() {
-      var m = 60, lo = -MARGIN - m, hi = W + MARGIN + m;
-      vb.x = Math.min(Math.max(vb.x, lo - vb.w * 0.5), hi - vb.w * 0.5);
-      vb.y = Math.min(Math.max(vb.y, -MARGIN - m - vb.h * 0.5), H + MARGIN + m - vb.h * 0.5);
+      var m = 90;
+      vb.x = Math.min(Math.max(vb.x, -m - vb.w * 0.6), SC.W + m - vb.w * 0.4);
+      vb.y = Math.min(Math.max(vb.y, -m - vb.h * 0.6), SC.H + m - vb.h * 0.4);
     }
-    function fit() {
-      var r = box2(), w = fitW();
-      if (r.w < 560) { w = r.w / 0.8; var c = N[hub] || { x: W / 2, y: H / 2 }; vb.w = w; vb.h = w * r.h / r.w; vb.x = c.x - w / 2; vb.y = c.y - vb.h / 2.4; clampVB(); }
-      else { vb.w = w; vb.h = w * r.h / r.w; vb.x = W / 2 - w / 2; vb.y = H / 2 - vb.h / 2; }
-      setVB();
+    function fit(top) {
+      var r = box2(), pad = SC.kind === "chain" ? 8 : 12, s = Math.min(r.w / (SC.W + 2 * pad), r.h / (SC.H + 2 * pad));
+      if (SC.kind === "chain") s = Math.min(s, 1.15);
+      var narrow = r.w < 600 && SC.kind !== "chain";
+      if (narrow && !top && s < 0.62) {  /* phones: start readable, anchored at the first columns; "Fit" shows the whole map */
+        s = 0.62; vb.w = r.w / s; vb.h = r.h / s; vb.x = -pad; vb.y = -pad;
+      } else { vb.w = r.w / s; vb.h = r.h / s; vb.x = SC.W / 2 - vb.w / 2; vb.y = SC.H / 2 - vb.h / 2; }
+      fitS = s; setVB();
     }
-    function fitAll() { var r = box2(), w = fitW(); vb.w = w; vb.h = w * r.h / r.w; vb.x = W / 2 - w / 2; vb.y = H / 2 - vb.h / 2; setVB(); }
-    function zoomAt(k, cx, cy) { /* cx, cy in client px, k > 1 zooms in */
-      var r = box2(), minW = fitW() / 9, maxW = fitW() * 1.25;
-      var nw = Math.min(maxW, Math.max(minW, vb.w / k)); k = vb.w / nw;
+    function zoomAt(k, cx, cy) {
+      var r = box2(), maxW = r.w / (fitS * 0.7), minW = r.w / 4;
+      var nw = Math.min(maxW, Math.max(minW, vb.w / k));
       var px = (cx - r.l) / r.w, py = (cy - r.t) / r.h, wx = vb.x + px * vb.w, wy = vb.y + py * vb.h;
       vb.w = nw; vb.h = nw * r.h / r.w; vb.x = wx - px * vb.w; vb.y = wy - py * vb.h; clampVB(); setVB();
     }
     function zoomCenter(k) { var r = box2(); zoomAt(k, r.l + r.w / 2, r.t + r.h / 2); }
     function panBy(fx, fy) { vb.x += fx * vb.w; vb.y += fy * vb.h; clampVB(); setVB(); }
-    function centerOn(id) { var n = N[id]; if (!n) return; vb.x = n.x - vb.w / 2; vb.y = n.y - vb.h / 2; clampVB(); setVB(); }
+    function centerOn(id) { var n = SC.nodes[id]; if (!n) return; vb.x = n.x - vb.w / 2; vb.y = n.y - vb.h / 2; clampVB(); setVB(); }
     function ensureVisible(id) {
-      var n = N[id]; if (!n) return; var m = 50;
+      var n = SC.nodes[id]; if (!n) return; var m = 60;
       if (n.x < vb.x + m || n.x > vb.x + vb.w - m || n.y < vb.y + m || n.y > vb.y + vb.h - m - 20) centerOn(id);
     }
-
     var ptrs = {}, drag = null, pinch = null, moved = false, suppress = false;
     view.addEventListener("pointerdown", function (ev) {
       if (ev.button > 0) return;
       box.classList.add("act");
       ptrs[ev.pointerId] = { x: ev.clientX, y: ev.clientY };
-      var ids = Object.keys(ptrs);
-      moved = false;
-      if (ids.length === 1) drag = { x: ev.clientX, y: ev.clientY, vx: vb.x, vy: vb.y, id: ev.pointerId };
-      else if (ids.length === 2) {
-        var a = ptrs[ids[0]], b = ptrs[ids[1]];
-        pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, w: vb.w, mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 };
-        drag = null; moved = true;
+      var pids = Object.keys(ptrs); moved = false;
+      if (pids.length === 1) drag = { x: ev.clientX, y: ev.clientY, vx: vb.x, vy: vb.y, id: ev.pointerId };
+      else if (pids.length === 2) {
+        var a = ptrs[pids[0]], b = ptrs[pids[1]];
+        pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, w: vb.w }; drag = null; moved = true;
       }
     });
     view.addEventListener("pointermove", function (ev) {
@@ -338,15 +637,12 @@ SCRIPT = r"""
       p.x = ev.clientX; p.y = ev.clientY;
       var r = box2();
       if (pinch) {
-        var ids = Object.keys(ptrs); if (ids.length < 2) return;
-        var a = ptrs[ids[0]], b = ptrs[ids[1]], d = Math.hypot(a.x - b.x, a.y - b.y) || 1;
-        var want = pinch.w * pinch.d / d; zoomAt(vb.w / want, (a.x + b.x) / 2, (a.y + b.y) / 2);
+        var pids = Object.keys(ptrs); if (pids.length < 2) return;
+        var a = ptrs[pids[0]], b = ptrs[pids[1]], d = Math.hypot(a.x - b.x, a.y - b.y) || 1;
+        zoomAt(vb.w / (pinch.w * pinch.d / d), (a.x + b.x) / 2, (a.y + b.y) / 2);
       } else if (drag && drag.id === ev.pointerId) {
         var dx = ev.clientX - drag.x, dy = ev.clientY - drag.y;
-        if (!moved && Math.hypot(dx, dy) > 4) {
-          moved = true; view.classList.add("drag"); hideTip();
-          try { view.setPointerCapture(ev.pointerId); } catch (x) {}
-        }
+        if (!moved && Math.hypot(dx, dy) > 4) { moved = true; view.classList.add("drag"); hideTip(); try { view.setPointerCapture(ev.pointerId); } catch (x) {} }
         if (moved) { vb.x = drag.vx - dx * vb.w / r.w; vb.y = drag.vy - dy * vb.h / r.h; clampVB(); setVB(); }
       }
     });
@@ -362,21 +658,23 @@ SCRIPT = r"""
     view.addEventListener("wheel", function (ev) {
       if (!(ev.ctrlKey || ev.metaKey || box.classList.contains("act"))) return;
       ev.preventDefault();
-      var dy = ev.deltaMode === 1 ? ev.deltaY * 16 : ev.deltaY;
-      dy = Math.max(-120, Math.min(120, dy));
+      var dy = ev.deltaMode === 1 ? ev.deltaY * 16 : ev.deltaY; dy = Math.max(-120, Math.min(120, dy));
       zoomAt(Math.exp(-dy * (ev.ctrlKey ? 0.008 : 0.0016)), ev.clientX, ev.clientY);
     }, { passive: false });
     [].forEach.call(box.querySelectorAll(".czoom button"), function (b) {
       b.addEventListener("pointerdown", function (ev) { ev.stopPropagation(); });
-      b.addEventListener("click", function () {
-        var a = b.getAttribute("data-act");
-        if (a === "in") zoomCenter(1.4); else if (a === "out") zoomCenter(1 / 1.4); else fitAll();
-      });
+      b.addEventListener("click", function () { var a = b.getAttribute("data-act"); if (a === "in") zoomCenter(1.4); else if (a === "out") zoomCenter(1 / 1.4); else fit(true); });
     });
-    if (window.ResizeObserver) { var lastW = 0; new ResizeObserver(function () { var w = view.clientWidth; if (w && w !== lastW) { lastW = w; if (!lastW) return; setVB(); } }).observe(view); }
-    else window.addEventListener("resize", setVB);
+    var lastW = 0, lastV = false;
+    function onResize() {
+      var w = view.clientWidth; if (!w) return;
+      if (S.view === "chains" && CH.length && SC && SC.kind === "chain") {
+        if (Math.abs(w - lastW) > 8) { lastW = w; var keep = S.sel; SC = buildScene(); sizeView(); render(); applyAll(); fit(); if (keep && nodeEl[keep]) { } }
+      } else { lastW = w; if (SC) setVB(); }
+    }
+    if (window.ResizeObserver) new ResizeObserver(onResize).observe(view); else window.addEventListener("resize", onResize);
 
-    /* ---------- tooltip ---------- */
+    /* ---------- tooltip + hover ---------- */
     function showTip(build, ev) {
       tip.textContent = ""; build(tip); tip.style.display = "block";
       var r = view.getBoundingClientRect(), x = ev.clientX - r.left + 12, y = ev.clientY - r.top + 14, w = tip.offsetWidth, h = tip.offsetHeight;
@@ -388,28 +686,41 @@ SCRIPT = r"""
     function edgeTip(i) {
       var e = E[i];
       return function (t) {
-        var b = el("b", "", (N[e.f] ? N[e.f].l : "?") + " → " + (N[e.t] ? N[e.t].l : "?")); t.appendChild(b);
+        t.appendChild(el("b", "", (N[e.f] ? N[e.f].l : "?") + " → " + (N[e.t] ? N[e.t].l : "?")));
         t.appendChild(document.createElement("br")); t.appendChild(document.createTextNode(e.label || "(no mechanism given)"));
         var bits = [FX[e.effect] ? FX[e.effect][2] : "", e.kind === "causal" ? "" : e.kind, "strength " + e.s + "/3", (e.conf || "?") + " confidence", e.status || "reported", e.lag ? "lag: " + e.lag : "", e.order > 1 ? "step " + e.order : ""];
         t.appendChild(el("span", "tm", bits.filter(Boolean).join(" · ")));
         if (e.why && e.why !== e.label) t.appendChild(el("span", "tm", e.why));
       };
     }
-    edgeEl.forEach(function (g, i) {
-      if (!g) return;
+    function wireEdge(g, i) {
       var hit = g.querySelector(".hit");
       hit.addEventListener("mousemove", function (ev) { g.classList.add("hv"); showTip(edgeTip(i), ev); });
       hit.addEventListener("mouseleave", function () { g.classList.remove("hv"); hideTip(); });
       hit.addEventListener("click", function (ev) { ev.stopPropagation(); g.classList.add("hv"); showTip(edgeTip(i), ev); clearTimeout(tipTimer); tipTimer = setTimeout(function () { hideTip(); g.classList.remove("hv"); }, 3500); });
-    });
-
-    /* ---------- filtering ---------- */
-    function nodeOk(id) { var n = N[id]; return n && !F.hideDom[n.d] && (!F.region || n.r === F.region); }
-    function edgeOk(i) {
-      var e = E[i];
-      return nodeOk(e.f) && nodeOk(e.t) && conf(e) >= F.conf && (e.order || 1) <= F.order && (!F.status || (e.status || "reported") === F.status);
     }
-    function chains(id) {
+    function hover(id) {
+      if (hoverId === id) return;
+      clearHover(); if (!id || !nodeEl[id]) return;
+      hoverId = id; svg.classList.add("hov"); nodeEl[id].classList.add("hh");
+      outE[id].concat(inE[id]).forEach(function (i) {
+        if (!edgeEl[i] || !edgeOk(i)) return; edgeEl[i].classList.add("hh");
+        var o = E[i].f === id ? E[i].t : E[i].f; if (nodeEl[o]) nodeEl[o].classList.add("hov1");
+      });
+    }
+    function clearHover() {
+      if (!hoverId) return; hoverId = null; svg.classList.remove("hov");
+      [].forEach.call(svg.querySelectorAll(".hh,.hov1"), function (n) { n.classList.remove("hh"); n.classList.remove("hov1"); });
+    }
+
+    /* ---------- filters (Everything view) ---------- */
+    function filtersOn() { return SC && SC.kind === "all"; }
+    function nodeOk(id) { var n = N[id]; return n && (!filtersOn() || (!F.hideDom[n.d] && (!F.region || n.r === F.region))); }
+    function edgeOk(i) {
+      var e = E[i]; if (!nodeOk(e.f) || !nodeOk(e.t)) return false;
+      return !filtersOn() || (conf(e) >= F.conf && (e.order || 1) <= F.order && (!F.status || (e.status || "reported") === F.status));
+    }
+    function chainsOf(id) {
       var res = { nodes: {}, edges: {}, down: [], up: [] }; res.nodes[id] = 0;
       [["down", outE, "t"], ["up", inE, "f"]].forEach(function (dir) {
         var seen = {}; seen[id] = true; var front = [{ id: id, path: [id] }];
@@ -429,36 +740,38 @@ SCRIPT = r"""
       outE[id].concat(inE[id]).forEach(function (i) { if (E[i].kind === "contradicts" && edgeOk(i)) { res.edges[i] = true; res.nodes[E[i].f] = res.nodes[E[i].f] || 1; res.nodes[E[i].t] = res.nodes[E[i].t] || 1; } });
       return res;
     }
-    function refresh() {
-      var nv = 0, ev2 = 0, total = Object.keys(N).length, domUsed = {};
-      Object.keys(N).forEach(function (id) {
-        var ok = nodeOk(id); nodeEl[id].classList.toggle("hid", !ok);
-        if (ok) { nv++; }
-      });
-      edgeEl.forEach(function (g, i) { if (!g) return; var ok = edgeOk(i); g.classList.toggle("hid", !ok); if (ok) ev2++; });
+    var chain = null;
+    function applyAll() {
+      var nv = 0, ev2 = 0, total = ids.length;
+      Object.keys(nodeEl).forEach(function (id) { var ok = nodeOk(id); nodeEl[id].classList.toggle("hid", !ok); if (ok) nv++; });
+      Object.keys(edgeEl).forEach(function (i) { var ok = edgeOk(+i); edgeEl[i].classList.toggle("hid", !ok); if (ok) ev2++; });
       Object.keys(laneEl).forEach(function (d) { laneEl[d].classList.toggle("hid", !!F.hideDom[d]); });
-      if (sel && !nodeOk(sel)) sel = null;
-      chain = sel ? chains(sel) : null;
-      box.classList.toggle("focus", !!chain);
-      Object.keys(nodeEl).forEach(function (id) { nodeEl[id].classList.toggle("hl", !!(chain && chain.nodes[id] != null)); nodeEl[id].classList.toggle("sel", id === sel); });
-      edgeEl.forEach(function (g, i) { if (g) g.classList.toggle("hl", !!(chain && chain.edges[i])); });
+      if (S.sel && !nodeOk(S.sel)) S.sel = null;
+      chain = S.sel ? chainsOf(S.sel) : null;
+      var multi = SC.kind === "chain" ? (S.sel ? (function () { var h = { nodes: {}, edges: {} }; h.nodes[S.sel] = 0; outE[S.sel].concat(inE[S.sel]).forEach(function (i) { h.edges[i] = true; var o = E[i].f === S.sel ? E[i].t : E[i].f; h.nodes[o] = 1; }); return h; })() : null) : chain;
+      svg.classList.toggle("focus", !!multi);
+      var nHl = 0;
+      Object.keys(nodeEl).forEach(function (id) { nodeEl[id].classList.toggle("hl", !!(multi && multi.nodes[id] != null)); nodeEl[id].classList.toggle("sel", id === S.sel); });
+      Object.keys(edgeEl).forEach(function (i) { var on = !!(multi && multi.edges[i]); edgeEl[i].classList.toggle("hl", on); if (on) nHl++; });
+      Object.keys(edgeEl).forEach(function (i) { edgeEl[i].classList.toggle("lab", nHl > 0 && nHl <= 5 && edgeEl[i].classList.contains("hl")); });
       var q = F.q.trim().toLowerCase(), any = false;
-      Object.keys(N).forEach(function (id) {
-        var n = N[id], m = !!q && (n.l + " " + n.det + " " + n.dn + " " + n.r + " " + n.t).toLowerCase().indexOf(q) >= 0 && nodeOk(id);
-        nodeEl[id].classList.toggle("m", m); if (m) any = true;
+      Object.keys(nodeEl).forEach(function (id) {
+        var m = !!q && matches(id, q); nodeEl[id].classList.toggle("m", m); if (m) any = true;
       });
-      box.classList.toggle("searching", !!q && any && !chain);
+      svg.classList.toggle("searching", !!q && any && !multi);
       var cnt = box.querySelector(".ccount");
-      if (cnt) cnt.textContent = nv + " of " + total + " nodes · " + ev2 + " of " + E.length + " links" + (q ? (any ? "" : " · no match") : "");
-      var act = F.region || F.conf > 1 || F.order < 3 || F.status || q || Object.keys(F.hideDom).some(function (k) { return F.hideDom[k]; });
+      if (cnt) cnt.textContent = filtersOn() ? nv + " of " + total + " nodes · " + ev2 + " of " + E.length + " links" : "";
+      var act = F.region || F.conf > 1 || F.order < 3 || F.status || Object.keys(F.hideDom).some(function (k) { return F.hideDom[k]; });
       var cl = box.querySelector(".cclear"); if (cl) cl.hidden = !act;
       renderPanel();
       var bar = box.querySelector(".cbar");
-      if (bar) { bar.hidden = !sel; if (sel) bar.textContent = N[sel].l + " — details below ▾"; }
+      if (bar) { bar.hidden = !S.sel; if (S.sel) bar.textContent = N[S.sel].l + " — details below ▾"; }
     }
+    function matches(id, q) { var n = N[id]; return (n.l + " " + n.dn + " " + n.r + " " + (data.typeLabel[n.t] || "")).toLowerCase().indexOf(q) >= 0; }
 
-    /* ---------- side panel ---------- */
+    /* ---------- panel ---------- */
     function fxGlyph(e) { if (e.kind === "contradicts") return ["≠", "con"]; var f = FX[e.effect] || FX.none; return [f[0], f[1]]; }
+    function badge(st) { return el("span", "bdg " + st, st === "mixed" ? "Part predicted" : st === "predicted" ? "Predicted" : "Reported"); }
     function item(otherId, i, arrow) {
       var e = E[i], o = N[otherId], b = el("button", "pitem"); b.type = "button";
       var g = fxGlyph(e), fx = el("span", "fx " + g[1], g[0]); fx.setAttribute("aria-hidden", "true");
@@ -466,7 +779,7 @@ SCRIPT = r"""
       var meta = [e.kind !== "causal" ? e.kind : "", (e.conf || "?") + " conf.", e.status || "reported", e.lag || ""].filter(Boolean).join(" · ");
       b.appendChild(el("span", "mech", (e.label || "no mechanism given") + "  (" + meta + ")"));
       b.setAttribute("aria-label", (arrow || "") + " " + (o ? o.l : "") + ": " + (e.label || "") + ", " + (FX[e.effect] ? FX[e.effect][2] : "") + ", " + meta);
-      b.addEventListener("click", function () { choose(otherId, true); });
+      b.addEventListener("click", function () { goTo(otherId); });
       var li = el("li"); li.appendChild(b); return li;
     }
     function section(title, arr) {
@@ -474,11 +787,44 @@ SCRIPT = r"""
       var d = document.createDocumentFragment(); d.appendChild(el("h6", "", title));
       var ul = el("ul"); arr.forEach(function (x) { ul.appendChild(x); }); d.appendChild(ul); return d;
     }
+    function domChips(list) {
+      var w = el("div", "pmeta");
+      list.forEach(function (d) { var s = el("span", "dchip " + dcls(d), d >= 0 ? data.short[d] : "Other"); w.appendChild(s); });
+      return w;
+    }
+    function chainPanel() {
+      var c = CH[S.chain];
+      panel.appendChild(el("h5", "", c.title));
+      var m = el("div", "pmeta"); m.appendChild(badge(c.st)); c.d.forEach(function (d) { m.appendChild(el("span", "dchip " + dcls(d), d >= 0 ? data.short[d] : "Other")); });
+      panel.appendChild(m);
+      panel.appendChild(el("p", "empty", "Read it step by step. Click a step for the full story, or a faint node on the map to see what else it touches."));
+      var ol = el("ul");
+      c.n.forEach(function (id, i) {
+        var li = el("li"), b = el("button", "step"); b.type = "button";
+        if (i) {
+          var e = E[c.e[i - 1]], g = fxGlyph(e);
+          b.appendChild(el("span", "how", g[0] + " " + (e.label || "leads to") + "  (" + [e.conf ? e.conf + " conf." : "", e.status, e.lag].filter(Boolean).join(" · ") + ")"));
+        }
+        b.appendChild(el("span", "sn", N[id].l));
+        b.addEventListener("click", function () { choose(id, true); });
+        li.appendChild(b); ol.appendChild(li);
+      });
+      panel.appendChild(ol);
+      if (SC && SC.gp && SC.gp.total) {
+        var shown = Object.keys(SC.nodes).filter(function (id) { return SC.nodes[id].ghost; });
+        var rest = SC.vertical ? SC.gp.up.concat(SC.gp.dn) : [];
+        if (SC.gp.more || rest.length) {
+          var lis = rest.map(function (id) { var li = el("li"), b = el("button", "pitem", N[id].l); b.type = "button"; b.addEventListener("click", function () { goTo(id); }); li.appendChild(b); return li; });
+          var s = section("Also linked to this chain", lis); if (s) panel.appendChild(s);
+        }
+      }
+    }
     function renderPanel() {
       panel.textContent = "";
-      if (!sel) {
+      if (!S.sel) {
+        if (S.view === "chains" && CH.length) { chainPanel(); return; }
         panel.appendChild(el("p", "empty", "Select a node to see what drives it, what it drives, and its multi-step chains. Drag to pan; wheel, pinch or +/− to zoom; arrow keys move between nodes."));
-        var vis = Object.keys(N).filter(nodeOk).sort(function (a, b) { return (outE[b].length + inE[b].length) - (outE[a].length + inE[a].length); }).slice(0, 6);
+        var vis = Object.keys(SC.nodes).filter(function (id) { return nodeOk(id) && !SC.nodes[id].ghost; }).sort(function (a, b) { return N[b].k - N[a].k || (a < b ? -1 : 1); }).slice(0, 6);
         if (vis.length) {
           panel.appendChild(el("h6", "", "Most connected"));
           var ul = el("ul"); vis.forEach(function (id) {
@@ -488,12 +834,16 @@ SCRIPT = r"""
         }
         return;
       }
-      var n = N[sel], c = el("button", "clear", "Clear"); c.type = "button"; c.addEventListener("click", function () { choose(null); }); panel.appendChild(c);
+      var sel = S.sel, n = N[sel], c = el("button", "clear", "Clear"); c.type = "button"; c.addEventListener("click", function () { choose(null); }); panel.appendChild(c);
       panel.appendChild(el("h5", "", n.l));
       var meta = el("div", "pmeta"); meta.appendChild(el("span", "", data.typeLabel[n.t] || n.t));
-      if (n.dn) meta.appendChild(el("span", "", n.dn)); if (n.r) meta.appendChild(el("span", "", n.r));
+      if (n.dn) meta.appendChild(el("span", "dchip " + dcls(n.d), n.dn)); if (n.r) meta.appendChild(el("span", "", n.r));
       if (n.dir && n.dir !== "none") meta.appendChild(el("span", "", { up: "▲ rising", down: "▼ falling", flat: "▬ steady" }[n.dir] || ""));
       panel.appendChild(meta);
+      if (SC.nodes[sel] && SC.nodes[sel].ghost && S.view === "topic") {
+        var tk = n.d >= 0 ? "d" + n.d : "dx";
+        if (LAY["t:" + tk]) { var gb = el("button", "gobtn", "Open topic: " + (n.d >= 0 ? data.doms[n.d] : "Other")); gb.type = "button"; gb.addEventListener("click", function () { setView("topic", { topic: tk, sel: sel }); }); panel.appendChild(gb); }
+      }
       if (n.mkt) {
         var m = n.mkt, p = el("p"), s = el("span", "mkt " + (m.cp > 0 ? "up" : m.cp < 0 ? "down" : ""), (m.label || n.l) + (m.price ? " " + m.price : "") + (m.change ? " " + m.change : (m.cp != null ? " " + (m.cp > 0 ? "+" : "") + m.cp + "%" : "")));
         p.appendChild(s); panel.appendChild(p);
@@ -506,58 +856,77 @@ SCRIPT = r"""
       var s1 = section("Driven by (" + drivers.length + ")", drivers), s2 = section("Drives (" + driven.length + ")", driven);
       if (s1) panel.appendChild(s1); if (s2) panel.appendChild(s2);
       if (!s1 && !s2) panel.appendChild(el("p", "empty", "No visible links with the current filters."));
-      [["Further downstream (to 3 steps)", chain.down], ["Further upstream (to 3 steps)", chain.up]].forEach(function (g) {
+      var ch = chain || chainsOf(sel);
+      [["Further downstream (to 3 steps)", ch.down], ["Further upstream (to 3 steps)", ch.up]].forEach(function (g) {
         var far = g[1].filter(function (x) { return x.d > 1; }).slice(0, 8);
         var items = far.map(function (x) {
           var path = g[0].indexOf("down") > 0 ? x.path.slice(1) : x.path.slice(1).reverse();
           var b = el("button", "pitem", path.map(function (id) { return N[id].l; }).join(" → ")); b.type = "button";
-          b.addEventListener("click", function () { choose(x.id, true); }); var li = el("li"); li.appendChild(b); return li;
+          b.addEventListener("click", function () { goTo(x.id); }); var li = el("li"); li.appendChild(b); return li;
         });
         var s = section(g[0], items); if (s) panel.appendChild(s);
       });
       var good = (n.src || []).map(function (s) { return [s[0], safeUrl(s[1])]; }).filter(function (s) { return s[1]; });
       if (good.length) {
-        panel.appendChild(el("h6", "", "Sources")); var ul = el("ul", "src");
-        good.slice(0, 6).forEach(function (s) { var li = el("li"), a = el("a", "", s[0] || s[1]); a.href = s[1]; a.target = "_blank"; a.rel = "noopener noreferrer"; li.appendChild(a); ul.appendChild(li); });
-        panel.appendChild(ul);
+        panel.appendChild(el("h6", "", "Sources")); var ul2 = el("ul", "src");
+        good.slice(0, 6).forEach(function (s) { var li = el("li"), a = el("a", "", s[0] || s[1]); a.href = s[1]; a.target = "_blank"; a.rel = "noopener noreferrer"; li.appendChild(a); ul2.appendChild(li); });
+        panel.appendChild(ul2);
       }
     }
 
+    /* ---------- selection ---------- */
     function choose(id, pan) {
-      sel = (id && id !== sel) || (id && pan) ? id : null;
-      if (id == null) sel = null;
-      hideTip(); refresh();
-      if (sel && pan) { ensureVisible(sel); try { nodeEl[sel].focus({ preventScroll: true }); } catch (x) {} }
-      if (sel && window.matchMedia && window.matchMedia("(max-width: 899px)").matches && pan === "scroll") panel.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      S.sel = id && (id !== S.sel || pan) ? id : null;
+      if (id == null) S.sel = null;
+      hideTip();
+      if (S.sel && nodeEl[S.sel] && SC.nodes[S.sel].ghost) nodeEl[S.sel].classList.add("open");
+      applyAll();
+      if (S.sel && pan && nodeEl[S.sel]) { ensureVisible(S.sel); try { nodeEl[S.sel].focus({ preventScroll: true }); } catch (x) {} }
     }
-
-    Object.keys(nodeEl).forEach(function (id) {
-      var n = nodeEl[id];
-      n.addEventListener("click", function (ev) { ev.stopPropagation(); choose(sel === id ? null : id, false); });
+    function goTo(id) {
+      if (!N[id]) return;
+      if (!nodeEl[id] || (SC.kind === "chain" && SC.nodes[id] == null)) {
+        var ci = -1; CH.forEach(function (c, i) { if (ci < 0 && c.n.indexOf(id) >= 0) ci = i; });
+        var tk = N[id].d >= 0 ? "d" + N[id].d : "dx";
+        if (ci >= 0) setView("chains", { chain: ci, sel: id });
+        else if (LAY["t:" + tk]) setView("topic", { topic: tk, sel: id });
+        else setView("all", { sel: id });
+        if (!nodeEl[id]) setView("all", { sel: id });
+        return;
+      }
+      choose(id, true);
+    }
+    function wireNode(n, id) {
+      n.addEventListener("click", function (ev) { ev.stopPropagation(); choose(S.sel === id ? null : id, false); });
       n.addEventListener("keydown", function (ev) {
-        if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); ev.stopPropagation(); choose(sel === id ? null : id, false); }
+        if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); ev.stopPropagation(); choose(S.sel === id ? null : id, false); }
         else if (ev.key.indexOf("Arrow") === 0) { ev.preventDefault(); ev.stopPropagation(); spatial(id, ev.key); }
       });
-      n.addEventListener("focus", function () { ensureVisible(id); });
-      n.addEventListener("mousemove", function (ev) { if (drag && moved) return; showTip(function (t) { t.appendChild(el("b", "", N[id].l)); t.appendChild(el("span", "tm", (data.typeLabel[N[id].t] || "") + (N[id].dn ? " · " + N[id].dn : "") + (N[id].r ? " · " + N[id].r : ""))); }, ev); });
-      n.addEventListener("mouseleave", hideTip);
-    });
+      n.addEventListener("focus", function () { ensureVisible(id); hover(id); });
+      n.addEventListener("blur", function () { if (hoverId === id) clearHover(); });
+      n.addEventListener("mouseenter", function () { if (!(drag && moved)) hover(id); });
+      n.addEventListener("mousemove", function (ev) {
+        if (drag && moved) return;
+        showTip(function (t) { t.appendChild(el("b", "", N[id].l)); t.appendChild(el("span", "tm", (data.typeLabel[N[id].t] || "") + (N[id].dn ? " · " + N[id].dn : "") + (N[id].r ? " · " + N[id].r : ""))); }, ev);
+      });
+      n.addEventListener("mouseleave", function () { hideTip(); clearHover(); });
+    }
     function spatial(from, key) {
-      var a = N[from], best = null, bs = 1e9;
-      Object.keys(N).forEach(function (id) {
-        if (id === from || !nodeOk(id)) return; var b = N[id], dx = b.x - a.x, dy = b.y - a.y, p, q;
+      var a = SC.nodes[from], best = null, bs = 1e9;
+      Object.keys(SC.nodes).forEach(function (id) {
+        if (id === from || !nodeOk(id)) return; var b = SC.nodes[id], dx = b.x - a.x, dy = b.y - a.y, p, q;
         if (key === "ArrowRight") { p = dx; q = dy; } else if (key === "ArrowLeft") { p = -dx; q = dy; } else if (key === "ArrowDown") { p = dy; q = dx; } else { p = -dy; q = dx; }
         if (p <= 4) return; var s = p + 2.2 * Math.abs(q); if (Math.abs(q) > p * 2.5) s += 400; if (s < bs) { bs = s; best = id; }
       });
       if (best) { ensureVisible(best); nodeEl[best].focus({ preventScroll: true }); }
     }
-    svg.addEventListener("click", function (ev) { if (!ev.target.closest || !ev.target.closest(".nd")) { if (sel) choose(null); } });
+    svg.addEventListener("click", function (ev) { if (!ev.target.closest || !ev.target.closest(".nd")) { if (S.sel) choose(null); } });
     view.addEventListener("keydown", function (ev) {
       if (ev.target.closest && ev.target.closest("input,select,textarea")) return;
       var k = ev.key, onNode = ev.target.closest && ev.target.closest(".nd");
       if (k === "+" || k === "=") { ev.preventDefault(); zoomCenter(1.4); }
       else if (k === "-" || k === "_") { ev.preventDefault(); zoomCenter(1 / 1.4); }
-      else if (k === "0") { ev.preventDefault(); fitAll(); }
+      else if (k === "0") { ev.preventDefault(); fit(true); }
       else if (k === "Escape") { choose(null); hideTip(); }
       else if (!onNode && k.indexOf("Arrow") === 0) {
         ev.preventDefault(); var f = 0.15;
@@ -565,55 +934,158 @@ SCRIPT = r"""
       }
     });
 
-    /* ---------- controls ---------- */
+    /* ---------- chooser rail + headers + views ---------- */
+    function buildRail() {
+      rail.textContent = "";
+      if (S.view === "all") return;
+      var wrapEl = el("div", "rail-in");
+      if (S.view === "chains") {
+        wrapEl.appendChild(el("div", "rh", "Key causal chains"));
+        CH.forEach(function (c, i) {
+          var b = el("button", "ccard"); b.type = "button"; b.setAttribute("aria-pressed", i === S.chain ? "true" : "false"); b.setAttribute("data-c", i);
+          b.appendChild(el("span", "ct", c.title)); b.appendChild(el("span", "cs", c.sum));
+          var m = el("span", "cm"); m.appendChild(badge(c.st));
+          c.d.slice(0, 3).forEach(function (d) { m.appendChild(el("span", "dchip " + dcls(d), d >= 0 ? data.short[d] : "Other")); });
+          if (c.d.length > 3) m.appendChild(el("span", "dchip", "+" + (c.d.length - 3)));
+          b.appendChild(m);
+          b.addEventListener("click", function () { S.chain = i; S.sel = null; rebuild(); });
+          wrapEl.appendChild(b);
+        });
+      } else {
+        wrapEl.appendChild(el("div", "rh", "Pick a topic"));
+        var g1 = el("div", "tgrp"), g2 = el("div", "tgrp");
+        TOP.forEach(function (t) {
+          var b = el("button", "tbtn " + (t.t === "d" ? dcls(t.d) : "")); b.type = "button"; b.setAttribute("aria-pressed", t.k === S.topic ? "true" : "false"); b.setAttribute("data-t", t.k);
+          if (t.t === "d") b.appendChild(el("i")); b.appendChild(el("span", "tl", t.l)); b.appendChild(el("span", "tn", String(t.n)));
+          b.addEventListener("click", function () { S.topic = t.k; S.sel = null; rebuild(); });
+          (t.t === "d" ? g1 : g2).appendChild(b);
+        });
+        wrapEl.appendChild(g1);
+        if (g2.childNodes.length) { wrapEl.appendChild(el("div", "rh", "Regions")); wrapEl.appendChild(g2); }
+      }
+      rail.appendChild(wrapEl);
+    }
+    function headers() {
+      mt.textContent = ""; mh.textContent = "";
+      if (S.view === "chains") {
+        var c = CH[S.chain]; mt.appendChild(document.createTextNode(c.title + " ")); mt.appendChild(badge(c.st));
+        mh.textContent = SC.vertical ? "Top to bottom, one step per arrow. Tap any node for details." : "Left to right, one step per arrow. Faint nodes link to the chain: click one to follow it.";
+      } else if (S.view === "topic") {
+        var t = TOP.filter(function (x) { return x.k === S.topic; })[0];
+        mt.textContent = (t ? t.l : "Topic") + (t ? " · " + t.n + " nodes" : "");
+        mh.textContent = "Faint nodes belong to other topics. Click any node for its links.";
+      } else {
+        mt.textContent = "Everything · " + ids.length + " nodes, " + E.length + " links";
+        mh.textContent = "Click any node to light up its links. Hover or zoom in to read every label.";
+      }
+    }
+    function sizeView() {
+      if (SC.kind === "chain" && SC.vertical) view.style.height = Math.min(SC.H + 16, 820) + "px"; else view.style.height = "";
+    }
+    function rebuild() {
+      hideTip(); clearHover();
+      SC = buildScene(); sizeView(); box.setAttribute("data-view", S.view);
+      var fl = box.querySelector(".cflt"); if (fl) fl.hidden = S.view !== "all";
+      [].forEach.call(box.querySelectorAll(".seg button"), function (b) { b.setAttribute("aria-checked", b.getAttribute("data-view") === S.view ? "true" : "false"); });
+      buildRail(); headers(); render();
+      if (S.sel && !nodeEl[S.sel]) S.sel = null;
+      lastW = view.clientWidth; fit(); applyAll();
+    }
+    function setView(v, o) {
+      o = o || {}; S.view = v;
+      if (o.chain != null) S.chain = o.chain; if (o.topic) S.topic = o.topic;
+      S.sel = o.sel || null; rebuild();
+      if (o.sel && nodeEl[o.sel]) choose(o.sel, true);
+    }
+    [].forEach.call(box.querySelectorAll(".seg button"), function (b) {
+      if (b.getAttribute("data-view") === "chains" && !CH.length) b.hidden = true;
+      if (b.getAttribute("data-view") === "topic" && !TOP.length) b.hidden = true;
+      b.addEventListener("click", function () { setView(b.getAttribute("data-view")); });
+      b.addEventListener("keydown", function (ev) {
+        var k = ev.key; if (k !== "ArrowRight" && k !== "ArrowLeft") return;
+        var bs = [].filter.call(box.querySelectorAll(".seg button"), function (x) { return !x.hidden; }), i = bs.indexOf(b);
+        var nb = bs[(i + (k === "ArrowRight" ? 1 : bs.length - 1)) % bs.length]; ev.preventDefault(); nb.focus(); setView(nb.getAttribute("data-view"));
+      });
+    });
+
+    /* ---------- search with a result list ---------- */
+    var qi = box.querySelector(".csearch"), res = box.querySelector(".sres"), resIdx = -1;
+    function closeRes() { if (!res) return; res.hidden = true; res.textContent = ""; resIdx = -1; qi.setAttribute("aria-expanded", "false"); }
+    function runSearch() {
+      var q = qi.value.trim().toLowerCase(); F.q = qi.value;
+      res.textContent = ""; resIdx = -1;
+      if (!q) { closeRes(); applyAll(); return; }
+      var hits = ids.filter(function (id) { return matches(id, q); }).sort(function (a, b) {
+        var la = N[a].l.toLowerCase(), lb = N[b].l.toLowerCase(), pa = la.indexOf(q) === 0 ? 0 : la.indexOf(q) >= 0 ? 1 : 2, pb = lb.indexOf(q) === 0 ? 0 : lb.indexOf(q) >= 0 ? 1 : 2;
+        return pa - pb || N[b].k - N[a].k || (a < b ? -1 : 1);
+      });
+      if (!hits.length) { var li0 = el("li", "sno", "No node matches “" + qi.value.trim() + "”"); res.appendChild(li0); }
+      hits.slice(0, 8).forEach(function (id) {
+        var li = el("li"), b = el("button"); b.type = "button"; b.setAttribute("role", "option"); b.setAttribute("data-id", id);
+        b.appendChild(el("span", "", N[id].l)); b.appendChild(el("span", "dchip " + dcls(N[id].d), N[id].d >= 0 ? data.short[N[id].d] : (N[id].dn || "Other")));
+        b.addEventListener("click", function () { qi.value = ""; F.q = ""; closeRes(); goTo(id); });
+        li.appendChild(b); res.appendChild(li);
+      });
+      if (hits.length > 8) res.appendChild(el("li", "sno", (hits.length - 8) + " more — keep typing to narrow"));
+      res.hidden = false; qi.setAttribute("aria-expanded", "true"); applyAll();
+    }
+    if (qi) {
+      qi.addEventListener("input", runSearch);
+      qi.addEventListener("keydown", function (ev) {
+        var items = [].slice.call(res.querySelectorAll("button"));
+        if (ev.key === "ArrowDown" || ev.key === "ArrowUp") {
+          if (!items.length) return; ev.preventDefault();
+          resIdx = (resIdx + (ev.key === "ArrowDown" ? 1 : items.length - 1)) % items.length;
+          items.forEach(function (b, i) { b.classList.toggle("on", i === resIdx); }); items[resIdx].scrollIntoView({ block: "nearest" });
+        } else if (ev.key === "Enter") { var pick = items[resIdx >= 0 ? resIdx : 0]; if (pick) { ev.preventDefault(); pick.click(); } }
+        else if (ev.key === "Escape") { qi.value = ""; F.q = ""; closeRes(); applyAll(); }
+      });
+      qi.addEventListener("focus", function () { if (qi.value.trim()) runSearch(); });
+      document.addEventListener("click", function (ev) { if (!ev.target.closest || !ev.target.closest(".csw")) closeRes(); });
+    }
+
+    /* ---------- Everything filters ---------- */
     [].forEach.call(box.querySelectorAll(".chip[data-d]"), function (c) {
       c.addEventListener("click", function () {
         var d = c.getAttribute("data-d"), on = c.getAttribute("aria-pressed") === "true";
-        c.setAttribute("aria-pressed", on ? "false" : "true"); F.hideDom[d] = on; refresh();
+        c.setAttribute("aria-pressed", on ? "false" : "true"); F.hideDom[d] = on; applyAll();
       });
     });
-    function sel2(name, key, num) { var s = box.querySelector('select[name="' + name + '"]'); if (s) s.addEventListener("change", function () { F[key] = num ? +s.value : s.value; refresh(); }); }
+    function sel2(name, key, num) { var s = box.querySelector('select[name="' + name + '"]'); if (s) s.addEventListener("change", function () { F[key] = num ? +s.value : s.value; applyAll(); }); }
     sel2("region", "region"); sel2("conf", "conf", true); sel2("order", "order", true); sel2("status", "status");
-    var qi = box.querySelector(".csearch");
-    if (qi) {
-      qi.addEventListener("input", function () { F.q = qi.value; refresh(); });
-      qi.addEventListener("keydown", function (ev) {
-        if (ev.key === "Enter") { var m = Object.keys(nodeEl).filter(function (id) { return nodeEl[id].classList.contains("m"); })[0]; if (m) { ev.preventDefault(); choose(m, true); } }
-        if (ev.key === "Escape") { qi.value = ""; F.q = ""; refresh(); }
-      });
-    }
     var bar0 = box.querySelector(".cbar");
     if (bar0) { bar0.addEventListener("pointerdown", function (ev) { ev.stopPropagation(); }); bar0.addEventListener("click", function () { panel.scrollIntoView({ block: "start", behavior: "smooth" }); }); }
     var cl = box.querySelector(".cclear");
     if (cl) cl.addEventListener("click", function () {
-      F = { hideDom: {}, region: "", conf: 1, order: 3, status: "", q: "" };
+      F.hideDom = {}; F.region = ""; F.conf = 1; F.order = 3; F.status = "";
       [].forEach.call(box.querySelectorAll(".chip[data-d]"), function (c) { c.setAttribute("aria-pressed", "true"); });
-      [].forEach.call(box.querySelectorAll("select"), function (s) { s.selectedIndex = 0; }); if (qi) qi.value = ""; refresh();
+      [].forEach.call(box.querySelectorAll(".cflt select"), function (s) { s.selectedIndex = 0; }); applyAll();
     });
+    var fdet = box.querySelector(".cflt");
+    if (fdet) fdet.addEventListener("toggle", function () { setVB(); });
 
-    if (window.matchMedia && window.matchMedia("(max-width: 700px)").matches) { var fd = box.querySelector(".cfdet"); if (fd) fd.open = false; }
-    fit(); refresh();
-    var fdd = box.querySelector(".cfdet"); if (fdd) fdd.addEventListener("toggle", function () { setVB(); });
-    if (view.clientWidth === 0) window.addEventListener("load", function () { fit(); });
+    rebuild();
+    if (view.clientWidth === 0) window.addEventListener("load", function () { rebuild(); });
   }
   [].forEach.call(document.querySelectorAll(".cmap"), function (b) { try { init(b); } catch (e) { if (window.console) console.error(e); } });
 })();
 """
 
-
-# ---------------------------------------------------------------- connection map: clean
+# ---------------------------------------------------------------- connection map: data cleaning
 
 MAX_NODES = 50
 MAX_EDGES = 90
 _CONF = {"low": 1, "medium": 2, "high": 3}
 _LANE_OTHER = 7  # domain-less nodes
+SHORT = ["AI", "Tech", "Finance", "Markets", "Geopolitics", "Conflict", "Commodities", "Other"]
 
-COL_W = 172
-ROW_H = 70
-LANE_HEAD = 0
-LANE_GAP = 8
-PAD_X = 120
-PAD_Y = 8
+COL_W = 140      # horizontal pitch between causal-depth columns
+ROW_H = 72       # vertical pitch between node slots inside a topic row
+GUTTER = 120     # left tag column that names each topic row
+PAD_TOP = 34     # room for the "causes -> outcomes" axis
+LANE_GAP = 6
+SLOT_PAD = 24    # lane top padding before the first node centre
+LANE_TAIL = 54   # lane bottom padding after the last node centre (node label room)
 
 
 def _int(v, lo, hi, default):
@@ -711,11 +1183,8 @@ def _clean_graph(graph):
         edges = [e for e in edges if e["from"] in keep and e["to"] in keep]
     if len(edges) > MAX_EDGES:
         edges = sorted(edges, key=lambda e: -e["strength"])[:MAX_EDGES]
-        edges.sort(key=lambda e: 0)  # stable: keep strongest, original relative order is irrelevant after sort
     return nodes, edges
 
-
-# ---------------------------------------------------------------- layout (deterministic)
 
 def _wrap(label, width=16, lines=2):
     words = str(label or "").split()
@@ -730,7 +1199,7 @@ def _wrap(label, width=16, lines=2):
         out.append(cur)
     if len(out) > lines:
         out = out[:lines]
-        out[-1] = out[-1][: width - 1].rstrip() + "\u2026"
+        out[-1] = out[-1][: width - 1].rstrip() + "…"
     return [o[: width + 2] for o in out] or [""]
 
 
@@ -739,56 +1208,130 @@ _EXT = {"event": (16, 16), "country": (20, 20), "company": (15, 15), "sector": (
         "index": (20, 18), "institution": (18, 18)}
 
 
-def _shape(kind, x, y, cls):
-    hw, hh = _EXT[kind]
-    c = f'class="shape {cls}"'
+def _shape_path(kind):
+    """Outline centred on (0, 0); the browser scales/translates it. Pure constants, no user data."""
     if kind == "event":
-        return f'<circle {c} cx="{x:.1f}" cy="{y:.1f}" r="16"/>'
+        return "M-16 0A16 16 0 1 0 16 0A16 16 0 1 0 -16 0Z"
     if kind == "country":
-        return f'<path {c} d="M{x:.1f} {y - 20:.1f}L{x + 20:.1f} {y:.1f}L{x:.1f} {y + 20:.1f}L{x - 20:.1f} {y:.1f}Z"/>'
+        return "M0 -20L20 0L0 20L-20 0Z"
     if kind == "company":
-        return f'<rect {c} x="{x - 15:.1f}" y="{y - 15:.1f}" width="30" height="30" rx="4"/>'
+        return "M-11 -15H11A4 4 0 0 1 15 -11V11A4 4 0 0 1 11 15H-11A4 4 0 0 1 -15 11V-11A4 4 0 0 1 -11 -15Z"
     if kind == "sector":
-        pts = " ".join(f"{x + 19 * math.cos(math.radians(a)):.1f},{y + 19 * math.sin(math.radians(a)):.1f}" for a in range(0, 360, 60))
-        return f'<polygon {c} points="{pts}"/>'
+        pts = [f"{19 * math.cos(math.radians(a)):.1f} {19 * math.sin(math.radians(a)):.1f}" for a in range(0, 360, 60)]
+        return "M" + "L".join(pts) + "Z"
     if kind == "commodity":
-        return f'<rect {c} x="{x - 22:.1f}" y="{y - 13:.1f}" width="44" height="26" rx="13"/>'
+        return "M-9 -13H9A13 13 0 0 1 9 13H-9A13 13 0 0 1 -9 -13Z"
     if kind == "index":
-        return f'<path {c} d="M{x:.1f} {y - 18:.1f}L{x + 20:.1f} {y + 15:.1f}L{x - 20:.1f} {y + 15:.1f}Z"/>'
-    return (f'<path {c} d="M{x:.1f} {y - 18:.1f}L{x + 18:.1f} {y - 6:.1f}L{x + 18:.1f} {y + 15:.1f}'
-            f'L{x - 18:.1f} {y + 15:.1f}L{x - 18:.1f} {y - 6:.1f}Z"/>')
+        return "M0 -18L20 15L-20 15Z"
+    return "M0 -18L18 -6V15H-18V-6Z"
 
 
 def _lane_of(n):
     return n["di"] if n["di"] >= 0 else _LANE_OTHER
 
 
-SAME_DX = 108   # min x distance between linked nodes in one lane (labels need room)
-CROSS_DX = 48   # min x distance between linked nodes in different lanes (link runs diagonally)
-MIN_ROW_DX = 106  # nodes of one lane row never closer than this
+# ---------------------------------------------------------------- key chains
 
-
-def _layout(nodes, edges):
-    """Swim-lane layout. x = causal depth (weighted longest path, left to right), lane = domain
-    (ordered to shorten cross-lane links), rows inside a lane packed so labels never overlap.
-    Returns pos {id: (x, y)}, lanes [(lane, top, height)], width, height, xs."""
-    ids = [n["id"] for n in nodes]
-    order_ix = {i: k for k, i in enumerate(ids)}
-    lane = {n["id"]: _lane_of(n) for n in nodes}
-    succ = {i: [] for i in ids}
-    for e in edges:
+def _find_chains(nodes, edges, limit=8):
+    """Top multi-step causal chains (3-5 nodes, following causal edges), best first, with little overlap."""
+    byid = {n["id"]: n for n in nodes}
+    adj = {n["id"]: [] for n in nodes}
+    cin = {n["id"]: 0 for n in nodes}
+    cout = {n["id"]: 0 for n in nodes}
+    deg = {n["id"]: 0 for n in nodes}
+    for k, e in enumerate(edges):
+        deg[e["from"]] += 1
+        deg[e["to"]] += 1
         if e["kind"] == "causal":
-            succ[e["from"]].append(e["to"])
+            adj[e["from"]].append((e["to"], k))
+            cin[e["to"]] += 1
+            cout[e["from"]] += 1
+    paths, budget = [], [40000]
+
+    def dfs(path, eis):
+        if budget[0] <= 0:
+            return
+        if len(path) >= 3:
+            paths.append((tuple(path), tuple(eis)))
+            budget[0] -= 1
+        if len(path) == 5:
+            return
+        for t, k in adj[path[-1]]:
+            if t in path:
+                continue
+            path.append(t)
+            eis.append(k)
+            dfs(path, eis)
+            path.pop()
+            eis.pop()
+
+    for n in nodes:
+        dfs([n["id"]], [])
+    min_len = 3
+    if not paths:  # tiny graphs: fall back to single strong links
+        min_len = 2
+        for k, e in enumerate(edges):
+            if e["kind"] == "causal":
+                paths.append(((e["from"], e["to"]), (k,)))
+
+    def score(path, eis):
+        q = 0.0
+        for k in eis:
+            e = edges[k]
+            q += e["strength"] * 1.3 + _CONF.get(e["conf"], 2) * 0.8 + (1.2 if e["status"] == "reported" else 0.0)
+        hub = sum(min(deg[i], 10) for i in path) * 0.25
+        mk = sum(1 for i in path if byid[i]["mkt"]) * 1.2
+        cross = (len({_lane_of(byid[i]) for i in path}) - 1) * 1.6
+        ends = (1.5 if cin[path[0]] == 0 else 0.0) + (1.5 if (byid[path[-1]]["mkt"] or cout[path[-1]] == 0) else 0.0)
+        weak = -3.0 if any(edges[k]["strength"] == 1 for k in eis) else 0.0
+        return q + hub + mk + cross + ends + weak
+
+    ranked = sorted(((score(p, es), p, es) for p, es in paths), key=lambda r: (-r[0], r[1]))
+    chosen = []
+    for sc, p, es in ranked:
+        if len(p) < min_len:
+            continue
+        ok = True
+        for c in chosen:
+            shared = len(set(p) & set(c["n"]))
+            if shared > min(len(p), len(c["n"])) // 2 or (p[0] == c["n"][0] and p[-1] == c["n"][-1]) or p[-1] == c["n"][-1] and p[0] == c["n"][0]:
+                ok = False
+                break
+            if p[0] == c["n"][0] and shared >= 2:
+                ok = False
+                break
+        if not ok:
+            continue
+        stat = {edges[k]["status"] for k in es}
+        labels = [edges[k]["label"] for k in es if edges[k]["label"]]
+        chosen.append({
+            "id": f"c{len(chosen)}", "n": list(p), "e": list(es), "sc": round(sc, 1),
+            "title": f'{byid[p[0]]["label"]} → {byid[p[-1]]["label"]}',
+            "sum": " › ".join(labels),
+            "d": list(dict.fromkeys(_lane_of(byid[i]) if _lane_of(byid[i]) < 7 else -1 for i in p)),
+            "st": "reported" if stat == {"reported"} else ("predicted" if stat == {"predicted"} else "mixed")})
+        if len(chosen) >= limit:
+            break
+    return chosen
+
+
+# ---------------------------------------------------------------- layered layout (deterministic)
+
+def _assign_layers(ids, edges):
+    """Causal depth: longest path from causes to effects over causal links (cycles broken by DFS),
+    sources pulled next to their first consumer. Returns {id: layer} with layers starting at 0."""
+    order_ix = {i: k for k, i in enumerate(ids)}
+    idset = set(ids)
+    succ = {i: [] for i in ids}
     indeg = {i: 0 for i in ids}
     deg = {i: 0 for i in ids}
     for e in edges:
-        indeg[e["to"]] += 1
-        deg[e["from"]] += 1
-        deg[e["to"]] += 1
-    nbr0 = {i: [] for i in ids}
-    for e in edges:
-        nbr0[e["from"]].append(e["to"])
-        nbr0[e["to"]].append(e["from"])
+        if e["from"] in idset and e["to"] in idset:
+            deg[e["from"]] += 1
+            deg[e["to"]] += 1
+            if e["kind"] == "causal":
+                succ[e["from"]].append(e["to"])
+                indeg[e["to"]] += 1
     state, fwd = {}, []
 
     def dfs(u):
@@ -810,97 +1353,166 @@ def _layout(nodes, edges):
     for u, v in fwd:
         preds[v].append(u)
         fsucc[u].append(v)
+    L = {}
 
-    def wdx(a, b):
-        return SAME_DX if lane[a] == lane[b] else CROSS_DX
-
-    xs = {}
-
-    def px(i):
-        if i not in xs:
-            xs[i] = 0 if not preds[i] else max(px(p) + wdx(p, i) for p in preds[i])
-        return xs[i]
+    def lay(i):
+        if i not in L:
+            L[i] = 0
+            L[i] = 0 if not preds[i] else max(lay(p) for p in preds[i]) + 1
+        return L[i]
 
     for i in ids:
-        px(i)
-    for _ in range(2):  # pull sources next to their first consumer so links stay short
-        for i in ids:
-            if not preds[i] and fsucc[i]:
-                xs[i] = max(xs[i], min(xs[s] - wdx(i, s) for s in fsucc[i]))
-
-    for _ in range(10):  # slide nodes toward the median of their neighbours inside their legal interval
-        for i in sorted(ids, key=lambda k: (xs[k], order_ix[k])):
-            lo = max([xs[p] + wdx(p, i) for p in preds[i]] or [-10 ** 6])
-            hi = min([xs[q] - wdx(i, q) for q in fsucc[i]] or [10 ** 6])
-            nb = sorted(xs[j] for j in nbr0[i])
-            if not nb or lo > hi:
-                continue
-            med = nb[len(nb) // 2] if len(nb) % 2 else (nb[len(nb) // 2 - 1] + nb[len(nb) // 2]) / 2
-            xs[i] = min(max(med, lo), hi)
-    mn = min(xs.values())
+        lay(i)
     for i in ids:
-        xs[i] -= mn
+        if not preds[i] and fsucc[i]:
+            L[i] = min(L[s] for s in fsucc[i]) - 1
+    lo = min(L.values()) if L else 0
+    return {i: L[i] - lo for i in ids}
 
+
+def _seg_cross(a, b, c, d):
+    def o(p, q, r):
+        return (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0])
+    return o(a, b, c) * o(a, b, d) < 0 and o(c, d, a) * o(c, d, b) < 0
+
+
+def _flow_layout(nodes, edges, lane_of, cap=3, layers=None, ghosts=(), ghost_cap=5, row_h=ROW_H, col_w=COL_W):
+    """Columns = causal depth (causes left, outcomes right); rows = topic lanes; inside a lane the
+    nodes of one column stack in slots ordered by barycentre sweeps to cut crossings. A column
+    holding more than `cap` nodes of one lane splits into sub-columns to its left, so lanes stay short.
+    Returns dict(pos, lanes, W, H, col)."""
+    ids = [n["id"] for n in nodes]
+    order_ix = {i: k for k, i in enumerate(ids)}
+    idset = set(ids)
+    ghosts = set(ghosts)
+    L = dict(layers) if layers is not None else _assign_layers(ids, [e for e in edges if e["from"] in idset and e["to"] in idset])
+    wdeg = {i: 0 for i in ids}
+    nbr = {i: [] for i in ids}
+    for e in edges:
+        if e["from"] in idset and e["to"] in idset:
+            wdeg[e["from"]] += e["strength"]
+            wdeg[e["to"]] += e["strength"]
+            nbr[e["from"]].append(e["to"])
+            nbr[e["to"]].append(e["from"])
+    lane = {i: lane_of[i] for i in ids}
+
+    # lane order: short cross-lane links first
     used = sorted(set(lane.values()))
     wt = {}
     for e in edges:
-        a, b = lane[e["from"]], lane[e["to"]]
-        if a != b:
-            k = (min(a, b), max(a, b))
-            wt[k] = wt.get(k, 0) + e["strength"] + (0.5 if e["kind"] == "causal" else 0)
-    best, bestc = tuple(used), None
+        if e["from"] in idset and e["to"] in idset:
+            a, b = lane[e["from"]], lane[e["to"]]
+            if a != b:
+                k = (min(a, b), max(a, b))
+                wt[k] = wt.get(k, 0) + e["strength"] + (0.5 if e["kind"] == "causal" else 0)
+    best = tuple(used)
     if len(used) > 1:
+        bestc = None
         for perm in itertools.permutations(used):
             pos = {l: k for k, l in enumerate(perm)}
             c = sum(w * abs(pos[a] - pos[b]) for (a, b), w in wt.items())
             if bestc is None or c < bestc - 1e-9:
                 best, bestc = perm, c
-    lane_pos = {l: k for k, l in enumerate(best)}
-    nbr = {i: [] for i in ids}
-    for e in edges:
-        nbr[e["from"]].append(e["to"])
-        nbr[e["to"]].append(e["from"])
 
-    # row packing inside each lane
-    row = {}
-    nrows = {}
-    for l in best:
-        members = sorted([i for i in ids if lane[i] == l], key=lambda i: (xs[i], order_ix[i]))
-        for pass_no in (1, 2):
-            placed = {}
-            R = nrows.get(l, 1)
-            for i in members:
-                if pass_no == 1:
-                    scan = range(0, 50)
-                else:
-                    pref = sum(lane_pos[lane[j]] - lane_pos[l] for j in nbr[i] if lane[j] != l)
-                    scan = range(R - 1, -1, -1) if pref > 0 else range(0, R)
-                for r in scan:
-                    if all(abs(xs[j] - xs[i]) >= MIN_ROW_DX for j in placed.get(r, [])):
-                        placed.setdefault(r, []).append(i)
-                        row[i] = r
-                        break
-            if pass_no == 1:
-                nrows[l] = (max(row[i] for i in members) + 1) if members else 1
-        used_rows = sorted({row[i] for i in members})
-        remap = {r: k for k, r in enumerate(used_rows)}
-        for i in members:
-            row[i] = remap[row[i]]
-        nrows[l] = max(1, len(used_rows))
-    heights = {l: 26 + (nrows[l] - 1) * ROW_H + 62 for l in best}
-    tops, y = {}, PAD_Y
+    # sub-columns for crowded cells
+    cell = {}
+    for i in ids:
+        cell.setdefault((lane[i], L[i]), []).append(i)
+    sub = {}
+    for key, mem in cell.items():
+        mem.sort(key=lambda i: (-wdeg[i], order_ix[i]))
+        c = ghost_cap if all(m in ghosts for m in mem) else cap
+        parts = max(1, math.ceil(len(mem) / c))
+        chunk = math.ceil(len(mem) / parts)
+        for j, i in enumerate(mem):
+            sub[i] = j // chunk
+    nsub = {}
+    for i in ids:
+        nsub[L[i]] = max(nsub.get(L[i], 1), sub[i] + 1)
+    colidx, ncol = {}, 0
+    for layer in sorted(nsub):
+        for s in range(nsub[layer] - 1, -1, -1):
+            colidx[(layer, s)] = ncol
+            ncol += 1
+    col = {i: colidx[(L[i], sub[i])] for i in ids}
+
+    groups = {}
+    for i in ids:
+        groups.setdefault((lane[i], col[i]), []).append(i)
+    R = {l: max([len(g) for (ln, c), g in groups.items() if ln == l] or [1]) for l in best}
+    heights = {l: SLOT_PAD + (R[l] - 1) * row_h + LANE_TAIL for l in best}
+    tops, y = {}, PAD_TOP
     for l in best:
         tops[l] = y
         y += heights[l] + LANE_GAP
-    H = y - LANE_GAP + PAD_Y
-    X0 = PAD_X + 40
-    pos = {i: (X0 + xs[i], tops[lane[i]] + 26 + row[i] * ROW_H) for i in ids}
-    W = X0 + max(xs.values()) + 56
+    H = y - LANE_GAP + 8
+    slot = {}
+    for g in groups.values():
+        g.sort(key=lambda i: order_ix[i])
+        for k, i in enumerate(g):
+            slot[i] = k
+
+    def ypos(i, sl=None):
+        return tops[lane[i]] + SLOT_PAD + (slot[i] if sl is None else sl[i]) * row_h
+
+    X0 = GUTTER + 56
+
+    def xpos(i):
+        return X0 + col[i] * col_w
+
+    elist = [(e["from"], e["to"]) for e in edges if e["from"] in idset and e["to"] in idset]
+
+    def crossings(sl):
+        pts = {i: (xpos(i), ypos(i, sl)) for i in ids}
+        segs = [(pts[a], pts[b], a, b) for a, b in elist]
+        n = 0
+        for x in range(len(segs)):
+            for z in range(x + 1, len(segs)):
+                p, q, a, b = segs[x]
+                r, s, c, d = segs[z]
+                if a in (c, d) or b in (c, d):
+                    continue
+                if _seg_cross(p, q, r, s):
+                    n += 1
+        return n
+
+    bestslot, bestn = dict(slot), crossings(slot)
+    for it in range(10):
+        cols = list(range(ncol)) if it % 2 == 0 else list(range(ncol - 1, -1, -1))
+        for c in cols:
+            for l in best:
+                g = groups.get((l, c))
+                if not g:
+                    continue
+                tgt = {}
+                for i in g:
+                    others = [j for j in nbr[i] if col[j] != c] or nbr[i]
+                    tgt[i] = (sum(ypos(j) for j in others) / len(others)) if others else ypos(i)
+                g.sort(key=lambda i: (tgt[i], order_ix[i]))
+                want = [min(R[l] - 1, max(0, int(round((tgt[i] - tops[l] - SLOT_PAD) / row_h)))) for i in g]
+                for k in range(1, len(want)):
+                    want[k] = max(want[k], want[k - 1] + 1)
+                over = (want[-1] - (R[l] - 1)) if want else 0
+                if over > 0:
+                    want = [w - over for w in want]
+                    for k in range(len(want) - 2, -1, -1):
+                        want[k] = min(want[k], want[k + 1] - 1)
+                    want = [max(0, w) for w in want]
+                    for k in range(1, len(want)):
+                        want[k] = max(want[k], want[k - 1] + 1)
+                for i, w in zip(g, want):
+                    slot[i] = w
+        n = crossings(slot)
+        if n < bestn:
+            bestslot, bestn = dict(slot), n
+    slot = bestslot
+    pos = {i: (xpos(i), ypos(i)) for i in ids}
+    W = X0 + (ncol - 1) * col_w + 66
     lanes = [(l, tops[l], heights[l]) for l in best]
-    return pos, lanes, W, H, {i: pos[i][0] for i in ids}
+    return {"pos": pos, "lanes": lanes, "W": W, "H": H, "col": col, "layer": L, "crossings": bestn}
 
 
-# ---------------------------------------------------------------- edge geometry
+# ---------------------------------------------------------------- edge routing around nodes
 
 def _bez(p, t):
     (x0, y0), (x1, y1), (x2, y2), (x3, y3) = p
@@ -913,72 +1525,80 @@ def _spread(k, n, step):
     return (k - (n - 1) / 2) * min(step, 20 / max(n, 1))
 
 
-def _route(edges, nodes_by_id, pos, layer):
-    """Return per-edge dict(pts=[P0,C1,C2,P3], mode). Modes: fwd (side to side), down (side to top),
-    up (top to side), side (loop around the right edge for same-column links), top (arched loop)."""
-    ports = {"fo": {}, "fi": {}, "to": {}, "ti": {}}
-    modes = []
-    for i, e in enumerate(edges):
+def _route_edges(edge_ids, edges, pos, byid):
+    """One cubic per edge from the right side of the source to the left side of the target. Links that
+    would run through other nodes (or their labels) bow above/below them; the cheapest clean candidate
+    wins. Returns {edge_index: [x0,y0,x1,y1,x2,y2,x3,y3]}."""
+    boxes = {}
+    for nid, (x, y) in pos.items():
+        hw, hh = _EXT[byid[nid]["type"]]
+        lines = _wrap(byid[nid]["label"])
+        lw = max(len(s) for s in lines) * 3.7 + 3
+        half = max(hw, lw) + 3
+        boxes[nid] = (x - half, y - hh - 4, x + half, y + hh + 6 + 14 * len(lines))
+    outp, inp = {}, {}
+    for k in edge_ids:
+        e = edges[k]
+        outp.setdefault(e["from"], []).append(k)
+        inp.setdefault(e["to"], []).append(k)
+    off_o, off_i = {}, {}
+    for nid, lst in outp.items():
+        lst.sort(key=lambda k: (pos[edges[k]["to"]][1], k))
+        for j, k in enumerate(lst):
+            off_o[k] = _spread(j, len(lst), 6)
+    for nid, lst in inp.items():
+        lst.sort(key=lambda k: (pos[edges[k]["from"]][1], k))
+        for j, k in enumerate(lst):
+            off_i[k] = _spread(j, len(lst), 6)
+    out = {}
+    order = sorted(edge_ids, key=lambda k: (-edges[k]["strength"], k))
+    for k in order:
+        e = edges[k]
         a, b = e["from"], e["to"]
-        dx = layer[b] - layer[a]
-        dy = pos[b][1] - pos[a][1]
-        if e["kind"] == "feedback" or dx < -4:
-            mode, o, d = "top", "to", "ti"
-        elif dx < 30:
-            mode, o, d = "side", "fo", "fi"
-        elif dx < 118 and dy > 46:
-            mode, o, d = "down", "fo", "ti"
-        elif dx < 118 and dy < -46:
-            mode, o, d = "up", "to", "fi"
-        else:
-            mode, o, d = "fwd", "fo", "fi"
-        modes.append(mode)
-        ports[o].setdefault(a, []).append(i)
-        ports[d].setdefault(b, []).append(i)
-    off = {}
-    for tag, dd in ports.items():
-        for nid, lst in dd.items():
-            far = "to" if tag in ("fo", "to") else "from"
-            if tag in ("ti", "to"):
-                lst.sort(key=lambda i: (pos[edges[i][far]][0], i))
-            else:
-                lst.sort(key=lambda i: (pos[edges[i][far]][1], i))
-            for k, i in enumerate(lst):
-                off[(i, tag)] = _spread(k, len(lst), 7)
-    routes = []
-    for i, e in enumerate(edges):
-        a, b = e["from"], e["to"]
-        (x1, y1), (x2, y2) = pos[a], pos[b]
-        hw1, hh1 = _EXT[nodes_by_id[a]["type"]]
-        hw2, hh2 = _EXT[nodes_by_id[b]["type"]]
-        mode = modes[i]
-        right = (x1 + hw1 + 1, y1 + off.get((i, "fo"), 0))
-        left = (x2 - hw2 - 2, y2 + off.get((i, "fi"), 0))
-        if mode == "fwd":
-            dx = max(36, (left[0] - right[0]) * 0.45)
-            pts = [right, (right[0] + dx, right[1]), (left[0] - dx, left[1]), left]
-        elif mode == "down":
-            p3 = (x2 + off.get((i, "ti"), 0), y2 - hh2 - 3)
-            k = max(30, (p3[1] - right[1]) * 0.45)
-            pts = [right, (right[0] + max(24, (p3[0] - right[0]) * 0.7), right[1]), (p3[0], p3[1] - k), p3]
-        elif mode == "up":
-            p0 = (x1 + off.get((i, "to"), 0), y1 - hh1 - 1)
-            k = max(30, (p0[1] - left[1]) * 0.45)
-            pts = [p0, (p0[0], p0[1] - k), (left[0] - max(24, (left[0] - p0[0]) * 0.7), left[1]), left]
-        elif mode == "side":
-            p3 = (x2 + hw2 + 2, y2 + off.get((i, "fi"), 0))
-            bulge = 54 + 0.12 * abs(y2 - y1)
-            pts = [right, (right[0] + bulge, right[1]), (p3[0] + bulge, p3[1]), p3]
-        else:
-            p0 = (x1 + off.get((i, "to"), 0), y1 - hh1 - 1)
-            p3 = (x2 + off.get((i, "ti"), 0), y2 - hh2 - 3)
-            up = min(p0[1], p3[1]) - 44 - min(0.1 * abs(x2 - x1), 30)
-            sg = 6 if x2 >= x1 else -6
-            pts = [p0, (p0[0] - sg, up), (p3[0] + sg, up), p3]
-        routes.append({"pts": pts, "mode": mode})
-    return routes
-
-
+        (xa, ya), (xb, yb) = pos[a], pos[b]
+        hwa = _EXT[byid[a]["type"]][0]
+        hwb = _EXT[byid[b]["type"]][0]
+        p0 = (xa + hwa + 2, ya + off_o.get(k, 0))
+        p3 = (xb - hwb - 3, yb + off_i.get(k, 0))
+        dx = p3[0] - p0[0]
+        fwd = dx > 24
+        ax = max(34.0, 0.42 * dx) if fwd else 64.0 + 0.1 * abs(ya - yb)
+        bows = [0, 26, -26, 52, -52, 82, -82, 118, -118, 150, -150]
+        if not fwd:
+            bows = [b_ for b_ in bows if abs(b_) >= 52] or bows
+        best_c, best_s = None, None
+        for bw in bows:
+            for b1, b2 in ((bw, bw), (bw, 0), (0, bw)):
+                if bw == 0 and (b1, b2) != (0, 0):
+                    continue
+                c1 = (p0[0] + ax, p0[1] + b1)
+                c2 = (p3[0] - ax, p3[1] + b2)
+                pts = [p0, c1, c2, p3]
+                xs = [q[0] for q in pts]
+                ys = [q[1] for q in pts]
+                bb = (min(xs), min(ys), max(xs), max(ys))
+                near = [nid for nid, bx in boxes.items() if nid not in (a, b) and not (bx[2] < bb[0] or bx[0] > bb[2] or bx[3] < bb[1] or bx[1] > bb[3])]
+                hits = 0
+                for s in range(1, 26):
+                    px, py = _bez(pts, s / 26.0)
+                    for nid in near:
+                        bx = boxes[nid]
+                        if bx[0] <= px <= bx[2] and bx[1] <= py <= bx[3]:
+                            hits += 1
+                            break
+                # own label box: the curve should not cross the source/target label region either
+                cost = hits * 100 + abs(b1) + abs(b2) + (0 if fwd else 30)
+                if best_s is None or cost < best_s:
+                    best_c, best_s = pts, cost
+                if hits == 0 and bw == 0:
+                    break
+            if best_s is not None and best_s < 100 and bw == 0:
+                break
+            if best_s is not None and best_s < 100 and bw != 0 and abs(bw) >= 26:
+                # a clean bowed candidate exists; larger bows only cost more
+                break
+        out[k] = [round(v, 1) for q in best_c for v in q]
+    return out
 # ---------------------------------------------------------------- legend
 
 _SHP = {
@@ -1022,6 +1642,65 @@ def _legend(types_used, has):
 
 # ---------------------------------------------------------------- connection map
 
+# ---------------------------------------------------------------- scenes (topic views)
+
+def _pick_layout(nodes, edges, lane_of, caps, tw, th, **kw):
+    """Try several column heights and keep the layout that shows biggest in a tw x th viewport."""
+    best, bs = None, None
+    for cap in caps:
+        r = _flow_layout(nodes, edges, lane_of, cap=cap, **kw)
+        s = min(tw / (r["W"] + 24.0), th / (r["H"] + 24.0), 1.2)
+        key = (round(s, 2), -r["crossings"])
+        if bs is None or key > bs:
+            best, bs = r, key
+    return best
+
+
+def _scene_json(res, routes, ghosts=(), with_lanes=False):
+    out = {"W": round(res["W"]), "H": round(res["H"]),
+           "p": {i: [round(x, 1), round(y, 1)] for i, (x, y) in res["pos"].items()},
+           "e": {str(k): v for k, v in routes.items()}}
+    if ghosts:
+        out["g"] = sorted(ghosts)
+    if with_lanes:
+        out["lanes"] = [[l if l < 7 else -1, round(t), round(h)] for l, t, h in res["lanes"]]
+    return out
+
+
+def _topic_scene(members, edges, byid, order_ix, ghost_cap=10):
+    """Nodes of one topic laid out by causal depth, plus the strongest outside neighbours as ghosts
+    (causes in a column on the left, effects in a column on the right)."""
+    mids = [m["id"] for m in members]
+    mset = set(mids)
+    inner = [k for k, e in enumerate(edges) if e["from"] in mset and e["to"] in mset]
+    L = _assign_layers(mids, [edges[k] for k in inner])
+    gs = {}
+    for k, e in enumerate(edges):
+        a_in, b_in = e["from"] in mset, e["to"] in mset
+        if a_in == b_in:
+            continue
+        other = e["to"] if a_in else e["from"]
+        rec = gs.setdefault(other, [0, False, []])
+        rec[0] += e["strength"]
+        rec[1] = rec[1] or (not a_in)  # the outside node causes a member
+        rec[2].append(k)
+    ranked = sorted(gs, key=lambda i: (-gs[i][0], order_ix[i]))[:ghost_cap]
+    maxl = max(L.values()) if L else 0
+    layers = {i: v + 1 for i, v in L.items()}
+    for g in ranked:
+        layers[g] = 0 if gs[g][1] else maxl + 2
+    gset = set(ranked)
+    ekeys = inner + sorted(k for g in ranked for k in gs[g][2])
+    ekeys = list(dict.fromkeys(ekeys))
+    sub_nodes = [byid[i] for i in mids] + [byid[g] for g in ranked]
+    res = _pick_layout(sub_nodes, [edges[k] for k in ekeys], {n["id"]: 0 for n in sub_nodes}, (3, 4, 5, 6, 8, 11), 740, 560,
+                       layers=layers, ghosts=gset, ghost_cap=6)
+    routes = _route_edges(ekeys, edges, res["pos"], byid)
+    return _scene_json(res, routes, gset)
+
+
+# ---------------------------------------------------------------- connection map
+
 def _json_embed(obj):
     s = json.dumps(obj, ensure_ascii=False, separators=(",", ":"))
     return (s.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
@@ -1040,7 +1719,7 @@ def _select(name, label, options):
 
 
 def connection_map(graph, note=""):
-    """Interactive inline-SVG connection map. Returns '' if the graph is empty or unusable."""
+    """Interactive connection map (key chains / by topic / everything). Returns '' if the graph is unusable."""
     try:
         return _connection_map(graph, note)
     except Exception:  # never let a malformed LLM graph break the page build
@@ -1053,188 +1732,111 @@ def _connection_map(graph, note=""):
         return ""
     uid = next(_counter)
     byid = {n["id"]: n for n in nodes}
-    pos, lanes, W, H, layer = _layout(nodes, edges)
-    routes = _route(edges, byid, pos, layer)
+    order_ix = {n["id"]: k for k, n in enumerate(nodes)}
+    lane_of = {n["id"]: _lane_of(n) for n in nodes}
 
-    # label boxes of nodes (for edge-label collision avoidance)
-    nbox = []
+    # everything: layered layout with topic rows
+    res = _pick_layout(nodes, edges, lane_of, (2, 3, 4, 5), 1000, 860, row_h=70, col_w=124)
+    lay = {"all": _scene_json(res, _route_edges(range(len(edges)), edges, res["pos"], byid), (), True)}
+
+    # topics: one per domain (and per region with at least two nodes)
+    members_by = {}
     for n in nodes:
-        x, y = pos[n["id"]]
-        hw, hh = _EXT[n["type"]]
-        lines = _wrap(n["label"])
-        lw = max(len(l) for l in lines) * 6.3 + 6
-        nbox.append((x - hw - 3, y - hh - 3, x + hw + 3, y + hh + 3))
-        nbox.append((x - lw / 2, y + hh + 2, x + lw / 2, y + hh + 4 + 14 * len(lines)))
+        members_by.setdefault(_lane_of(n), []).append(n)
+    topics = []
+    for l in sorted(members_by, key=lambda l: (-len(members_by[l]), l)):
+        key = f"d{l}" if l < 7 else "dx"
+        topics.append({"k": key, "t": "d", "d": l if l < 7 else -1, "l": DOMAINS[l] if l < 7 else "Other", "n": len(members_by[l])})
+        lay["t:" + key] = _topic_scene(members_by[l], edges, byid, order_ix)
+    regions = {}
+    for n in nodes:
+        if n["region"]:
+            regions.setdefault(n["region"], []).append(n)
+    for r in sorted(regions, key=lambda r: (-len(regions[r]), r)):
+        if len(regions[r]) < 2:
+            continue
+        topics.append({"k": "r:" + r, "t": "r", "d": -2, "l": r, "n": len(regions[r])})
+        lay["t:r:" + r] = _topic_scene(regions[r], edges, byid, order_ix)
 
-    def hit(b, boxes):
-        return sum(1 for o in boxes if not (b[2] <= o[0] or b[0] >= o[2] or b[3] <= o[1] or b[1] >= o[3]))
+    chains = _find_chains(nodes, edges)
 
-    placed = []
-    order = sorted(range(len(edges)), key=lambda i: (-edges[i]["strength"], i))
-    lab_pos = {}
-    for i in order:
-        e = edges[i]
-        txt = _wrap(e["label"], 24, 1)[0] if e["label"] else ""
-        w = len(txt) * 5.6 + 6
-        best_c, best_s = None, None
-        for t in (0.5, 0.42, 0.58, 0.34, 0.66, 0.26, 0.74, 0.18, 0.82):
-            px, py = _bez(routes[i]["pts"], t)
-            chip = (px - 8, py - 8, px + 8, py + 8)
-            for side in (-1, 1):
-                bb = (px - w / 2, py - 25, px + w / 2, py - 8) if side < 0 else (px - w / 2, py + 9, px + w / 2, py + 26)
-                s = hit(bb, nbox) * 3 + hit(chip, nbox) * 3 + hit(bb, placed) * 2 + hit(chip, placed)
-                if best_s is None or s < best_s:
-                    best_c, best_s = (px, py, side, bb), s
-                if s == 0:
-                    break
-            if best_s == 0:
-                break
-        px, py, side, bb = best_c
-        lab_pos[i] = (px, py, txt, side)
-        placed.append(bb)
+    deg = {n["id"]: 0 for n in nodes}
+    for e in edges:
+        deg[e["from"]] += 1
+        deg[e["to"]] += 1
+    types_used, doms_used, jn = set(), {}, {}
+    for n in nodes:
+        l = _lane_of(n)
+        types_used.add(n["type"])
+        doms_used[l] = doms_used.get(l, 0) + 1
+        dname = DOMAINS[l] if l < 7 else (n["dom"] or "")
+        jn[n["id"]] = {"l": n["label"], "t": n["type"], "d": l if l < 7 else -1, "dn": dname, "r": n["region"],
+                       "det": n["detail"], "why": n["why"], "dir": n["dir"], "src": n["src"], "k": deg[n["id"]]}
+        if n["mkt"]:
+            jn[n["id"]]["mkt"] = n["mkt"]
+        if n["thr"]:
+            jn[n["id"]]["thr"] = n["thr"]
+    hub = max(nodes, key=lambda n: (deg[n["id"]], -order_ix[n["id"]]))["id"]
+    je = [{"f": e["from"], "t": e["to"], "label": e["label"], "effect": e["effect"], "s": e["strength"], "conf": e["conf"],
+           "status": e["status"], "order": e["order"], "kind": e["kind"], "why": e["why"], "lag": e["lag"]} for e in edges]
+    payload = {"uid": uid, "nodes": jn, "edges": je, "chains": chains, "topics": topics, "lay": lay, "hub": hub,
+               "typeLabel": TYPE_LABEL, "short": SHORT, "doms": DOMAINS,
+               "shapes": {t: _shape_path(t) for t in TYPES}, "ext": {t: list(_EXT[t]) for t in TYPES}}
 
     defs = ['<defs>']
-    for s, size in ((1, 8), (2, 10), (3, 12)):
+    for s, size in ((1, 8), (2, 10), (3, 12), (4, 15)):
         for eff in ("up", "down", "mixed", "none"):
             defs.append(f'<marker id="mk{uid}-{eff}{s}" viewBox="0 0 10 10" refX="9.5" refY="5" markerWidth="{size}" markerHeight="{size}" '
                         f'markerUnits="userSpaceOnUse" orient="auto"><path class="mk e-{eff}" d="M0 0.8 L10 5 L0 9.2Z"/></marker>')
         defs.append(f'<marker id="mk{uid}-bar{s}" viewBox="0 0 10 14" refX="5" refY="7" markerWidth="{size * 0.8:.0f}" markerHeight="{size * 1.12:.0f}" '
                     f'markerUnits="userSpaceOnUse" orient="auto"><path class="mk bar" d="M5 1 V13"/></marker>')
     defs.append("</defs>")
+    svg = (f'<svg viewBox="0 0 800 400" role="group" preserveAspectRatio="xMidYMid meet" '
+           f'aria-label="Connection map: {len(nodes)} nodes, {len(edges)} links. Use the view switch above the map to change what is shown.">'
+           f'{"".join(defs)}<g class="scene"></g></svg>')
 
-    lane_svg = []
-    for l, top, h in lanes:
-        cls = f"d{l}" if l < 7 else "dx"
-        name = DOMAINS[l] if l < 7 else "Other"
-        cnt = sum(1 for n in nodes if _lane_of(n) == l)
-        ll = _wrap(f"{name}", 15, 3)
-        tsp = "".join(f'<tspan x="{PAD_X - 100 + 14}" y="{top + 20 + k * 13:.0f}">{_e(t)}</tspan>' for k, t in enumerate(ll))
-        lane_svg.append(
-            f'<g class="lg" data-d="{l if l < 7 else -1}"><rect class="lane {cls}" x="{PAD_X - 108}" y="{top}" width="{W - PAD_X + 100}" height="{h}" rx="9"/>'
-            f'<circle class="lanedot {cls}" cx="{PAD_X - 100 + 6}" cy="{top + 16}" r="4.5"/>'
-            f'<text class="lanelabel">{tsp}</text><text class="lanecount" x="{PAD_X - 100 + 14}" y="{top + 20 + len(ll) * 13:.0f}">{cnt} nodes</text></g>')
-    edge_svg = [None] * len(edges)
-    has = {}
-    for i, e in enumerate(edges):
-        r = routes[i]
-        p0, c1, c2, p3 = r["pts"]
-        d = f"M{p0[0]:.1f} {p0[1]:.1f}C{c1[0]:.1f} {c1[1]:.1f} {c2[0]:.1f} {c2[1]:.1f} {p3[0]:.1f} {p3[1]:.1f}"
-        sw = 1.1 + e["strength"] * 0.85
-        s = e["strength"]
-        eff = e["effect"]
-        con = e["kind"] == "contradicts"
-        has[e["kind"]] = True
-        mk = f"url(#mk{uid}-bar{s})" if con else f"url(#mk{uid}-{eff}{s})"
-        px, py, txt, side = lab_pos[i]
-        if con:
-            glyph = '<text class="glyphtx" y="3.6">\u2260</text>'
-        elif eff == "up":
-            glyph = '<path class="glyph" d="M0 -3.6 L3.8 2.6 L-3.8 2.6Z"/>'
-        elif eff == "down":
-            glyph = '<path class="glyph" d="M0 3.6 L3.8 -2.6 L-3.8 -2.6Z"/>'
-        elif eff == "mixed":
-            glyph = '<text class="glyphtx" y="3.6">\u00B1</text>'
-        else:
-            glyph = '<path class="glyph" d="M-3.4 -1 H3.4 V1 H-3.4Z"/>'
-        eo = {"high": 0.95, "medium": 0.72, "low": 0.5}.get(e["conf"], 0.72)
-        cls = (f'ed e-{eff} k-{e["kind"]} st-{e["status"]} c-{e["conf"] or "medium"}' + (" perm" if s >= 3 and txt else ""))
-        aria = f'{byid[e["from"]]["label"]} to {byid[e["to"]]["label"]}: {e["label"]}'
-        edge_svg[i] = (
-            f'<g class="{cls}" data-i="{i}" style="--eo:{eo};--sw2:{sw + 1:.1f}px">'
-            f'<path class="line" d="{d}" stroke-width="{sw:.2f}" marker-end="{mk}"><title>{_e(aria)}</title></path>'
-            f'<path class="hit" d="{d}"/>'
-            f'<g transform="translate({px:.1f} {py:.1f})"><circle class="chip2" r="7"/>{glyph}'
-            f'<text class="elabel" y="{-11 if side < 0 else 19}">{_e(txt)}</text></g></g>')
-    # stronger edges drawn last (on top) but keep their data-i
-    edge_order = sorted(range(len(edges)), key=lambda i: (edges[i]["strength"], i))
-
-    node_svg, types_used, doms_used, jn = [], set(), {}, {}
-    deg = {n["id"]: 0 for n in nodes}
-    for e in edges:
-        deg[e["from"]] += 1
-        deg[e["to"]] += 1
-    for n in nodes:
-        x, y = pos[n["id"]]
-        hw, hh = _EXT[n["type"]]
-        l = _lane_of(n)
-        cls = f"d{l}" if l < 7 else "dx"
-        types_used.add(n["type"])
-        doms_used[l] = doms_used.get(l, 0) + 1
-        lines = _wrap(n["label"])
-        ty0 = y + hh + 14
-        tsp = "".join(f'<tspan x="{x:.1f}" y="{ty0 + k * 13.5:.1f}">{_e(t)}</tspan>' for k, t in enumerate(lines))
-        dname = DOMAINS[l] if l < 7 else (n["dom"] or "")
-        meta = TYPE_LABEL[n["type"]] + (f", {dname}" if dname else "") + (f", {n['region']}" if n["region"] else "")
-        db = ""
-        if n["dir"] in ("up", "down", "flat"):
-            bx, by = x + hw * 0.78, y - hh * 0.8
-            tri = {"up": f"M{bx:.1f} {by - 5.5:.1f}L{bx + 5:.1f} {by + 4:.1f}L{bx - 5:.1f} {by + 4:.1f}Z",
-                   "down": f"M{bx:.1f} {by + 5.5:.1f}L{bx + 5:.1f} {by - 4:.1f}L{bx - 5:.1f} {by - 4:.1f}Z",
-                   "flat": f"M{bx - 5:.1f} {by - 2.2:.1f}H{bx + 5:.1f}V{by + 2.2:.1f}H{bx - 5:.1f}Z"}[n["dir"]]
-            db = f'<path class="dirb {n["dir"]}" d="{tri}"/>'
-        ring = _ring(n["type"], x, y)
-        node_svg.append(
-            f'<g class="nd" tabindex="0" role="button" data-id="{_e(n["id"])}" aria-label="{_e(n["label"])}, {_e(meta)}. Show connections.">'
-            f'<rect class="tap" x="{x - 62:.1f}" y="{y - hh - 6:.1f}" width="124" height="{2 * hh + 12 + 14 * len(lines) + 6}"/>'
-            f'{_shape(n["type"], x, y, cls)}{ring}{db}<text class="nlabel">{tsp}</text></g>')
-        jn[n["id"]] = {"l": n["label"], "t": n["type"], "d": l if l < 7 else -1, "dn": dname, "r": n["region"], "x": round(x, 1), "y": round(y, 1),
-                       "det": n["detail"], "why": n["why"], "dir": n["dir"], "src": n["src"]}
-        if n["mkt"]:
-            jn[n["id"]]["mkt"] = n["mkt"]
-        if n["thr"]:
-            jn[n["id"]]["thr"] = n["thr"]
-    hub = max(nodes, key=lambda n: (deg[n["id"]], -nodes.index(n)))["id"]
-    je = [{"f": e["from"], "t": e["to"], "label": e["label"], "effect": e["effect"], "s": e["strength"], "conf": e["conf"],
-           "status": e["status"], "order": e["order"], "kind": e["kind"], "why": e["why"], "lag": e["lag"]} for e in edges]
-    payload = {"nodes": jn, "edges": je, "W": round(W), "H": round(H), "hub": hub, "typeLabel": TYPE_LABEL}
-
-    svg = (f'<svg viewBox="0 0 {W:.0f} {H:.0f}" role="group" preserveAspectRatio="xMidYMid meet" '
-           f'aria-label="Connection map: {len(nodes)} nodes, {len(edges)} links, grouped by domain, flowing left to right">'
-           f'{"".join(defs)}{"".join(lane_svg)}<g class="edges">{"".join(edge_svg[i] for i in edge_order)}</g>{"".join(node_svg)}</svg>')
-
-    # controls
+    # everything-view filters
     chips = "".join(_chip_html(l if l < 7 else -1, DOMAINS[l] if l < 7 else "Other", c) for l, c in sorted(doms_used.items())) if len(doms_used) > 1 else ""
-    regions = sorted({n["region"] for n in nodes if n["region"]})
-    ctrl = []
+    reg_names = sorted({n["region"] for n in nodes if n["region"]})
+    flt = []
     if chips:
-        ctrl.append(f'<div class="grp" role="group" aria-label="Filter by domain">{chips}</div>')
-    if len(regions) > 1:
-        ctrl.append(_select("region", "Region", [("", "All regions")] + [(r, r) for r in regions]))
+        flt.append(f'<div class="grp" role="group" aria-label="Show or hide topics">{chips}</div>')
+    if len(reg_names) > 1:
+        flt.append(_select("region", "Region", [("", "All regions")] + [(r, r) for r in reg_names]))
     if len({e["conf"] or "medium" for e in edges}) > 1:
-        ctrl.append(_select("conf", "Minimum confidence", [("1", "Any confidence"), ("2", "Medium + high"), ("3", "High only")]))
+        flt.append(_select("conf", "Minimum confidence", [("1", "Any confidence"), ("2", "Medium + high"), ("3", "High only")]))
     if any(e["order"] > 1 for e in edges):
-        ctrl.append(_select("order", "Chain depth", [("3", "All chain steps"), ("2", "Up to 2 steps"), ("1", "Direct links only")]))
+        flt.append(_select("order", "Chain depth", [("3", "All chain steps"), ("2", "Up to 2 steps"), ("1", "Direct links only")]))
     if len({e["status"] for e in edges}) > 1:
-        ctrl.append(_select("status", "Status", [("", "Reported + predicted"), ("reported", "Reported only"), ("predicted", "Predicted only")]))
-    if len(nodes) >= 6:
-        ctrl.append('<input class="csearch" type="search" placeholder="Find a node" aria-label="Search nodes" autocomplete="off">')
-    ctrl.append('<button type="button" class="clink cclear" hidden>Clear filters</button>')
-    filters = (f'<details class="cfdet" open><summary>Filters and search<span class="ccount" aria-live="polite"></span></summary>'
-               f'<div class="cfilters">{"".join(ctrl)}</div></details>')
+        flt.append(_select("status", "Status", [("", "Reported + predicted"), ("reported", "Reported only"), ("predicted", "Predicted only")]))
+    flt.append('<button type="button" class="clink cclear" hidden>Clear filters</button>')
+    filters = (f'<details class="cflt" hidden><summary>Filters<span class="ccount" aria-live="polite"></span></summary>'
+               f'<div class="cfilters">{"".join(flt)}</div></details>')
+
+    seg = ('<div class="seg" role="radiogroup" aria-label="Map view">'
+           '<button type="button" role="radio" aria-checked="true" data-view="chains">Key chains</button>'
+           '<button type="button" role="radio" aria-checked="false" data-view="topic">By topic</button>'
+           '<button type="button" role="radio" aria-checked="false" data-view="all">Everything</button></div>')
+    search = ''
+    if len(nodes) >= 4:
+        search = (f'<div class="csw"><input class="csearch" type="search" role="combobox" aria-expanded="false" aria-controls="sres{uid}" '
+                  f'aria-autocomplete="list" placeholder="Find a node" aria-label="Search nodes" autocomplete="off">'
+                  f'<ul class="sres" id="sres{uid}" role="listbox" aria-label="Matching nodes" hidden></ul></div>')
     zoom = ('<div class="czoom"><button type="button" data-act="in" aria-label="Zoom in" title="Zoom in (+)">+</button>'
             '<button type="button" data-act="out" aria-label="Zoom out" title="Zoom out (\u2212)">\u2212</button>'
-            '<button type="button" data-act="fit" class="fit" aria-label="Fit whole map" title="Fit whole map (0)">Fit</button></div>')
+            '<button type="button" data-act="fit" class="fit" aria-label="Fit to view" title="Fit to view (0)">Fit</button></div>')
+    nos = ""
+    if chains:
+        nos = ('<noscript><ol class="nos">' + "".join(f'<li>{_e(c["title"])}: {_e(c["sum"])}</li>' for c in chains) + "</ol></noscript>")
     note_html = f'<p class="vnote">{_e(note)}</p>' if note else ""
     return (f'<h4>Connection map</h4>{note_html}<div class="cmapwrap">'
-            f'<div class="cmap" id="cmap{uid}">{filters}<div class="cbody">'
+            f'<div class="cmap" id="cmap{uid}" data-view="chains"><div class="ctop">{seg}{search}</div>{filters}{nos}<div class="cbody">'
+            f'<nav class="crail" aria-label="Chooser"></nav>'
+            f'<div class="cmain"><div class="mhead"><div class="mt"></div><div class="mh"></div></div>'
             f'<div class="cview" tabindex="0" aria-label="Map area. Plus and minus zoom, zero fits, arrow keys pan, Tab moves between nodes.">{svg}{zoom}'
-            f'<div class="chint">Drag to pan, scroll or pinch to zoom</div><button type="button" class="cbar" hidden></button><div class="ctip" aria-hidden="true"></div></div>'
-            f'<div class="cpanel" aria-live="polite"></div></div>{_legend(types_used, has)}'
+            f'<div class="chint">Drag to pan, scroll or pinch to zoom</div><button type="button" class="cbar" hidden></button><div class="ctip" aria-hidden="true"></div></div></div>'
+            f'<div class="cpanel" aria-live="polite"></div></div>{_legend(types_used, {e["kind"]: True for e in edges})}'
             f'<script type="application/json" class="cdata">{_json_embed(payload)}</script></div></div>')
-
-
-def _ring(kind, x, y):
-    """Outline following the node shape, used for focus / selection / search match."""
-    hw, hh = _EXT[kind]
-    if kind == "event":
-        return f'<circle class="ring" cx="{x:.1f}" cy="{y:.1f}" r="20"/>'
-    if kind == "country":
-        return f'<path class="ring" d="M{x:.1f} {y - 25:.1f}L{x + 25:.1f} {y:.1f}L{x:.1f} {y + 25:.1f}L{x - 25:.1f} {y:.1f}Z"/>'
-    if kind == "commodity":
-        return f'<rect class="ring" x="{x - 27:.1f}" y="{y - 18:.1f}" width="54" height="36" rx="18"/>'
-    return f'<rect class="ring" x="{x - hw - 5:.1f}" y="{y - hh - 5:.1f}" width="{2 * hw + 10}" height="{2 * hh + 10}" rx="8"/>'
-
-
 
 # ---------------------------------------------------------------- scenario tree
 
