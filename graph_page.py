@@ -999,15 +999,18 @@ def _legend(types_used, has):
             items.append(f'<span><svg viewBox="0 0 16 16" aria-hidden="true" class="shp">{_SHP[t]}</svg>{TYPE_LABEL[t]}</span>')
     items.append('<span class="sep"></span><span><b>Link</b></span>')
 
+    W24 = 'stroke-width="2.4"'
+    WD = 'stroke-width="2.4" stroke-dasharray="6 3.5"'
+
     def lk(cls, d, extra="", head=True):
         h = '<path class="hd %s" d="M34 6 L27 2.5 L27 9.5Z"/>' % cls if head else ""
         return f'<svg class="lk" viewBox="0 0 36 12" aria-hidden="true"><path class="{cls}" d="{d}" {extra}/>{h}</svg>'
 
-    items.append(f'<span>{lk("up", "M1 6 H27", "stroke-width=\"2.4\"")}<span>raises</span></span>')
-    items.append(f'<span>{lk("down", "M1 6 H27", "stroke-width=\"2.4\"")}<span>lowers</span></span>')
-    items.append(f'<span>{lk("mixed", "M1 6 H27", "stroke-width=\"2.4\"")}<span>mixed</span></span>')
-    items.append(f'<span>{lk("", "M1 6 H27", "stroke-width=\"2.4\"")}<span>reported</span></span>')
-    items.append(f'<span>{lk("", "M1 6 H27", "stroke-width=\"2.4\" stroke-dasharray=\"6 3.5\"")}<span>predicted</span></span>')
+    items.append(f'<span>{lk("up", "M1 6 H27", W24)}<span>raises</span></span>')
+    items.append(f'<span>{lk("down", "M1 6 H27", W24)}<span>lowers</span></span>')
+    items.append(f'<span>{lk("mixed", "M1 6 H27", W24)}<span>mixed</span></span>')
+    items.append(f'<span>{lk("", "M1 6 H27", W24)}<span>reported</span></span>')
+    items.append(f'<span>{lk("", "M1 6 H27", WD)}<span>predicted</span></span>')
     if has.get("feedback"):
         items.append(f'<span><svg class="lk" viewBox="0 0 36 12" aria-hidden="true"><path d="M3 11 C3 -4 31 -4 31 8" stroke-width="2"/><path class="hd" d="M31 11 L27.5 6 L34.5 6Z"/></svg><span>feedback loop</span></span>')
     if has.get("contradicts"):
