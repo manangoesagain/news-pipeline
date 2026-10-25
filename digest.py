@@ -269,6 +269,8 @@ def title_tokens(title: str) -> set:
 # ---------------------------------------------------------------- fetchers
 
 def make_item(title, summary, link, source, published, hint, origin):
+    if link and urlparse(link).scheme not in ("http", "https"):
+        link = ""
     return {
         "title": clean_text(title),
         "summary": truncate(clean_text(summary), 300),
@@ -562,12 +564,12 @@ Today is {today}. Write an analytical brief grounded ONLY in these headlines and
   "contrarian": [{{"signal": "evidence in today's news", "mainstream_view": "what most coverage assumes", "why_it_matters": "..."}}],
   "bottom_line": "two sentences on what matters most tonight",
   "graph": {{
-    "nodes": [{{"id": "n1", "label": "short name, max 28 chars", "type": "event|company|country|sector|market", "domain": "one of: {domains}, or empty"}}],
-    "edges": [{{"from": "n1", "to": "n2", "label": "verb phrase, max 24 chars", "strength": 1}}]
+    "nodes": [{{"id": "n1", "label": "short name, max 28 chars", "type": "event|country|company|sector|commodity|index|institution", "domain": "one of: {domains}, or empty", "region": "India|US|Canada|China|Global", "detail": "1-2 sentences: what happened, with numbers, names and dates from the headlines", "why_it_matters": "one sentence on why a reader should care", "direction": "up|down|flat|none", "market": "exact label from the market snapshot if this node is that ticker/commodity/index, else empty", "ids": [3, 17]}}],
+    "edges": [{{"from": "n1", "to": "n2", "label": "the mechanism, max 30 chars, e.g. raises shipping costs", "effect": "up|down|mixed", "strength": 1, "confidence": "low|medium|high", "status": "reported|predicted", "order": 1, "kind": "causal|feedback|contradicts", "why": "one sentence explaining the mechanism", "lag": "hours|days|weeks"}}]
   }}
 }}
 Give 3-4 causal chains, 3-5 second-order effects, 3-4 scenarios and 2-3 contrarian signals.
-For "graph": a connection map of tonight's news. 8-14 nodes and 8-20 edges. Each edge is a cause->effect arrow (from causes to), and most edges should link nodes from DIFFERENT domains. Use only facts from the headlines above; strength 3 = directly reported link, 2 = strong inference, 1 = plausible spillover. Every edge endpoint must be a node id; ids are n1, n2, ...
+For "graph": a detailed connection map of tonight's news with 30-45 nodes and 40-65 edges. Node types: event (something that happened), country, company, sector, commodity, index (stock index, currency, crypto), institution (central bank, regulator, policy, alliance). Cover EVERY domain and give every node a concrete detail and why_it_matters. Every edge is a cause->effect arrow (from causes to) whose label states the MECHANISM (not just "affects"), with effect = whether the target goes up or down (or mixed). status "reported" = the headlines directly report this link; "predicted" = your inference. order 1 = direct effect, 2 = second-order, 3 = third-order: build multi-step chains (A->B->C->D) and mark them with order. Use kind "feedback" for an edge that loops back to an earlier cause and "contradicts" where one development cuts against another. Make hub nodes (one cause with 3+ effects) where the news supports it; include India, US, Canada and China angles. strength 3 = strong/direct, 2 = moderate, 1 = weak spillover; confidence is how sure you are of the link. Put the headline ids that support a node in its ids list (the number at the start of each headline line). Every edge endpoint must be a node id; ids are n1, n2, ...
 """
 
 
@@ -577,6 +579,7 @@ def build_intelligence(stories, articles_today, snapshot):
     extra = [a for a in articles_today if normalize_url(a["link"]) not in seen]
     rows = [(s["domain"], s["region"], ", ".join(s["sources"][:3]), s["title"]) for s in pool]
     rows += [(a.get("domain", ""), a.get("region", ""), a.get("source", ""), a["title"]) for a in extra[:220]]
+    rows_meta = [(s["title"], s["link"]) for s in pool] + [(a["title"], a["link"]) for a in extra[:220]]
     lines = "\n".join(f"{i} | {d} | {r} | {src} | {t}" for i, (d, r, src, t) in enumerate(rows))
     mkt = "\n".join(f"{m['label']}: {market.fmt_price(m)} {market.fmt_change(m)}" for m in snapshot) or "n/a"
     result = llm.generate_json(INTEL_PROMPT.format(lines=lines, market=mkt, today=NOW.strftime("%A, %B %d, %Y"),
@@ -590,6 +593,10 @@ def build_intelligence(stories, articles_today, snapshot):
         print(f"[INTEL] graph validation error: {e}")
         g = None
     if g:
+        try:
+            g = enrich_graph(g, snapshot, load_json(archive.THREADS_FILE, {"threads": []}), rows_meta)
+        except Exception as e:
+            print(f"[INTEL] graph enrichment error: {e}")
         result["graph"] = g
     else:
         result.pop("graph", None)
@@ -597,7 +604,13 @@ def build_intelligence(stories, articles_today, snapshot):
     return result
 
 
-GRAPH_NODE_TYPES = {"event", "company", "country", "sector", "market"}
+GRAPH_NODE_TYPES = {"event", "country", "company", "sector", "commodity", "index", "institution", "market"}
+MAX_NODES, MAX_EDGES = 50, 80
+
+
+def _clean(text, n):
+    text = re.sub(r"\s+", " ", str(text or "")).strip()
+    return truncate(text, n) if len(text) > n else text
 
 
 def sanitize_graph(g):
@@ -608,37 +621,64 @@ def sanitize_graph(g):
     for n in g.get("nodes") or []:
         if not isinstance(n, dict):
             continue
-        nid = str(n.get("id") or "").strip()
-        label = re.sub(r"\s+", " ", str(n.get("label") or "")).strip()
+        nid = _clean(n.get("id"), 12)
+        label = _clean(n.get("label"), 28)
         if not nid or not label or nid in ids:
             continue
-        label = truncate(label, 28) if len(label) > 28 else label
         ntype = str(n.get("type") or "").strip().lower()
+        if ntype == "market":
+            ntype = "index"
         if ntype not in GRAPH_NODE_TYPES:
             ntype = "event"
         domain = str(n.get("domain") or "").strip()
-        if domain not in DOMAIN_ORDER:
-            domain = ""
+        node = {"id": nid, "label": label, "type": ntype, "domain": domain if domain in DOMAIN_ORDER else ""}
+        for key, size in (("detail", 260), ("why_it_matters", 200), ("market", 20)):
+            val = _clean(n.get(key), size)
+            if val:
+                node[key] = val
+        region = str(n.get("region") or "").strip()
+        if region in REGION_WEIGHT or region == "Global":
+            node["region"] = region
+        direction = str(n.get("direction") or "").strip().lower()
+        if direction in ("up", "down", "flat"):
+            node["direction"] = direction
+        raw_ids = n.get("ids") if isinstance(n.get("ids"), list) else []
+        node["ids"] = [int(i) for i in raw_ids if str(i).strip().isdigit()][:4]
         ids.add(nid)
-        nodes.append({"id": nid, "label": label, "type": ntype, "domain": domain})
-    nodes = nodes[:14]
+        nodes.append(node)
+    nodes = nodes[:MAX_NODES]
     ids = {n["id"] for n in nodes}
     edges, seen = [], set()
     for e in g.get("edges") or []:
         if not isinstance(e, dict):
             continue
-        a, b = str(e.get("from") or "").strip(), str(e.get("to") or "").strip()
+        a, b = _clean(e.get("from"), 12), _clean(e.get("to"), 12)
         if a not in ids or b not in ids or a == b or (a, b) in seen:
             continue
-        label = re.sub(r"\s+", " ", str(e.get("label") or "")).strip()
-        label = truncate(label, 24) if len(label) > 24 else label
         try:
             strength = min(3, max(1, int(round(float(e.get("strength", 2))))))
         except (TypeError, ValueError):
             strength = 2
+        try:
+            order = min(3, max(1, int(round(float(e.get("order", 1))))))
+        except (TypeError, ValueError):
+            order = 1
+        edge = {"from": a, "to": b, "label": _clean(e.get("label"), 32), "strength": strength, "order": order}
+        for key, allowed, default in (("effect", ("up", "down", "mixed"), "mixed"),
+                                      ("confidence", ("low", "medium", "high"), "medium"),
+                                      ("status", ("reported", "predicted"), "predicted"),
+                                      ("kind", ("causal", "feedback", "contradicts"), "causal"),
+                                      ("lag", ("hours", "days", "weeks"), "")):
+            val = str(e.get(key) or "").strip().lower()
+            val = val if val in allowed else default
+            if val:
+                edge[key] = val
+        why = _clean(e.get("why"), 220)
+        if why:
+            edge["why"] = why
         seen.add((a, b))
-        edges.append({"from": a, "to": b, "label": label, "strength": strength})
-    edges = edges[:20]
+        edges.append(edge)
+    edges = edges[:MAX_EDGES]
     used = {x for e in edges for x in (e["from"], e["to"])}
     nodes = [n for n in nodes if n["id"] in used]  # drop orphans
     if len(nodes) < 4 or len(edges) < 3:
@@ -646,29 +686,98 @@ def sanitize_graph(g):
     return {"nodes": nodes, "edges": edges}
 
 
-def build_fallback_graph(stories, thread_store):
-    """Cheap non-AI graph: one node per cross-domain thread (2+ stories), edges between
-    threads sharing >=2 keywords. Returns {"graph":..., "source":"threads"} or None."""
+def enrich_graph(g, snapshot, thread_store, rows_meta):
+    """Attach source links, today's market move and thread age to each node (no LLM)."""
+    by_label = {m["label"]: m for m in snapshot or []}
+    threads = (thread_store or {}).get("threads", [])
+    for n in g["nodes"]:
+        ids_ = n.pop("ids", [])
+        n["sources"] = [{"title": rows_meta[i][0], "link": rows_meta[i][1]}
+                        for i in ids_ if 0 <= i < len(rows_meta)][:3]
+        m = by_label.get(n.pop("market", ""))
+        if m and m.get("price") is not None:
+            n["market"] = {"label": m["label"], "price": market.fmt_price(m), "change": market.fmt_change(m),
+                           "change_pct": m.get("change_pct")}
+        toks = archive.tokens(n["label"] + " " + n.get("detail", ""))
+        best, shared = None, 0
+        for t in threads:
+            k = len(toks & set(t.get("keywords", [])))
+            if k > shared:
+                best, shared = t, k
+        if best and shared >= 3 and len(best.get("stories", [])) >= 2:
+            try:
+                first = datetime.fromisoformat(best["first_seen"])
+                days = max(1, (NOW - first.astimezone(ET)).days)
+            except Exception:
+                days = None
+            n["thread"] = {"id": best["id"], "stories": len(best["stories"]), "days": days,
+                           "first_seen": best["first_seen"][:10]}
+    return g
+
+
+# market instrument label -> headline words that mean the story is about it
+MARKET_WORDS = {
+    "S&P 500": {"wall", "s&p", "dow", "nasdaq", "stocks", "equities"}, "Nasdaq": {"nasdaq", "tech", "stocks"},
+    "Nifty 50": {"nifty", "sensex", "dalal", "indian"}, "TSX": {"tsx", "toronto", "canadian"},
+    "USD/INR": {"rupee", "inr"}, "USD/CAD": {"loonie", "canadian", "cad"},
+    "Gold": {"gold", "bullion"}, "WTI Crude": {"oil", "crude", "opec", "brent", "wti", "tanker"},
+    "Bitcoin": {"bitcoin", "crypto", "btc"},
+}
+
+
+def build_fallback_graph(stories, thread_store, snapshot=None):
+    """No-AI map from story threads (cross-domain or 3+ stories) plus big market movers.
+    Edges join threads that share keywords, and movers to threads about them.
+    Returns {"graph":..., "source":"threads"} or None."""
     threads = [t for t in (thread_store or {}).get("threads", [])
-               if len(t.get("stories", [])) >= 2 and len(t.get("domains", [])) >= 2]
-    threads.sort(key=lambda t: (len(t["stories"]), t.get("last_seen", "")), reverse=True)
-    threads = threads[:12]
+               if len(t.get("stories", [])) >= 3 or (len(t.get("stories", [])) >= 2 and len(t.get("domains", [])) >= 2)]
+    threads.sort(key=lambda t: (len(t["domains"]) > 1, len(t["stories"]), t.get("last_seen", "")), reverse=True)
+    threads = threads[:30]
     if len(threads) < 2:
         return None
     nodes = []
     for i, t in enumerate(threads, 1):
-        label = truncate(t["title"], 28) if len(t["title"]) > 28 else t["title"]
-        nodes.append({"id": f"n{i}", "label": label, "type": "event",
-                      "domain": t["domains"][0] if t["domains"][0] in DOMAIN_ORDER else ""})
+        latest = sorted(t["stories"], key=lambda x: x["date"], reverse=True)
+        try:
+            days = max(1, (NOW - datetime.fromisoformat(t["first_seen"]).astimezone(ET)).days)
+        except Exception:
+            days = None
+        nodes.append({
+            "id": f"n{i}", "label": _clean(t["title"], 28), "type": "event",
+            "domain": t["domains"][0] if t["domains"] and t["domains"][0] in DOMAIN_ORDER else "",
+            "region": latest[0].get("region") if latest[0].get("region") in REGION_WEIGHT else "Global",
+            "detail": _clean(f"{len(t['stories'])} stories across {', '.join(t['domains'][:3])}. Latest: {latest[0]['title']}", 260),
+            "sources": [{"title": x["title"], "link": x["link"]} for x in latest[:3]],
+            "thread": {"id": t["id"], "stories": len(t["stories"]), "days": days, "first_seen": t["first_seen"][:10]},
+        })
     edges = []
     for i in range(len(threads)):
         for j in range(i + 1, len(threads)):
             shared = set(threads[i].get("keywords", [])) & set(threads[j].get("keywords", []))
             if len(shared) >= 2:
-                edges.append({"from": f"n{i+1}", "to": f"n{j+1}",
-                              "label": truncate(", ".join(sorted(shared)[:2]), 24),
-                              "strength": 3 if len(shared) >= 4 else 2 if len(shared) == 3 else 1})
-    edges = sorted(edges, key=lambda e: -e["strength"])[:20]
+                a, b = (i, j) if threads[i]["last_seen"] >= threads[j]["last_seen"] else (j, i)
+                edges.append({"from": f"n{a+1}", "to": f"n{b+1}", "label": _clean("shares: " + ", ".join(sorted(shared)[:3]), 32),
+                              "strength": 3 if len(shared) >= 4 else 2 if len(shared) == 3 else 1,
+                              "status": "reported", "confidence": "low", "order": 1, "kind": "causal", "effect": "mixed"})
+    # market movers (>= 1% either way) linked to threads that talk about them
+    n_id = len(threads)
+    for m in snapshot or []:
+        pct = m.get("change_pct")
+        if m.get("price") is None or pct is None or abs(pct) < 1:
+            continue
+        words = MARKET_WORDS.get(m["label"], set())
+        hits = [i for i, t in enumerate(threads) if words & set(t.get("keywords", [])) or words & archive.tokens(t["title"])]
+        if not hits:
+            continue
+        n_id += 1
+        nid = f"n{n_id}"
+        nodes.append({"id": nid, "label": m["label"], "type": "index", "domain": "", "direction": "up" if pct > 0 else "down",
+                      "detail": f"{m['label']} moved {market.fmt_change(m)} to {market.fmt_price(m)}.",
+                      "market": {"label": m["label"], "price": market.fmt_price(m), "change": market.fmt_change(m), "change_pct": pct}})
+        for i in hits[:3]:
+            edges.append({"from": f"n{i+1}", "to": nid, "label": "moves the market", "strength": 2, "status": "predicted",
+                          "confidence": "low", "order": 1, "kind": "causal", "effect": "up" if pct > 0 else "down"})
+    edges = sorted(edges, key=lambda e: -e["strength"])[:60]
     used = {x for e in edges for x in (e["from"], e["to"])}
     nodes = [n for n in nodes if n["id"] in used]
     if len(nodes) < 2 or not edges:
@@ -901,9 +1010,13 @@ def send_telegram(message: str) -> bool:
 
 
 def send_telegram_photo(png: bytes, caption: str) -> bool:
-    resp = requests.post(f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto",
-                         data={"chat_id": CHAT_ID, "caption": caption[:1000], "parse_mode": "HTML"},
-                         files={"photo": ("connection_map.png", png, "image/png")}, timeout=60)
+    try:
+        resp = requests.post(f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto",
+                             data={"chat_id": CHAT_ID, "caption": caption[:1000], "parse_mode": "HTML"},
+                             files={"photo": ("connection_map.png", png, "image/png")}, timeout=60)
+    except requests.RequestException as e:
+        print(f"[TELEGRAM ERROR] map image: {type(e).__name__}")
+        return False
     if resp.status_code == 200:
         print("[TELEGRAM] sent connection map")
         return True
@@ -931,7 +1044,11 @@ def send_email(subject: str, html_content: str, attachments=None) -> bool:
     }
     if attachments:
         payload["attachments"] = attachments
-    resp = requests.post(url, json=payload, headers=headers, timeout=20)
+    try:
+        resp = requests.post(url, json=payload, headers=headers, timeout=45)
+    except requests.RequestException as e:
+        print(f"[EMAIL ERROR] {type(e).__name__}")
+        return False
     if resp.status_code == 200:
         print("[EMAIL] sent successfully")
         return True
@@ -1108,7 +1225,8 @@ def main():
         if intel:
             recent = [a["title"] for a in articles_since(articles, NOW - timedelta(days=3))]
             patterns.review_predictions(NOW, llm, recent)
-            patterns.record_predictions(intel.get("scenarios") or [], NOW)
+            if not DRY_RUN:
+                patterns.record_predictions(intel.get("scenarios") or [], NOW)
         extra["patterns"] = patterns.detect_patterns(NOW)
         extra["prediction_accuracy"] = patterns.accuracy_summary()
     except Exception as e:
@@ -1128,7 +1246,7 @@ def main():
 
     intel_lite = None
     try:
-        intel_lite = build_fallback_graph(stories, load_json(archive.THREADS_FILE, {"threads": []}))
+        intel_lite = build_fallback_graph(stories, load_json(archive.THREADS_FILE, {"threads": []}), snapshot)
     except Exception as e:
         print(f"[GRAPH LITE ERROR] {e}")
 

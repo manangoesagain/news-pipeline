@@ -21,6 +21,9 @@ MATCH_MIN_SHARED = 3        # headline words a story must share with a thread
 KEYWORDS_PER_THREAD = 14
 THREAD_STORY_CAP = 80       # keep the file small; the daily archive has everything
 THREAD_IDLE_DAYS = 60       # a thread not seen for this long stops matching new stories
+SINGLETON_KEEP_DAYS = 21    # one-story threads older than this are dropped
+THREAD_KEEP_DAYS = 120      # any thread idle this long is dropped
+WC_CAP = 40
 
 STOP = {"the", "a", "an", "of", "to", "in", "on", "for", "and", "or", "is", "are", "as", "at", "by",
         "with", "from", "after", "over", "says", "say", "new", "its", "it", "be", "has", "have", "will",
@@ -137,9 +140,14 @@ def update_threads(stories: list, now: datetime) -> dict:
         for w in toks:
             t["wc"][w] = t["wc"].get(w, 0) + 1
         t["keywords"] = [w for w, _ in Counter(t["wc"]).most_common(KEYWORDS_PER_THREAD)]
+        if len(t["wc"]) > WC_CAP:
+            t["wc"] = dict(Counter(t["wc"]).most_common(WC_CAP))
         t["domains"] = sorted({x["domain"] for x in t["stories"]})
         touched.add(t["id"])
 
+    single_cut = (now - timedelta(days=SINGLETON_KEEP_DAYS)).isoformat()
+    keep_cut = (now - timedelta(days=THREAD_KEEP_DAYS)).isoformat()
+    threads = [t for t in threads if t["last_seen"] >= keep_cut and (len(t["stories"]) > 1 or t["last_seen"] >= single_cut)]
     threads.sort(key=lambda t: t["last_seen"], reverse=True)
     store["threads"] = threads
     store["updated"] = now.isoformat()

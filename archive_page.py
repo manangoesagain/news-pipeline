@@ -96,6 +96,7 @@ PAGE = r"""<!DOCTYPE html>
 </div>
 <script>
 const $ = id => document.getElementById(id);
+const safe = u => /^https?:\/\//i.test(String(u || "")) ? u : "#";
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let days = [], stories = [], threads = [];
 
@@ -105,7 +106,7 @@ async function init() {
   const idx = await get("_data/archive/index.json");
   days = idx ? idx.days : [];
   const loaded = await Promise.all(days.map(d => get(`_data/archive/${d.date}.json`)));
-  loaded.forEach(d => d && d.stories.forEach(s => stories.push({...s, day: d.date})));
+  loaded.forEach(d => d && Array.isArray(d.stories) && d.stories.forEach(s => stories.push({...s, day: d.date})));
   const th = await get("_data/threads.json");
   threads = th ? th.threads : [];
   $("stats").textContent = `${stories.length} stories over ${days.length} day${days.length === 1 ? "" : "s"} · ${threads.filter(t => t.stories.length > 1).length} story threads`;
@@ -116,7 +117,7 @@ async function init() {
 
 function storyHtml(s) {
   const src = (s.sources || [s.source]).slice(0, 3).join(", ");
-  return `<div class="card"><a class="t" href="${esc(s.link)}" target="_blank" rel="noopener">${esc(s.title)}</a>
+  return `<div class="card"><a class="t" href="${esc(safe(s.link))}" target="_blank" rel="noopener">${esc(s.title)}</a>
     <div class="meta">${s.breaking ? '<span class="brk">BREAKING</span> · ' : ""}${esc(src)} · ${esc(s.region)}</div>
     <span class="chip">${esc(s.domain)}</span>${s.why ? `<div class="meta">${esc(s.why)}</div>` : ""}</div>`;
 }
@@ -146,7 +147,7 @@ function renderThreads() {
       <div class="meta">${t.stories.length} stories · ${esc(t.first_seen.slice(0,10))} → ${esc(t.last_seen.slice(0,10))}${t.domains.length > 1 ? " · cross-topic" : ""}</div>
       ${t.domains.map(d => `<span class="chip">${esc(d)}</span>`).join("")}
     </summary><div class="tl">${t.stories.slice().sort((a,b) => a.date.localeCompare(b.date)).map(s =>
-      `<div><span class="d">${esc(s.date)} · ${esc(s.source)}</span><br><a class="t" href="${esc(s.link)}" target="_blank" rel="noopener">${esc(s.title)}</a></div>`).join("")}
+      `<div><span class="d">${esc(s.date)} · ${esc(s.source)}</span><br><a class="t" href="${esc(safe(s.link))}" target="_blank" rel="noopener">${esc(s.title)}</a></div>`).join("")}
     </div></details></div>`).join("");
 }
 
@@ -155,7 +156,7 @@ let hmSel = null;
 function dayNum(s) { return Math.floor(Date.parse(s + "T00:00:00Z") / 864e5); }
 function renderHeat() {
   if (!stories.length) { $("hmtable").innerHTML = ""; $("hmnote").textContent = "No stories loaded yet."; return; }
-  const maxD = Math.max(...stories.map(s => dayNum(s.day)));
+  const maxD = stories.reduce((m, s) => Math.max(m, dayNum(s.day)), 0);
   const per = s => { const a = maxD - dayNum(s.day); return a < 7 ? "cur" : a < 14 ? "prev" : null; };
   const doms = [...new Set(stories.map(s => s.domain || "Other"))].sort();
   const regs = [...new Set(stories.map(s => s.region || "Other"))].sort();
