@@ -257,7 +257,7 @@ CSS = """
     .cmap .ed.hh path.line, .cmap .ed.hl path.line, .cmap .ed.hv path.line { stroke-width: var(--sw2, 2.6); }
     .cmap .ed.ghosted { opacity: .55; }
     .cmap .ed.ghosted.hl, .cmap .ed.ghosted.hh { opacity: 1; }
-    .cmap svg.focus .ed:not(.hl):not(.perm) { opacity: .04; }
+    .cmap svg.focus .ed:not(.hl):not(.perm) { opacity: .25; }
     .cmap svg.focus .nd:not(.hl):not(.ghost) { opacity: .22; }
     .cmap svg.scn-chain.focus .nd:not(.hl):not(.ghost) { opacity: .5; }
     .cmap svg.scn-chain.focus .nd.ghost { opacity: 1; }
@@ -266,7 +266,8 @@ CSS = """
     .cmap svg.scn-chain .ed.ghosted.hl { opacity: 1; }
     .cmap svg.scn-chain .elabel { font-size: 12px; font-weight: 600; fill: var(--text); }
     .cmap svg.scn-chain.focus .ed.perm { opacity: 1; }
-    .cmap svg.hov .ed:not(.hh):not(.perm):not(.hv) { opacity: .04; }
+    .cmap svg.hov .ed:not(.hh):not(.perm):not(.hv) { opacity: .25; }
+    .cmap svg.lsel .ed:not(.hl):not(.hh):not(.hv):not(.perm) { opacity: 0; }
     .cmap svg.hov .nd:not(.hh):not(.hov1) { opacity: .28; }
     .cmap svg.scn-chain.hov .nd { opacity: 1; }
     .cmap svg.scn-chain.hov .nd.ghost { opacity: 1; }
@@ -285,12 +286,12 @@ CSS = """
     /* map tools: currency lens + predicted ghosts */
     .mhead { align-items: center; }
     .mtools { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; margin-left: auto; }
-    .lens { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--ink2); }
-    .lens .lbl { margin-right: 2px; }
-    .cmap .lens button { font-size: 12px; font-weight: 600; padding: 3px 11px; min-height: 28px; border: 1px solid var(--border); border-radius: 999px; background: transparent; cursor: pointer; }
-    .cmap .lens button[aria-checked="true"] { background: var(--text); color: var(--card); border-color: var(--text); }
+    .lens, .lns { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--ink2); }
+    .lens .lbl, .lns .lbl { margin-right: 2px; } .lns { align-items: center; gap: 4px; font-size: 12px; color: var(--ink2); }
+    .cmap .lns button, .cmap .lens button { font-size: 12px; font-weight: 600; padding: 3px 11px; min-height: 28px; border: 1px solid var(--border); border-radius: 999px; background: transparent; cursor: pointer; }
+    .cmap .lns button[aria-checked="true"], .cmap .lens button[aria-checked="true"] { background: var(--text); color: var(--card); border-color: var(--text); }
     .ptog { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; color: var(--ink2); cursor: pointer; min-height: 28px; }
-    @media (max-width: 899px) { .cmap .lens button, .ptog { min-height: 44px; } .cmap .lens button { padding: 3px 14px; } .ptog input { width: 20px; height: 20px; } .mtools { margin-left: 0; } }
+    @media (max-width: 899px) { .cmap .lns button, .cmap .lens button, .ptog { min-height: 44px; } .cmap .lens button { padding: 3px 14px; } .ptog input { width: 20px; height: 20px; } .mtools { margin-left: 0; } }
     .sronly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
     /* map: lens, trace, predicted ghosts, full map */
@@ -562,7 +563,7 @@ SCRIPT = r"""
         .replace(/\s*\(\s*(?:(?:per|see|from|via|cf\.?)\s+)?n\d+(?:\s*(?:,|;|and|&|\/)\s*n?\d+)*\s*\)/gi, "")
         .replace(/\b[Nn]odes?\s+n(\d+)\b/g, function (m, d) { return N["n" + d] ? N["n" + d].l : ""; })
         .replace(/\bn(\d+)\b/g, function (m, d) { return N["n" + d] ? N["n" + d].l : m; });
-      o = o.replace(/;?\s*\blabeled\s+[^;.]*?(?=\s*(?:;|\.|$))/gi, "").replace(/^\s*(?:detail|up|down|mixed|flat)\s*;\s*/i, "").replace(/^detail shows\s*/i, "Shows ").replace(/^(?:detail|up|down|mixed|flat)$/i, "").replace(/;\s*$/, "");
+      if (/\blabeled\b|^detail shows/i.test(str)) o = o.replace(/;?\s*\blabeled\s+[^;.]*?(?=\s*(?:;|\.|$))/gi, "").replace(/^\s*(?:detail|up|down|mixed|flat)\s*;\s*/i, "").replace(/^detail shows\s*/i, "Shows ").replace(/^(?:detail|up|down|mixed|flat)$/i, "").replace(/;\s*$/, "");
       return o === str ? str : o.replace(/\s+([,.;:])/g, "$1").replace(/\s{2,}/g, " ").trim();
     }
     (function walk(o) {
@@ -690,7 +691,7 @@ SCRIPT = r"""
       Object.keys(L.e || {}).forEach(function (k) {
         var e = E[+k]; if (!e || !sc.nodes[e.f] || !sc.nodes[e.t]) return;
         var gs = sc.nodes[e.f].ghost || sc.nodes[e.t].ghost, pts = L.e[k].map(function (v, i) { return i % 2 ? v * ky : fx(v); });
-        sc.edges.push({ i: +k, pts: pts, ghosted: gs, sw: kind === "all" ? 0.9 + e.s * 0.45 : kind === "full" ? 0.8 + e.s * 0.4 : 1.3 + e.s * 0.6, size: e.s, lab: { x: 0, y: 0, w: kind === "full" ? 26 : 24, ln: kind === "full" ? 1 : 3, anchor: "middle", mid: true } });
+        sc.edges.push({ i: +k, pts: pts, ghosted: gs, sw: (kind === "all" || kind === "full") ? (e.weak ? 1 : { 1: 1.5, 2: 2, 3: 3 }[e.s] || 1.5) : 1.3 + e.s * 0.6, size: e.s, lab: { x: 0, y: 0, w: kind === "full" ? 26 : 24, ln: kind === "full" ? 1 : 3, anchor: "middle", mid: true } });
       });
       return sc;
     }
@@ -736,7 +737,7 @@ SCRIPT = r"""
     function mkEdge(o) {
       var e = E[o.i], eff = e.effect, con = e.kind === "contradicts", p = o.pts;
       var eo = { 3: 0.5, 2: 0.34, 1: 0.2 }[conf(e)];
-      if (SC.kind === "chain") eo = { 3: 1, 2: 0.85, 1: 0.7 }[conf(e)]; else if (SC.kind === "full") eo = { 3: 0.42, 2: 0.3, 1: 0.2 }[conf(e)]; else if (SC.kind !== "all") eo = { 3: 0.9, 2: 0.7, 1: 0.5 }[conf(e)];
+      if (SC.kind === "chain") eo = { 3: 1, 2: 0.85, 1: 0.7 }[conf(e)]; else if (SC.kind === "full" || SC.kind === "all") eo = e.weak ? 0.4 : 0.78; else eo = { 3: 0.9, 2: 0.7, 1: 0.5 }[conf(e)];
       var g = sv("g", { "class": "ed e-" + eff + " k-" + e.kind + " st-" + e.status + (o.perm ? " perm" : "") + (o.ghosted ? " ghosted" : ""), "data-i": o.i });
       var swc = SC.kind === "chain" && conf(e) === 1 ? o.sw * 0.8 : o.sw;
       g.setAttribute("style", "--eo:" + (o.perm ? 1 : eo) + ";--sw:" + r1(swc) + "px;--sw2:" + r1(swc + 1.4) + "px");
@@ -1977,7 +1978,7 @@ SCRIPT = r"""
         mh.textContent = "Faint nodes belong to other topics. Click any node for its links.";
       } else if (S.view === "full") {
         mt.textContent = "Full map · " + ids.length + " nodes, " + E.length + " links";
-        mh.textContent = "Every node is named and every arrow says why. Drag to pan, zoom in for detail; links stay faint until you pick a node.";
+        mh.textContent = "Every node is named and every arrow says why. Drag to pan, zoom in for detail. Hover or pick a node to light up its links; the rest dim.";
       } else {
         mt.textContent = "Everything · " + ids.length + " nodes, " + E.length + " links";
         mh.textContent = "Hover a node for a quick look, click it to open the focus view. Links light up as you hover.";
@@ -2071,6 +2072,12 @@ SCRIPT = r"""
         S.lens = b.getAttribute("data-lens") || "";
         [].forEach.call(box.querySelectorAll(".lens button"), function (x) { x.setAttribute("aria-checked", x === b ? "true" : "false"); });
         lastLK = ""; applyAll();
+      });
+    });
+    [].forEach.call(box.querySelectorAll(".lns button"), function (b) {
+      b.addEventListener("click", function () {
+        S.lines = b.getAttribute("data-lines") || "all"; svg.classList.toggle("lsel", S.lines === "sel");
+        [].forEach.call(box.querySelectorAll(".lns button"), function (x) { x.setAttribute("aria-checked", x === b ? "true" : "false"); });
       });
     });
     var ptog = box.querySelector(".ptog input"); if (ptog) ptog.addEventListener("change", function () { S.showPred = ptog.checked; placeFutures(box2().w / vb.w); });
@@ -2340,7 +2347,7 @@ def _clean_graph(graph):
             "from": f, "to": t, "label": _txt(e.get("label"), 140), "effect": eff if eff in ("up", "down", "mixed") else "none",
             "strength": _int(e.get("strength"), 1, 3, 1), "conf": conf if conf in _CONF else "", "status": "predicted" if stat == "predicted" else "reported",
             "order": _int(e.get("order"), 1, 3, 1), "kind": kind, "why": _txt(e.get("why"), 300), "lag": _txt(e.get("lag"), 40),
-            "card": _clean_ecard(e.get("card"))})
+            "weak": bool(e.get("weak")), "card": _clean_ecard(e.get("card"))})
     if len(nodes) > MAX_NODES:
         deg = {}
         for e in edges:
@@ -3229,7 +3236,7 @@ def _connection_map(graph, note=""):
         if first:
             ltop[str(l if l < 7 else -1)] = (first if len(first) <= 62 else first[:60].rsplit(" ", 1)[0] + "\u2026")
     je = [{"f": e["from"], "t": e["to"], "label": e["label"], "effect": e["effect"], "s": e["strength"], "conf": e["conf"],
-           "status": e["status"], "order": e["order"], "kind": e["kind"], "why": e["why"], "lag": e["lag"], **({"c": e["card"]} if e.get("card") else {})} for e in edges]
+           "status": e["status"], "order": e["order"], "kind": e["kind"], "why": e["why"], "lag": e["lag"], **({"weak": True} if e.get("weak") else {}), **({"c": e["card"]} if e.get("card") else {})} for e in edges]
     payload = {"uid": uid, "nodes": jn, "edges": je, "chains": chains, "topics": topics, "lay": lay, "hub": hub,
                "typeLabel": TYPE_LABEL, "short": SHORT, "doms": DOMAINS, "pat": _clean_patterns(graph), "mk": _clean_market(graph), "ltop": ltop,
                "shapes": {t: _shape_path(t) for t in TYPES}, "ext": {t: list(_EXT[t]) for t in TYPES}}
@@ -3285,6 +3292,9 @@ def _connection_map(graph, note=""):
              '<button type="button" role="radio" aria-checked="false" data-lens="INR" title="Indian rupee">INR</button>'
              '<button type="button" role="radio" aria-checked="false" data-lens="CAD" title="Canadian dollar">CAD</button>'
              '<button type="button" role="radio" aria-checked="false" data-lens="USD" title="US dollar">USD</button></div>'
+             '<div class="lns" role="radiogroup" aria-label="Which lines to draw"><span class="lbl">Lines</span>'
+             '<button type="button" role="radio" aria-checked="true" data-lines="all">All</button>'
+             '<button type="button" role="radio" aria-checked="false" data-lines="sel">Only selected</button></div>'
              '<label class="ptog"><input type="checkbox" checked> Show predictions</label></div>')
     note_html = f'<p class="vnote">{_e(note)}</p>' if note else ""
     return (f'<h4>How the news moves markets, step by step</h4><p class="vnote">Each arrow is one cause-and-effect step. Green raises, red lowers.</p>{note_html}<div class="cmapwrap">'
