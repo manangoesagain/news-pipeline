@@ -662,6 +662,7 @@ Write a card for EVERY node id in this list: {hub_ids}. Give 2-3 predictions per
 """
 
 FOCUS_HUBS = 15
+FOCUS_BATCH = 5
 FOCUS_LINKS = 30
 
 
@@ -762,24 +763,36 @@ def attach_market(g, snapshot):
 
 
 def add_focus_cards(g, snapshot, themes=""):
-    """Second, separate AI call (own time budget): full cards for the busiest nodes. Never raises."""
+    """Separate AI calls (own time budget): full cards for the busiest nodes, in small parallel batches
+    so one slow reply cannot lose them all. Never raises."""
     try:
+        from concurrent.futures import ThreadPoolExecutor
         hubs, deg = hub_ids(g)
-        by_id = {x["id"]: x for x in g["nodes"]}
-        hub_set = set(hubs)
-        touching = [e for e in g["edges"] if e["from"] in hub_set or e["to"] in hub_set]
-        touching.sort(key=lambda e: (-e.get("strength", 1), e["from"]))
-        keys = [f"{e['from']}>{e['to']}" for e in touching[:FOCUS_LINKS]]
         nodes_txt = "\n".join(f"{n['id']} | {n['type']} | {n.get('domain', '')} | {n['label']} | {n.get('detail', '')}"
                               for n in g["nodes"])
         links_txt = "\n".join(f"{e['from']} -> {e['to']} | {e.get('label', '')} | {e.get('effect', '')} | {e.get('status', '')}"
                               for e in g["edges"])
         mkt = "\n".join(f"{m['label']}: {m['price']} {m['change']}" for m in g.get("market", [])) or "n/a"
-        res = llm.generate_json(CARDS_PROMPT.format(today=NOW.strftime("%A, %B %d, %Y"), market=mkt, nodes=nodes_txt,
-                                                    links=links_txt, hub_ids=", ".join(hubs), link_keys=", ".join(keys)),
-                                label="CARDS", require="cards", temperature=0.3, budget_s=360, per_model_s=180)
-        kept = sanitize_cards(res, g, hubs)
-        print(f"[CARDS] {kept} of {len(hubs)} focus cards kept")
+        today = NOW.strftime("%A, %B %d, %Y")
+        batches = [hubs[i:i + FOCUS_BATCH] for i in range(0, len(hubs), FOCUS_BATCH)]
+
+        def run(batch):
+            bset = set(batch)
+            touching = [e for e in g["edges"] if e["from"] in bset or e["to"] in bset]
+            touching.sort(key=lambda e: (-e.get("strength", 1), e["from"]))
+            keys = [f"{e['from']}>{e['to']}" for e in touching[:FOCUS_LINKS // 2]]
+            try:
+                return llm.generate_json(CARDS_PROMPT.format(today=today, market=mkt, nodes=nodes_txt, links=links_txt,
+                                                             hub_ids=", ".join(batch), link_keys=", ".join(keys)),
+                                         label="CARDS", require="cards", temperature=0.3, budget_s=300, per_model_s=150)
+            except Exception as e:
+                print(f"[CARDS] batch error {type(e).__name__}: {e}")
+                return None
+
+        with ThreadPoolExecutor(max_workers=len(batches) or 1) as ex:
+            results = list(ex.map(run, batches))
+        kept = sum(sanitize_cards(res, g, batch) for res, batch in zip(results, batches))
+        print(f"[CARDS] {kept} of {len(hubs)} focus cards kept ({len(batches)} batches)")
     except Exception as e:
         print(f"[CARDS ERROR] {type(e).__name__}: {e}")
     try:
