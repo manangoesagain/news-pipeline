@@ -647,6 +647,7 @@ Return JSON only:
 {{
   "cards": {{
     "<node id>": {{
+      "so_what": "the whole story in at most 15 plain words: what it means and who gains or loses",
       "headline": "one sentence takeaway, max 140 chars",
       "points": ["exactly 4 short bullets in this order: (1) what is happening, with numbers and names; (2) why it happens - the first-principles mechanism; (3) what is likely next, as an if-then; (4) what to watch for and what would prove this wrong. Max 120 chars each"],
       "for_you": {{"India": "max 100 chars", "US": "max 100 chars", "Canada": "max 100 chars"}},
@@ -700,6 +701,9 @@ def sanitize_cards(res, g, hubs):
         if not points:
             continue
         card = {"headline": txt(c.get("headline"), 140), "points": points}
+        so_what = txt(c.get("so_what"), 110)
+        if so_what:
+            card["so_what"] = so_what
         fy = c.get("for_you") if isinstance(c.get("for_you"), dict) else {}
         card["for_you"] = {k: txt(fy.get(k), 100) for k in ("India", "US", "Canada") if txt(fy.get(k), 100)}
         cur = c.get("currency") if isinstance(c.get("currency"), dict) else {}
@@ -752,8 +756,18 @@ def light_cards(g):
             points.append(_clean("Driven by: " + "; ".join(f"{by_id[e['from']]['label']} ({e['label']})" for e in ins), 120))
         if outs:
             points.append(_clean("Leads to: " + "; ".join(f"{by_id[e['to']]['label']} ({e['label']})" for e in outs), 120))
+        ups = [by_id[e["to"]]["label"] for e in outs if e.get("effect") == "up"]
+        downs = [by_id[e["to"]]["label"] for e in outs if e.get("effect") == "down"]
+        so_what = ""
+        if ups or downs:
+            bits = []
+            if ups:
+                bits.append("lifts " + " and ".join(ups[:2]))
+            if downs:
+                bits.append("hurts " + " and ".join(downs[:2]))
+            so_what = _clean(f"{node['label']} {' but '.join(bits)}", 110)
         if points:
-            node["card"] = {"headline": _clean(node.get("why_it_matters") or node.get("detail") or node["label"], 140),
+            node["card"] = {"so_what": so_what, "headline":_clean(node.get("why_it_matters") or node.get("detail") or node["label"], 140),
                             "points": points, "for_you": {}, "currency": {}, "predictions": [], "against": [],
                             "pattern": "", "light": True}
 
