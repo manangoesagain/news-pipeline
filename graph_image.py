@@ -25,10 +25,13 @@ MAX_H = 3400
 MAX_BYTES = 2_500_000
 MAX_STORIES = 4
 DEBUG = False  # tests: re-raise instead of returning None
-INK, MUTED, SURFACE, LINE = "#1b1f27", "#4b5260", "#fbfaf7", "#394150"
+INK, MUTED, SURFACE, LINE = "#1c1b19", "#55534d", "#fbfaf7", "#3a3935"
 CARD, CARD_EDGE = "#ffffff", "#d6d2c8"
-CONTRA = "#d03b3b"
-FONT_NODE, FONT_TAG, FONT_EDGE, FONT_LEG = 50, 36, 48, 40
+# Polarity accents (glyphs + arrowheads only; text stays in ink): raises blue, lowers red.
+# "cuts against" is amber + dotted + a = glyph, so it never reads as "lowers".
+RAISE, LOWER, CONTRA = "#2a78d6", "#e34948", "#b97a00"
+POL = {"up": ("▲", RAISE), "down": ("▼", LOWER), "mixed": ("↕", INK)}
+FONT_NODE, FONT_TAG, FONT_EDGE, FONT_LEG = 50, 36, 48, 48
 NODE_W, GAP3, GAP2 = 490, 350, 500
 
 # (name, tag, colour) - colour-blind-checked categorical slots (validate_palette.js,
@@ -80,7 +83,7 @@ def _clean(text):
     return re.sub(r"\s+", " ", text).strip()
 
 
-def _tint(hexc, k=0.84):
+def _tint(hexc, k=0.91):
     h = hexc.lstrip("#")
     r, g, b = (int(h[i:i + 2], 16) for i in (0, 2, 4))
     return "#%02x%02x%02x" % tuple(int(c + (255 - c) * k) for c in (r, g, b))
@@ -343,6 +346,12 @@ class _Ctx:
         self.ax.add_patch(FancyBboxPatch((x + r, y + r), w - 2 * r, h - 2 * r, boxstyle=f"round,pad={r}",
                                          fc=fc, ec=ec, lw=lw * 0.72, zorder=z))
 
+    def gtext(self, x, y, s, px, color=INK, ha="center", weight="normal", gcol=None, wid=0, gw=0):
+        """Centred label whose leading glyph (polarity cue) is drawn in gcol, rest in ink."""
+        x0 = x - wid / 2
+        self.text(x0, y, s[0], px, gcol or color, "left", weight)
+        self.text(x0 + gw, y, s[1:].lstrip(), px, color, "left", weight)
+
     def circle(self, x, y, r, fc):
         from matplotlib.patches import Circle
         self.ax.add_patch(Circle((x, y), r, fc=fc, ec=fc, zorder=4))
@@ -361,7 +370,7 @@ class _Ctx:
         col = CONTRA if rec["kind"] == "contradicts" else LINE
         lw = (6, 9, 13)[rec["strength"] - 1]
         head = head or 34 + 6 * rec["strength"]
-        base = _arrow_head(self.ax, pts, head, col)
+        base = _arrow_head(self.ax, pts, head, _edge_color(rec) if rec.get("effect") or rec["kind"] == "contradicts" else col)
         body = np.vstack([pts[:-1], base])
         self.ax.plot(body[:, 0], body[:, 1], color=col, lw=lw * 0.72, ls=ls, dash_capstyle=cap,
                      solid_capstyle="butt", alpha=(0.75, 0.9, 1.0)[rec["conf"]], zorder=2)
@@ -404,9 +413,29 @@ def _draw_node(ops, nd, box, cx, cy, w, h):
 
 
 def _edge_text(rec):
-    pre = {"contradicts": "✕ "}.get(rec["kind"], "")
-    eff = {"up": "▲ ", "down": "▼ ", "mixed": "↕ "}.get(rec["effect"], "")
-    return (pre + eff + (rec["label"] or "leads to")).strip()
+    if rec["kind"] == "contradicts":
+        pre = "≠ "
+    else:
+        pre = POL[rec["effect"]][0] + " " if rec["effect"] in POL else ""
+    return (pre + (rec["label"] or "leads to")).strip()
+
+
+def _edge_color(rec):
+    if rec["kind"] == "contradicts":
+        return CONTRA
+    return POL[rec["effect"]][1] if rec["effect"] in POL else INK
+
+
+def _emit_lab(ops, meas, cx, y, lines, rec):
+    """Emit centred edge-label lines (first line carries the coloured polarity glyph)."""
+    for n, ln in enumerate(lines):
+        if n == 0 and ln[:1] in "▲▼↕≠":
+            wid, gw = meas.w(ln, FONT_EDGE), meas.w(ln[0] + " ", FONT_EDGE)
+            ops.append(("gtext", (cx, y, ln, FONT_EDGE, INK, "center", "normal"),
+                        dict(gcol=_edge_color(rec), wid=wid, gw=gw)))
+        else:
+            ops.append(("text", (cx, y, ln, FONT_EDGE, INK, "center"), {}))
+        y += FONT_EDGE * 1.18
 
 
 def _rows_for(k):
@@ -475,9 +504,7 @@ def _story(meas, nodes, path, use, num, y0, x0, cw):
             ops.append(("arrow", ([(ax_, ay), (bx_, ay)], rec), {}))
             gx = (ax_ + bx_) / 2
             ly = ay - 18 - len(lab[j]) * FONT_EDGE * 1.18 + FONT_EDGE * 0.59
-            for ln in lab[j]:
-                ops.append(("text", (gx, ly, ln, FONT_EDGE, INK, "center"), {}))
-                ly += FONT_EDGE * 1.18
+            _emit_lab(ops, meas, gx, ly, lab[j], rec)
         rowinfo.append((top, nh))
         row_y = top + nh
         if ri < len(plan) - 1:
@@ -509,9 +536,7 @@ def _story(meas, nodes, path, use, num, y0, x0, cw):
         mx = (a[0] + b[0]) / 2
         ops.append(("rrect", (mx - lw_ / 2, ym - lh / 2, lw_, lh, 14, CARD, CARD), {"z": 5}))
         ly = ym - lh / 2 + 8 + FONT_EDGE * 0.59
-        for ln in lines:
-            ops.append(("text", (mx, ly, ln, FONT_EDGE, INK, "center"), {}))
-            ly += FONT_EDGE * 1.18
+        _emit_lab(ops, meas, mx, ly, lines, rec)
     bottom = row_y + CARD_PAD * 0.7
     h = bottom - y0
     ops.insert(0, ("rrect", (x0, y0, cw, h, 30, CARD, CARD_EDGE, 3), {"z": 0.5}))
@@ -634,10 +659,20 @@ def _draw(graph, title, meas, nodes, edges):
     def link_item(txt, kind):
         def fn(xp, yp):
             rec = dict(kind="contradicts" if kind == "contra" else "causal", reported=kind != "pred",
-                       strength=2, conf=2)
+                       strength=2, conf=2, effect="")
             foot.append(("arrow", ([(xp, yp), (xp + 100, yp)], rec, 26), {}))
-            T(xp + 116, yp, txt, FONT_LEG)
-        return 116 + meas.w(txt, FONT_LEG), fn
+            if kind == "contra":
+                T(xp + 116, yp, "≠", FONT_LEG, CONTRA, weight="bold")
+                T(xp + 116 + meas.w("≠ ", FONT_LEG, "bold"), yp, txt, FONT_LEG)
+            else:
+                T(xp + 116, yp, txt, FONT_LEG)
+        return 116 + (meas.w("≠ ", FONT_LEG, "bold") if kind == "contra" else 0) + meas.w(txt, FONT_LEG), fn
+
+    def pol_item(glyph, col, txt):
+        def fn(xp, yp):
+            T(xp, yp, glyph, FONT_LEG, col, weight="bold")
+            T(xp + meas.w(glyph + " ", FONT_LEG, "bold"), yp, txt, FONT_LEG)
+        return meas.w(glyph + " ", FONT_LEG, "bold") + meas.w(txt, FONT_LEG), fn
 
     def text_item(txt):
         return meas.w(txt, FONT_LEG), (lambda xp, yp: T(xp, yp, txt, FONT_LEG))
@@ -648,8 +683,10 @@ def _draw(graph, title, meas, nodes, edges):
     ly = flow([dom_item(d) for d in used_dom], ly, "Colour")
     tl = [t for t in LEGEND_TYPES if t in used_typ or (t == "index" and "market" in used_typ)]
     ly = flow([typ_item(t) for t in tl], ly + 4, "Shape")
-    ly = flow([link_item("reported", "rep"), link_item("predicted", "pred"), link_item("contradicts", "contra"),
-               text_item("▲ ▼ effect · thicker = stronger")], ly + 4, "Links")
+    ly = flow([link_item("reported", "rep"), link_item("predicted", "pred"), link_item("cuts against", "contra"),
+               pol_item("▲", RAISE, "raises"),
+               pol_item("▼", LOWER, "lowers"), pol_item("↕", INK, "mixed"),
+               text_item("thicker = stronger")], ly + 4, "Links")
     foot.insert(0, ("rrect", (x0, panel_top, W - 2 * MARGIN, ly - panel_top - 16, 26, "#f1efe8", CARD_EDGE, 2), {"z": 0.5}))
     y = ly + 24
 
