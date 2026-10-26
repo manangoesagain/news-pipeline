@@ -635,6 +635,8 @@ CARDS_PROMPT = """You are an intelligence analyst writing "focus cards" for the 
 Today is {today}. Market snapshot (price, daily change):
 {market}
 
+STRICT RULES: (1) Use only numbers, names and dates that appear in the nodes, links or market snapshot below. Any future price level, date, probability or figure you add yourself must be written as a scenario in words ("if oil holds above its current level") - never invent specific levels, dates, dollar amounts or statistics. (2) Never write node ids such as n12 or "IDs 5, 18" anywhere in the text; use names. (3) For "currency", dir means the PRESSURE THIS STORY PUTS on that currency (stronger/weaker/flat); it is not today's move, which is shown separately. (4) Keep predictions consistent with the key points and with each other; do not contradict yourself. (5) "pattern" must be a hedged, general recurring pattern, not specific historical numbers from memory.
+
 Nodes (id | type | domain | label | detail):
 {nodes}
 
@@ -685,7 +687,7 @@ def sanitize_cards(res, g, hubs):
     kept = 0
 
     def txt(v, n):
-        return _clean(v, n)
+        return _clean_text(v, n)
 
     def lst(v, n, size):
         return [txt(x, size) for x in v[:n] if txt(x, size)] if isinstance(v, list) else []
@@ -822,6 +824,16 @@ def _clean(text, n):
     return truncate(text, n) if len(text) > n else text
 
 
+_LEAK_RE = re.compile(r"\s*\((?:ids?|nodes?|links?)\b[^)]*\)|\b[Nn]odes?\s+n\d+\b|\(?\bn\d{1,3}\b\)?", re.I)
+
+
+def _clean_text(text, n):
+    """_clean for human-readable fields: also drops leaked node ids like 'n12' or '(IDs 5, 18)'."""
+    text = _LEAK_RE.sub("", str(text or ""))
+    text = re.sub(r"\s+([,.;:])", r"\1", text)
+    return _clean(text, n)
+
+
 def sanitize_graph(g):
     """Validate LLM graph data. Returns a clean {"nodes","edges"} dict or None."""
     if not isinstance(g, dict):
@@ -831,7 +843,7 @@ def sanitize_graph(g):
         if not isinstance(n, dict):
             continue
         nid = _clean(n.get("id"), 12)
-        label = _clean(n.get("label"), 28)
+        label = _clean_text(n.get("label"), 28)
         if not nid or not label or nid in ids:
             continue
         ntype = str(n.get("type") or "").strip().lower()
@@ -842,7 +854,7 @@ def sanitize_graph(g):
         domain = str(n.get("domain") or "").strip()
         node = {"id": nid, "label": label, "type": ntype, "domain": domain if domain in DOMAIN_ORDER else ""}
         for key, size in (("detail", 260), ("why_it_matters", 200), ("market", 20)):
-            val = _clean(n.get(key), size)
+            val = _clean_text(n.get(key), size)
             if val:
                 node[key] = val
         region = str(n.get("region") or "").strip()
@@ -856,12 +868,34 @@ def sanitize_graph(g):
         ids.add(nid)
         nodes.append(node)
     nodes = nodes[:MAX_NODES]
+    # merge duplicates the model sometimes writes twice (same market ticker, or near-identical names)
+    idmap, kept = {}, []
+    for n in nodes:
+        twin = None
+        toks = archive.tokens(n["label"])
+        for k in kept:
+            ktoks = archive.tokens(k["label"])
+            same_mkt = n.get("market") and n.get("market") == k.get("market")
+            overlap = len(toks & ktoks) / max(1, len(toks | ktoks))
+            if same_mkt or (overlap >= 0.75 and n["type"] == k["type"]) or n["label"].lower() == k["label"].lower():
+                twin = k
+                break
+        if twin is None:
+            kept.append(n)
+        else:
+            idmap[n["id"]] = twin["id"]
+            for key in ("detail", "why_it_matters", "region", "direction", "market"):
+                if n.get(key) and not twin.get(key):
+                    twin[key] = n[key]
+            twin["ids"] = (twin.get("ids", []) + n.get("ids", []))[:4]
+    nodes = kept
     ids = {n["id"] for n in nodes}
     edges, seen = [], set()
     for e in g.get("edges") or []:
         if not isinstance(e, dict):
             continue
         a, b = _clean(e.get("from"), 12), _clean(e.get("to"), 12)
+        a, b = idmap.get(a, a), idmap.get(b, b)
         if a not in ids or b not in ids or a == b or (a, b) in seen:
             continue
         try:
@@ -872,7 +906,7 @@ def sanitize_graph(g):
             order = min(3, max(1, int(round(float(e.get("order", 1))))))
         except (TypeError, ValueError):
             order = 1
-        edge = {"from": a, "to": b, "label": _clean(e.get("label"), 32), "strength": strength, "order": order}
+        edge = {"from": a, "to": b, "label": _clean_text(e.get("label"), 32), "strength": strength, "order": order}
         for key, allowed, default in (("effect", ("up", "down", "mixed"), "mixed"),
                                       ("confidence", ("low", "medium", "high"), "medium"),
                                       ("status", ("reported", "predicted"), "predicted"),
@@ -882,7 +916,7 @@ def sanitize_graph(g):
             val = val if val in allowed else default
             if val:
                 edge[key] = val
-        why = _clean(e.get("why"), 220)
+        why = _clean_text(e.get("why"), 220)
         if why:
             edge["why"] = why
         seen.add((a, b))
