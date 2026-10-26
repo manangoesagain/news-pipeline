@@ -333,7 +333,7 @@ CSS = """
     .sic path { fill: var(--dx); } .sic path.d0 { fill: var(--d0); } .sic path.d1 { fill: var(--d1); } .sic path.d2 { fill: var(--d2); } .sic path.d3 { fill: var(--d3); } .sic path.d4 { fill: var(--d4); } .sic path.d5 { fill: var(--d5); } .sic path.d6 { fill: var(--d6); }
     .fview { padding: 14px 20px 16px; font-size: 13px; line-height: 1.4; display: flex; flex-direction: column; gap: 10px; position: relative; overflow: hidden; }
     .fview[hidden] { display: none; }
-    @media (min-width: 900px) { .fview { height: clamp(620px, calc(100vh - 84px), 900px); } .fview.noflow { height: auto; min-height: 0; } }
+    @media (min-width: 900px) { .fview { height: auto; min-height: 560px; } }
     .fv-top { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; justify-content: space-between; }
     .fv-crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 4px; font-size: 13px; min-width: 0; }
     .fv-crumbs .sep { color: var(--muted); padding: 0 2px; }
@@ -369,6 +369,7 @@ CSS = """
     .fv-trace .tnode { font-weight: 600; } .fv-trace .tl { color: var(--ink2); border-style: dashed; } .fv-trace .tx { margin-left: auto; }
     .fv-flow { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 4px; }
     .fv-dg { flex: 1; min-height: 230px; position: relative; overflow: hidden auto; }
+    @media (min-width: 900px) { .fv-flow { flex: none; } .fv-dg { flex: none; height: clamp(300px, calc(100vh - 500px), 470px); } }
     .fv-leg { display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: center; font-size: 12px; color: var(--ink2); }
     .fv-leg span { display: inline-flex; align-items: center; gap: 5px; }
     .fv-leg .lg { fill: none; stroke: var(--ink2); stroke-width: 2; } .fv-leg .lg.pred { stroke-dasharray: 6 4; } .fv-leg .lg.con { stroke: var(--con); stroke-dasharray: 1.5 4; stroke-linecap: round; }
@@ -379,7 +380,7 @@ CSS = """
     .stile h3 { margin: 0; font-size: 12px; font-weight: 700; color: var(--ink2); }
     .stile .sn { font-size: 13px; font-weight: 600; color: var(--text); overflow-wrap: anywhere; } .stile .sn.mute { color: var(--muted); font-weight: 500; }
     .stile .nm { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; } .stile .nm .chp { font-size: 11.5px; border: 1px solid var(--ink2); border-radius: 999px; padding: 0 8px; white-space: nowrap; }
-    .stile .snx { font-size: 13px; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .stile .snx { font-size: 13px; color: var(--text); display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
     .stile .cr { display: flex; flex-wrap: wrap; gap: 0 12px; align-items: baseline; font-size: 12.5px; }
     .stile .cr .ck { min-width: 2.6em; } .stile .cr .cs, .stile .cr .ct { color: var(--ink2); white-space: nowrap; }
     .stile .cr .gly { font-weight: 700; }
@@ -397,7 +398,7 @@ CSS = """
       .fv-strip { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .fyc { min-height: 44px; } .gauges { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; gap: 6px; }
       .gg { min-height: 44px; flex-direction: column; gap: 2px; border-radius: 10px; padding: 4px 6px; justify-content: center; text-align: center; }
-      .stile .cr .w { display: none; } .stile .cr { display: grid; grid-template-columns: 2.6em 1fr 1fr; gap: 0 6px; }
+      .stile.cur { grid-column: 1 / -1; } .stile .snx { display: block; -webkit-line-clamp: unset; } .stile .cr .w { display: none; } .stile .cr { display: grid; grid-template-columns: 2.6em 1fr 1fr; gap: 0 6px; }
     }
     .pop.wide { width: min(560px, calc(100% - 12px)); max-height: min(78vh, 560px); }
     .pop a { color: var(--accent, var(--focus)); }
@@ -454,7 +455,8 @@ CSS = """
     .cmap .dg .ed.dgl path.line { stroke-linecap: round; }
     .cmap .dg .ed.dgl.st-predicted:not(.k-contradicts) path.line { stroke-dasharray: 7 5; }
     .dg .gl { font-weight: 700; } .dg .gl.up { fill: var(--up); } .dg .gl.down { fill: var(--down); } .dg .gl.con { fill: var(--text); }
-    .dg .dg-l { font-size: 12px; }
+    .dg .dg-l { font-size: 12px; stroke-width: 5px; }
+    .dg .dg-tagr { fill: var(--card); stroke: var(--ink2); stroke-width: 1.2; } .dg .dg-tagt { font-size: 12px; font-weight: 600; fill: var(--ink2); } .dg .gl.mixed, .dg .gl.none, .dg .gl.flat { fill: var(--ink2); }
     .dg .dg-dir { font-size: 14px; font-weight: 700; }
     .dg .dg-hub { cursor: pointer; outline: none; } .dg .dg-hub:hover .dg-pil, .dg .dg-hub:focus-visible .dg-pil { fill: var(--soft2); }
     .dg .dg-more-t { font-size: 12px; font-weight: 600; fill: var(--ink2); }
@@ -560,6 +562,7 @@ SCRIPT = r"""
         .replace(/\s*\(\s*(?:(?:per|see|from|via|cf\.?)\s+)?n\d+(?:\s*(?:,|;|and|&|\/)\s*n?\d+)*\s*\)/gi, "")
         .replace(/\b[Nn]odes?\s+n(\d+)\b/g, function (m, d) { return N["n" + d] ? N["n" + d].l : ""; })
         .replace(/\bn(\d+)\b/g, function (m, d) { return N["n" + d] ? N["n" + d].l : m; });
+      o = o.replace(/;?\s*\blabeled\s+[^;.]*?(?=\s*(?:;|\.|$))/gi, "").replace(/^\s*(?:detail|up|down|mixed|flat)\s*;\s*/i, "").replace(/^detail shows\s*/i, "Shows ").replace(/^(?:detail|up|down|mixed|flat)$/i, "").replace(/;\s*$/, "");
       return o === str ? str : o.replace(/\s+([,.;:])/g, "$1").replace(/\s{2,}/g, " ").trim();
     }
     (function walk(o) {
@@ -1214,7 +1217,8 @@ SCRIPT = r"""
     function todayOf(K) {
       var m = mkFor(K); if (!m || typeof m.cp !== "number") return null;
       var flat = Math.abs(m.cp) < 0.05, str = K === "USD" ? m.cp : -m.cp, dir = flat ? "flat" : (str > 0 ? "stronger" : "weaker");
-      return { dir: dir, word: CUNIT[K] + " " + (flat ? "flat" : dir) + " today", pair: m.l + " " + (m.p || "") + (m.c ? " " + m.c : "") };
+      var pair = m.l + " " + (flat ? "flat" : (m.cp > 0 ? "up " : "down ") + Math.abs(m.cp).toFixed(2) + "%") + (m.p ? " (" + m.p + ")" : "");
+      return { dir: dir, word: CUNIT[K] + " " + (flat ? "flat" : dir) + " today", pair: pair, why: K === "USD" || flat ? pair : pair + ", so the " + CUNIT[K].toLowerCase() + " is " + dir };
     }
     function curOf(id, K, info) {
       var c = info.cur[K], dv = false;
@@ -1243,8 +1247,18 @@ SCRIPT = r"""
       });
       return IMP;
     }
+    function whyMatters(id, info, im) {
+      var n = N[id], bits = [], cs = CURS.filter(function (K) { return curOf(id, K, info); }), rg = String(n.r || "").trim();
+      if (cs.length) bits.push("Moves " + cs.join(cs.length === 2 ? " and " : ", "));
+      if (/india|canada/i.test(rg) || /^us$|united states/i.test(rg)) bits.push("Touches " + (/^us$|united states/i.test(rg) ? "the US" : rg));
+      if (n.mkt && (n.mkt.change || n.mkt.price)) bits.push("Live market: " + (n.mkt.label || n.l) + (n.mkt.change ? " " + n.mkt.change.replace(/^[▲▼]\s*/, "") : ""));
+      if (!bits.length) bits.push(im.size === "big" ? "Big market mover" : "Linked to " + (outE[id].length + inE[id].length) + " other stories");
+      else if (im.size === "big" && bits.length < 2) bits.push("Big market mover");
+      return bits.slice(0, 2).join(" · ");
+    }
     function soWhat(id, info) {
       if (info.so) return words(info.so, 15);
+      if (N[id].c && N[id].c.hl) { var cl = String(N[id].c.hl).split(/[;:]|,\s|\s[–—-]\s|\s(?:on|as|amid|after|while|with|but)\s/i)[0].trim(); if (cl.split(/\s+/).length >= 3) return words(cl, 15); }
       var n = N[id], ups = [], downs = [], oth = [], t = "";
       sortLinks(outE[id], function (e) { return e.t; }).forEach(function (x) {
         if (x.e.kind === "contradicts") return; var l = N[x.o].l;
@@ -1365,7 +1379,7 @@ SCRIPT = r"""
         CURS.forEach(function (K) {
           var c = curOf(id, K, info), t = todayOf(K); if (!c) return;
           var d = el("div", "ps"); d.appendChild(el("b", "", K + " · " + CURNAME[K]));
-          if (t) d.appendChild(el("span", "", (t.dir === "flat" ? "▬ " : t.dir === "stronger" ? "▲ " : "▼ ") + t.word + " (" + t.pair + "). "));
+          if (t) d.appendChild(el("span", "", (t.dir === "flat" ? "▬ " : t.dir === "stronger" ? "▲ " : "▼ ") + t.word + ": " + t.why + ". "));
           d.appendChild(el("span", "", "This story's pressure: " + CDG[c.dir] + " " + c.dir + (c.why ? ". " + c.why : "") + (c.derived ? " (from graph links)" : "")));
           p.appendChild(d);
         });
@@ -1408,7 +1422,7 @@ SCRIPT = r"""
         ["India", "US", "Canada"].forEach(function (K) { var f = info.fy[K]; if (f && f.why) popSec(p, "For " + K, f.why); });
         CURS.forEach(function (K) {
           var c = curOf(id, K, info), t = todayOf(K); if (!c) return;
-          popSec(p, K + " · " + CURNAME[K], (t ? t.word.charAt(0).toUpperCase() + t.word.slice(1) + " (" + t.pair + "). " : "") + "Story's pressure " + CDG[c.dir] + " " + c.dir + (c.why ? ": " + c.why : ""));
+          popSec(p, K + " · " + CURNAME[K], (t ? t.word.charAt(0).toUpperCase() + t.word.slice(1) + ": " + t.why + ". " : "") + "Story's pressure " + CDG[c.dir] + " " + c.dir + (c.why ? ": " + c.why : ""));
         });
         preds.forEach(function (q) { if (q.wrong) popSec(p, "Would prove it wrong", q.wrong); });
         if (info.ag.length) { var d = el("div", "ps"); d.appendChild(el("b", "", "The case against")); info.ag.slice(0, 2).forEach(function (t) { var r = el("span", "", t); r.style.display = "block"; d.appendChild(r); }); p.appendChild(d); }
@@ -1536,9 +1550,9 @@ SCRIPT = r"""
       var rowEl = el("div", "t5row"); host.appendChild(rowEl);
       list.forEach(function (i) {
         var n = N[i], info = cardOf(i), b = el("button", "t5c"); b.type = "button";
-        b.setAttribute("aria-label", n.l + ". " + soWhat(i, info) + " Open the 10-second view.");
+        var why = whyMatters(i, info, im[i]); b.setAttribute("aria-label", n.l + ". " + why + ". Open the 10-second view.");
         var h = el("div", "t5h"); h.appendChild(el("span", "rk", String(im[i].top5))); h.appendChild(el("b", "", n.l)); b.appendChild(h);
-        b.appendChild(el("p", "t5s", soWhat(i, info)));
+        b.appendChild(el("p", "t5s", why));
         var ch = el("div", "t5m");
         CURS.forEach(function (K) { var c = curOf(i, K, info); if (!c) return; var s = el("span", "t5k", K + " "); s.appendChild(el("i", "gly " + c.dir, CDG[c.dir])); ch.appendChild(s); });
         ch.appendChild(el("span", "t5k", "Size " + im[i].size)); ch.appendChild(el("span", "t5k", "in " + im[i].when)); b.appendChild(ch);
@@ -1549,7 +1563,7 @@ SCRIPT = r"""
       var d = el("div", "fv-leg"); d.setAttribute("aria-label", "Legend");
       function it(cls, txt) { var s = el("span"); var g = sv("svg", { width: 34, height: 10, viewBox: "0 0 34 10", "aria-hidden": "true" }); g.appendChild(sv("path", { d: "M1 5H33", "class": "lg " + cls })); s.appendChild(g); s.appendChild(document.createTextNode(txt)); return s; }
       d.appendChild(it("rep", "reported")); d.appendChild(it("pred", "predicted")); d.appendChild(it("con", "contradicts"));
-      d.appendChild(el("span", "", "▲ raises  ▼ lowers  thicker = stronger  click any box or line for details"));
+      d.appendChild(el("span", "", "Labels: ▲ raises ▼ lowers · thicker line = stronger · tag = the node's own move · click any box for details"));
       return d;
     }
     function draw() { if (dgHost) drawDiagram(dgHost); }
@@ -1600,11 +1614,11 @@ SCRIPT = r"""
       eg.appendChild(sv("path", { "class": "line", d: d, "marker-end": "url(#mk" + UID + "-" + (e.kind === "contradicts" ? "bar" : "none") + e.s + ")" }));
       return eg;
     }
-    function lineAt(g, i, p, lw, tt0) {
+    function lineAt(g, i, p, lw, tt0, lx, ly) {
       var e = E[i], d = pathD(p), eg = dgLine(g, d, e), hit = sv("path", { "class": "hit", d: d, tabindex: "0", role: "button", "aria-expanded": "false" });
       hit.setAttribute("aria-label", "Open the steps for: " + N[e.f].l + " to " + N[e.t].l + ", " + (e.label || ""));
       var tt = sv("title"); tt.textContent = (e.kind === "contradicts" ? "cuts against: " : "") + (e.label || "no mechanism given"); hit.appendChild(tt); eg.appendChild(hit);
-      var q = bez(p, tt0 || 0.4), lt = glyphLabel(eg, e, q[0], q[1] - 8, lw, "middle");
+      var q = bez(p, tt0 || 0.4), lt = glyphLabel(eg, e, lx != null ? lx : q[0], ly != null ? ly : q[1] - 10, lw, "middle");
       function open(ev) { openCard("l" + i, hit, ev, edgeContent(i)); }
       hit.addEventListener("click", open); lt.addEventListener("click", open); hit.addEventListener("keydown", actKey(open));
       lt.style.cursor = "pointer"; lt.style.pointerEvents = "all";
@@ -1619,10 +1633,16 @@ SCRIPT = r"""
       var lines = wrap(nd.l, Math.max(6, Math.floor((w - 62) / 6.6)), 2), t = sv("text", { "class": "dg-nm", x: 33 });
       lines.forEach(function (s, i) { var ts = sv("tspan", { x: 33, y: r1(h / 2 + (i - (lines.length - 1) / 2) * 14 + 4.4) }); ts.textContent = s; t.appendChild(ts); });
       G.appendChild(t);
-      if (nd.dir === "up" || nd.dir === "down") { var tg = sv("text", { "class": "dg-dir " + nd.dir, x: w - 10, y: r1(h / 2 + 5), "text-anchor": "end" }); tg.textContent = nd.dir === "up" ? "▲" : "▼"; G.appendChild(tg); }
+      if (nd.dir === "up" || nd.dir === "down") dirTag(G, nd.dir, w - 40, h / 2, 32, "");
       function go(ev) { openCard("n" + o, G, ev, nodeCard(o, ei, role), o); }
       G.addEventListener("click", go); G.addEventListener("keydown", actKey(go));
       g.appendChild(G); return G;
+    }
+    function dirTag(parent, dir, x, cy, wd, word) {
+      var G = sv("g", { "class": "dg-tag", transform: "translate(" + r1(x) + " " + r1(cy - 9) + ")" }), tt = sv("title"); tt.textContent = "The node's own move: " + ({ up: "rising", down: "falling", flat: "steady" }[dir] || "");
+      G.appendChild(tt); G.appendChild(sv("rect", { "class": "dg-tagr", width: wd, height: 18, rx: 9 }));
+      var t = sv("text", { "class": "dg-tagt", x: wd / 2, y: 13, "text-anchor": "middle" }), g1 = sv("tspan", { "class": "gl " + dir }); g1.textContent = { up: "▲", down: "▼", flat: "▬" }[dir] || "";
+      t.appendChild(g1); if (word) t.appendChild(document.createTextNode(" " + word)); G.appendChild(t); parent.appendChild(G); return G;
     }
     function moreChip(g, x, y, w, label, key) {
       var G = sv("g", { "class": "dg-more", tabindex: "0", role: "button", transform: "translate(" + r1(x) + " " + r1(y) + ")", "aria-label": label });
@@ -1656,35 +1676,44 @@ SCRIPT = r"""
       var chipC = causes.length > cap0, chipE = effects.length > cap0, chipT = thrAll.length > 3;
       function units(v, chip) { return v + (chip ? 0.6 : 0); }
       var maxU = Math.max(units(vc.length, chipC), units(ve.length, chipE), units(thr.length, chipT), 1);
-      var svgH = Math.max(H, Math.ceil(titleH + 12 + maxU * 54)), avail = svgH - titleH - 10;
-      function rows(k, chip) { var u = units(k, chip), p = Math.min(92, avail / u), y0 = titleH + 4 + (avail - p * u) / 2, a = []; for (var i = 0; i < k; i++) a.push(y0 + p * (i + 0.5)); return a; }
+      var svgH = Math.max(H, Math.ceil(titleH + 16 + maxU * 56)), pit = Math.min(88, (svgH - titleH - 16) / maxU), blockH = titleH + 8 + maxU * pit, yo = Math.max(0, (svgH - blockH) / 2), avail = maxU * pit;
+      function rows(k, chip) { var u = units(k, chip), y0 = yo + titleH + 8 + (avail - pit * u) / 2, a = []; for (var i = 0; i < k; i++) a.push(y0 + pit * (i + 0.5)); return a; }
       var yc = rows(vc.length, chipC), ye = rows(ve.length, chipE), yt = rows(thr.length, chipT);
       var s = sv("svg", { viewBox: "0 0 " + W + " " + svgH, width: W, height: svgH, "class": "dg", role: "group" });
       s.setAttribute("aria-label", "Connections of " + n.l + ": " + causes.length + " causes, " + effects.length + " effects");
       var gB = sv("g"), gN = sv("g"), gT = sv("g", { "class": "dg-t" });
-      function title(tx, txt) { var t = sv("text", { x: tx, y: 15, "class": "dg-title" }); t.textContent = txt; gT.appendChild(t); }
+      function title(tx, txt) { var t = sv("text", { x: tx, y: yo + 15, "class": "dg-title" }); t.textContent = txt; gT.appendChild(t); }
       if (hasC) title(xL, "What drives it · " + causes.length); if (hasE) title(xE, "What it drives · " + effects.length); if (thr.length) title(xT, "Then · " + thrAll.length);
       /* centre box: sized to its content */
       var pl = wrap(n.l, Math.floor((hw - 24) / 7.6), 3), hasDir = n.dir && n.dir !== "none", hasMk = n.mkt && (n.mkt.price || n.mkt.change);
       var hubH = 16 + 20 + 8 + pl.length * 16 + (hasDir ? 18 : 0) + (hasMk ? 16 + (n.mkt.change ? 15 : 0) : 0) + 26;
-      var hubCy = titleH + 4 + avail / 2, hubTop = hubCy - hubH / 2;
+      var hubCy = yo + titleH + 8 + avail / 2, hubTop = hubCy - hubH / 2;
       var hub = sv("g", { "class": "dg-pillar dg-hub " + dcls(n.d), tabindex: "0", role: "button", "aria-expanded": "false", transform: "translate(" + xP + " " + r1(hubTop) + ")", "aria-label": n.l + ". Show full details." });
       hub.appendChild(sv("rect", { width: hw, height: hubH, rx: 12, "class": "dg-pil" }));
       var ic = sv("g", { transform: "translate(" + hw / 2 + " 26) scale(.7)" }); ic.appendChild(sv("path", { "class": "dg-ic " + dcls(n.d), d: SH[n.t] })); hub.appendChild(ic);
       var pt = sv("text", { "class": "dg-pn", "text-anchor": "middle" }), yy = 58;
       pl.forEach(function (t, i) { var ts = sv("tspan", { x: hw / 2, y: yy + i * 16 }); ts.textContent = t; pt.appendChild(ts); }); hub.appendChild(pt); yy += pl.length * 16 + 2;
-      if (hasDir) { var dt = sv("text", { "class": "dg-pd " + n.dir, x: hw / 2, y: yy, "text-anchor": "middle" }); var g1 = sv("tspan", { "class": "gl " + n.dir }); g1.textContent = { up: "▲", down: "▼", flat: "▬" }[n.dir] + " "; dt.appendChild(g1); dt.appendChild(document.createTextNode({ up: "rising", down: "falling", flat: "steady" }[n.dir])); hub.appendChild(dt); yy += 18; }
+      if (hasDir) { dirTag(hub, n.dir, hw / 2 - 42, yy - 4, 84, n.mkt ? "price" : { up: "rising", down: "falling", flat: "steady" }[n.dir]); yy += 24; }
       if (hasMk) { var mt2 = sv("text", { "class": "dg-pm", x: hw / 2, y: yy, "text-anchor": "middle" }); mt2.textContent = n.mkt.price || ""; hub.appendChild(mt2); if (n.mkt.change) { var mc = sv("text", { "class": "dg-pm", x: hw / 2, y: yy + 15, "text-anchor": "middle" }); mc.textContent = n.mkt.change; hub.appendChild(mc); } }
       var mo = sv("text", { "class": "dg-more-t", x: hw / 2, y: hubH - 9, "text-anchor": "middle" }); mo.textContent = "+ More"; hub.appendChild(mo);
       hubOpen(hub); gN.appendChild(hub);
       function port(k, i) { return k === 1 ? hubCy : hubCy + (i - (k - 1) / 2) * Math.min(14, (hubH - 44) / (k - 1)); }
       function curve(x0, y0, x1, y1) { var m = (x0 + x1) / 2; return [r1(x0), r1(y0), r1(m), r1(y0), r1(m), r1(y1), r1(x1), r1(y1)]; }
       var lw = Math.max(60, gw - 14);
-      vc.forEach(function (c, k) { lineAt(gB, c.i, curve(xL + colw + 2, yc[k], xP - 3, port(vc.length, k)), lw); neighbourBox(gN, c.o, xL, yc[k] - boxH / 2, colw, boxH, c.i, "c"); });
-      ve.forEach(function (c, k) { lineAt(gB, c.i, curve(xP + hw + 2, port(ve.length, k), xE - 3, ye[k]), lw, 0.62); neighbourBox(gN, c.o, xE, ye[k] - boxH / 2, colw, boxH, c.i, "e"); });
-      thr.forEach(function (t, k) { var py = ye[t.k]; lineAt(gB, t.y.i, curve(xE + colw + 2, py, xT - 3, yt[k]), lw, 0.66); neighbourBox(gN, t.y.o, xT, yt[k] - boxH / 2, colw, boxH, t.y.i, "e"); });
+      var LB = { c: [], e: [], t: [] };
+      function addL(grp, i, pth, tt) { LB[grp].push({ i: i, p: pth, t: tt, nl: wrap(shortLbl(E[i]).slice(1).trim(), Math.max(6, Math.floor(lw / 5.6)), 2).length }); }
+      vc.forEach(function (c, k) { addL("c", c.i, curve(xL + colw + 2, yc[k], xP - 3, port(vc.length, k)), 0.4); neighbourBox(gN, c.o, xL, yc[k] - boxH / 2, colw, boxH, c.i, "c"); });
+      ve.forEach(function (c, k) { addL("e", c.i, curve(xP + hw + 2, port(ve.length, k), xE - 3, ye[k]), 0.62); neighbourBox(gN, c.o, xE, ye[k] - boxH / 2, colw, boxH, c.i, "e"); });
+      thr.forEach(function (t, k) { var py = ye[t.k]; addL("t", t.y.i, curve(xE + colw + 2, py, xT - 3, yt[k]), 0.66); neighbourBox(gN, t.y.o, xT, yt[k] - boxH / 2, colw, boxH, t.y.i, "e"); });
+      ["c", "e", "t"].forEach(function (grp) {
+        var a = LB[grp];
+        a.forEach(function (l) { var q = bez(l.p, l.t), x0 = l.p[0], x1 = l.p[6]; l.lx = (x1 - x0 < lw + 8) ? (x0 + x1) / 2 : Math.min(Math.max(q[0], x0 + lw / 2 + 4), x1 - lw / 2 - 4); l.ly = q[1] - 10 - 6.5 * (l.nl - 1); });
+        a.sort(function (u, v) { return u.ly - v.ly; });
+        a.forEach(function (l, k) { if (k) { var pv = a[k - 1], need = pv.ly + (pv.nl + l.nl) * 6.5 + 7; if (l.ly < need) l.ly = need; } });
+        a.forEach(function (l) { lineAt(gB, l.i, l.p, lw, l.t, l.lx, l.ly); });
+      });
       function chipAt(rowsY, k, list, key, colx) {
-        var last = k ? rowsY[k - 1] + boxH / 2 + 6 : titleH + 6;
+        var last = k ? rowsY[k - 1] + boxH / 2 + 6 : yo + titleH + 6;
         moreChip(gN, colx, last, colw, FS.exp[key] ? "show fewer" : "+" + (list.length - k) + " more", key);
       }
       if (chipC) chipAt(yc, vc.length, causes, "cs", xL);
@@ -1722,7 +1751,7 @@ SCRIPT = r"""
           var hb = sv("g", { "class": "dg-pillar dg-hub " + dcls(n.d), tabindex: "0", role: "button", "aria-expanded": "false", transform: "translate(4 " + it.y + ")", "aria-label": n.l + ". Show full details." });
           hb.appendChild(sv("rect", { width: W - 8, height: 54, rx: 10, "class": "dg-pil" }));
           var ic = sv("g", { transform: "translate(26 27) scale(.7)" }); ic.appendChild(sv("path", { "class": "dg-ic " + dcls(n.d), d: SH[n.t] })); hb.appendChild(ic);
-          var pt = sv("text", { x: 50, y: 31, "class": "dg-pn" }); pt.textContent = clip(n.l, Math.floor((W - 150) / 7.6)) + (n.dir === "up" ? "  ▲" : n.dir === "down" ? "  ▼" : ""); hb.appendChild(pt);
+          var pt = sv("text", { x: 50, y: 31, "class": "dg-pn" }); pt.textContent = clip(n.l, Math.floor((W - ((n.dir && n.dir !== "none") ? 200 : 120)) / 7)); hb.appendChild(pt); if (n.dir && n.dir !== "none") dirTag(hb, n.dir, W - 118, 27, 62, n.mkt ? "price" : "");
           var mo = sv("text", { x: W - 18, y: 31, "class": "dg-more-t", "text-anchor": "end" }); mo.textContent = "+ More"; hb.appendChild(mo);
           hubOpen(hb); g.appendChild(hb); return;
         }
@@ -1735,7 +1764,7 @@ SCRIPT = r"""
         var nm = sv("text", { "class": "dg-nm", x: 44, y: 20 }); nm.textContent = clip(nd.l, Math.floor((bw - 100) / 7)); card.appendChild(nm);
         var ml = sv("text", { "class": "dg-l lnk", x: 44, y: 38, "text-anchor": "start" }), mtx = shortLbl(e), gs = sv("tspan", { "class": "gl " + (e.kind === "contradicts" ? "con" : e.effect) });
         gs.textContent = mtx.charAt(0) + " "; ml.appendChild(gs); ml.appendChild(document.createTextNode(clip(mtx.slice(1).trim(), Math.floor((bw - 100) / 5.8)))); card.appendChild(ml);
-        if (nd.dir === "up" || nd.dir === "down") { var tg = sv("text", { "class": "dg-dir " + nd.dir, x: bw - 10, y: 31, "text-anchor": "end" }); tg.textContent = nd.dir === "up" ? "▲" : "▼"; card.appendChild(tg); }
+        if (nd.dir === "up" || nd.dir === "down") dirTag(card, nd.dir, bw - 44, 26, 32, "");
         var go = function (ev) { openCard("n" + x.o, card, ev, nodeCard(x.o, x.i, it.kind === "c" ? "c" : "e"), x.o); };
         card.addEventListener("click", go); card.addEventListener("keydown", actKey(go));
         G2.appendChild(card); g.appendChild(G2);
