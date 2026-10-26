@@ -36,6 +36,32 @@ def available() -> bool:
     return bool(GEMINI_API_KEY or NVIDIA_API_KEY)
 
 
+def _drop_stray_closers(text: str) -> str:
+    """Remove closing brackets that do not match the open one (a model slip like '}]
+]')."""
+    out, stack, in_str, esc = [], [], False, False
+    for ch in text:
+        if in_str:
+            out.append(ch)
+            if esc:
+                esc = False
+            elif ch == "\\":
+                esc = True
+            elif ch == '"':
+                in_str = False
+            continue
+        if ch == '"':
+            in_str = True
+        elif ch in "{[":
+            stack.append("}" if ch == "{" else "]")
+        elif ch in "}]":
+            if not stack or stack[-1] != ch:
+                continue  # stray closer: drop it
+            stack.pop()
+        out.append(ch)
+    return "".join(out)
+
+
 def _extract_json(text: str, require: str = None):
     """Parse JSON from a reply that may be wrapped in reasoning text or code fences.
     Returns the largest JSON object found (that has `require` as a key, if given)."""
@@ -55,6 +81,14 @@ def _extract_json(text: str, require: str = None):
             return obj
     except json.JSONDecodeError:
         pass
+    fixed = _drop_stray_closers(text)
+    if fixed != text:
+        try:
+            obj = json.loads(re.sub(r",\s*([}\]])", lambda m: m.group(1), fixed))
+            if isinstance(obj, dict) and (not require or require in obj):
+                return obj
+        except json.JSONDecodeError:
+            pass
     decoder = json.JSONDecoder()
     best, best_len = None, 0
     for m in re.finditer(r"\{", text):
