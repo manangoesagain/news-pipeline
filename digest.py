@@ -34,7 +34,7 @@ import patterns
 BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
-RECIPIENT_EMAIL = os.environ.get("RECIPIENT_EMAIL", "PYRAMIDMANAN@gmail.com")
+RECIPIENT_EMAIL = os.environ.get("RECIPIENT_EMAIL") or "PYRAMIDMANAN@gmail.com"
 GNEWS_API_KEY = os.environ.get("GNEWS_API_KEY")
 NEWSDATA_API_KEY = os.environ.get("NEWSDATA_API_KEY")
 
