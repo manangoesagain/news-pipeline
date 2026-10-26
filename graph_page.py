@@ -77,11 +77,11 @@ def _dcls(name):
 # Colour never works alone: lanes are labelled, every node is labelled and has a type shape.
 
 CSS = """
-    .viz { --d0:#2a78d6; --d1:#eb6834; --d2:#1baf7a; --d3:#eda100; --d4:#e87ba4; --d5:#008300; --d6:#6250d6; --dx:#64748b;
+    .viz { --d0:#6250d6; --d1:#eb6834; --d2:#1baf7a; --d3:#eda100; --d4:#e87ba4; --d5:#008300; --d6:#2a78d6; --dx:#64748b;
            --ln:#64748b; --halo:var(--card); --soft:rgba(100,116,139,.12); --soft2:rgba(100,116,139,.2);
            --up:#2a78d6; --down:#e34948; --mix:#9a6700; --con:#fab219; --ink2:#475569; --focus:#2563eb; --lane:.075; }
     @media (prefers-color-scheme: dark) {
-      .viz { --d0:#3987e5; --d1:#d95926; --d2:#199e70; --d3:#c98500; --d4:#d55181; --d5:#008300; --d6:#9085e9; --dx:#94a3b8; --ln:#94a3b8;
+      .viz { --d0:#9085e9; --d1:#d95926; --d2:#199e70; --d3:#c98500; --d4:#d55181; --d5:#008300; --d6:#3987e5; --dx:#94a3b8; --ln:#94a3b8;
              --up:#3987e5; --down:#e66767; --mix:#d29922; --con:#fab219; --ink2:#c3c2b7; --focus:#79c0ff; --lane:.12;
              --soft:rgba(148,163,184,.14); --soft2:rgba(148,163,184,.24); }
     }

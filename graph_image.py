@@ -37,13 +37,13 @@ NODE_W, GAP3, GAP2 = 490, 350, 500
 # (name, tag, colour) - colour-blind-checked categorical slots (validate_palette.js,
 # light surface #fbfaf7: all checks pass, contrast WARN relieved by tag + legend labels).
 DOMAINS = [
-    ("AI & ML", "AI", "#2a78d6"),
+    ("AI & ML", "AI", "#6250d6"),
     ("Technology & Semiconductors", "TECH", "#eb6834"),
     ("Finance & Banking", "FIN", "#1baf7a"),
     ("Stock Markets & Trading", "MKT", "#eda100"),
     ("Geopolitics & Diplomacy", "GEO", "#e87ba4"),
     ("Wars & Conflicts", "WAR", "#008300"),
-    ("Commodities & Prices", "CMD", "#6250d6"),
+    ("Commodities & Prices", "CMD", "#2a78d6"),
 ]
 OTHER = ("Other", "OTH", "#6b7280")
 SHORT = {"Technology & Semiconductors": "Tech & Chips", "Finance & Banking": "Finance",
