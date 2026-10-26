@@ -580,10 +580,10 @@ Return JSON only:
 {{
   "graph": {{
     "nodes": [{{"id": "n1", "label": "short name, max 28 chars", "type": "event|country|company|sector|commodity|index|institution", "domain": "one of: {domains}, or empty", "region": "India|US|Canada|China|Global", "detail": "one sentence with the key number or name, max 150 chars", "direction": "up|down|flat|none", "market": "exact label from the market snapshot if this node is that ticker/commodity/index, else empty", "ids": [3, 17]}}],
-    "edges": [{{"from": "n1", "to": "n2", "label": "the mechanism, max 30 chars, e.g. raises shipping costs", "effect": "up|down|mixed", "strength": 1, "confidence": "low|medium|high", "status": "reported|predicted", "order": 1, "kind": "causal|feedback|contradicts", "lag": "hours|days|weeks"}}]
+    "edges": [{{"from": "n1", "to": "n2", "label": "the mechanism in at most 5 words, e.g. raises shipping costs", "effect": "up|down|mixed", "strength": 1, "confidence": "low|medium|high", "status": "reported|predicted", "order": 1, "kind": "causal|feedback|contradicts", "lag": "hours|days|weeks"}}]
   }}
 }}
-Build a detailed connection map of tonight's news with 26-34 nodes and 32-48 edges (keep every text field short). Node types: event (something that happened), country, company, sector, commodity, index (stock index, currency, crypto), institution (central bank, regulator, policy, alliance). Cover EVERY domain and give every node a concrete short detail. Every edge is a cause->effect arrow (from causes to) whose label states the MECHANISM (not just "affects"), with effect = whether the target goes up or down (or mixed). status "reported" = the headlines directly report this link; "predicted" = your inference. order 1 = direct effect, 2 = second-order, 3 = third-order: build multi-step chains (A->B->C->D) and mark them with order. Use kind "feedback" for an edge that loops back to an earlier cause and "contradicts" where one development cuts against another. Make hub nodes (one cause with 3+ effects) where the news supports it; include India, US, Canada and China angles. strength 3 = strong/direct, 2 = moderate, 1 = weak spillover; confidence is how sure you are of the link. Put the headline ids that support a node in its ids list (the number at the start of each headline line). Every edge endpoint must be a node id; ids are n1, n2, ...
+Build a detailed connection map of tonight's news with 26-34 nodes and 32-48 edges (keep every text field short). Node types: event (something that happened), country, company, sector, commodity, index (stock index, currency, crypto), institution (central bank, regulator, policy, alliance). Cover EVERY domain and give every node a concrete short detail. Every edge is a cause->effect arrow (from causes to) whose label states the MECHANISM (not just "affects"), with effect = whether the target goes up or down (or mixed). status "reported" = the headlines directly report this link; "predicted" = your inference. order 1 = direct effect, 2 = second-order, 3 = third-order: build multi-step chains (A->B->C->D) and mark them with order. Use kind "feedback" for an edge that loops back to an earlier cause and "contradicts" where one development cuts against another. Make hub nodes (one cause with 3+ effects) where the news supports it; include India, US, Canada and China angles. strength 3 = strong/direct, 2 = moderate, 1 = weak spillover; confidence is how sure you are of the link. Put the headline ids that support a node in its ids list (the number at the start of each headline line). Every edge endpoint must be a node id; ids are n1, n2, ... Only draw a link when the headlines support a real mechanism: do not connect unrelated stories, never link A->B and B->A, and put each node in the topic it truly belongs to (a cyclone is not geopolitics). Keep every link label to at most 5 words.
 """
 
 
@@ -658,7 +658,7 @@ Return JSON only:
     }}
   }},
   "links": {{
-    "<from id>><to id>": {{"steps": ["2-4 short mechanism steps"], "evidence": "max 140 chars", "weaken": "what could weaken this link, max 120 chars", "next": "where it leads next, max 100 chars", "seen_before": "max 120 chars, hedged"}}
+    "<from id>><to id>": {{"steps": ["2-4 short mechanism steps"], "evidence": "the real-world fact that supports this link, max 140 chars; never describe the data fields (no words like detail, label, node)", "weaken": "what could weaken this link, max 120 chars", "next": "where it leads next, max 100 chars", "seen_before": "max 120 chars, hedged"}}
   }}
 }}
 Write a card for EVERY node id in this list: {hub_ids}. Give 2-3 predictions per card. For currency, think through each of INR, CAD and USD separately (for example an oil spike tends to weaken INR, strengthen CAD, and strengthen USD as a haven). Write "links" entries only for these link keys: {link_keys}.
@@ -744,7 +744,10 @@ def sanitize_cards(res, g, hubs):
         if isinstance(c, dict):
             steps = lst(c.get("steps"), 4, 100)
             if steps:
-                e["card"] = {"steps": steps, "evidence": txt(c.get("evidence"), 140), "weaken": txt(c.get("weaken"), 120),
+                ev = txt(c.get("evidence"), 140)
+                if re.search(r"\b(label(?:l)?ed|detail|node)\b", ev, re.I):
+                    ev = ""  # the model described the data fields instead of a fact
+                e["card"] = {"steps": steps, "evidence": ev, "weaken": txt(c.get("weaken"), 120),
                              "next": txt(c.get("next"), 100), "seen_before": txt(c.get("seen_before"), 120)}
     return kept
 
@@ -908,6 +911,14 @@ def _clean(text, n):
 _LEAK_RE = re.compile(r"\s*\((?:ids?|nodes?|links?)\b[^)]*\)|\b[Nn]odes?\s+n\d+\b|\(?\bn\d{1,3}\b\)?", re.I)
 
 
+def _word_cut(text, n):
+    """Shorten to at most n characters on a word boundary, without an ellipsis."""
+    if len(text) <= n:
+        return text
+    cut = text[:n].rsplit(" ", 1)[0].rstrip(" ,;:-")
+    return cut or text[:n]
+
+
 def _clean_text(text, n):
     """_clean for human-readable fields: also drops leaked node ids like 'n12' or '(IDs 5, 18)'."""
     text = _LEAK_RE.sub("", str(text or ""))
@@ -958,7 +969,9 @@ def sanitize_graph(g):
             ktoks = archive.tokens(k["label"])
             same_mkt = n.get("market") and n.get("market") == k.get("market")
             overlap = len(toks & ktoks) / max(1, len(toks | ktoks))
-            if same_mkt or (overlap >= 0.75 and n["type"] == k["type"]) or n["label"].lower() == k["label"].lower():
+            contained = len(toks) >= 2 and len(ktoks) >= 2 and (toks <= ktoks or ktoks <= toks) \
+                and n["type"] in ("index", "commodity") and k["type"] in ("index", "commodity")
+            if same_mkt or contained or (overlap >= 0.75 and n["type"] == k["type"]) or n["label"].lower() == k["label"].lower():
                 twin = k
                 break
         if twin is None:
@@ -987,7 +1000,7 @@ def sanitize_graph(g):
             order = min(3, max(1, int(round(float(e.get("order", 1))))))
         except (TypeError, ValueError):
             order = 1
-        edge = {"from": a, "to": b, "label": _clean_text(e.get("label"), 32), "strength": strength, "order": order}
+        edge = {"from": a, "to": b, "label": _word_cut(_clean_text(e.get("label"), 200), 38), "strength": strength, "order": order}
         for key, allowed, default in (("effect", ("up", "down", "mixed"), "mixed"),
                                       ("confidence", ("low", "medium", "high"), "medium"),
                                       ("status", ("reported", "predicted"), "predicted"),
@@ -1002,6 +1015,17 @@ def sanitize_graph(g):
             edge["why"] = why
         seen.add((a, b))
         edges.append(edge)
+    # one direction per pair (keep the stronger), unless it is a deliberate feedback loop
+    best = {}
+    for e in edges:
+        key = frozenset((e["from"], e["to"]))
+        if e.get("kind") == "feedback":
+            continue
+        if key not in best or e["strength"] > best[key]["strength"]:
+            best[key] = e
+    edges = [e for e in edges if e.get("kind") == "feedback" or best[frozenset((e["from"], e["to"]))] is e]
+    if len(edges) > 40:  # a crowded map keeps only links the model is sure of
+        edges = [e for e in edges if not (e["strength"] <= 1 and e.get("confidence") == "low" and e.get("kind") != "contradicts")]
     edges = edges[:MAX_EDGES]
     used = {x for e in edges for x in (e["from"], e["to"])}
     nodes = [n for n in nodes if n["id"] in used]  # drop orphans
