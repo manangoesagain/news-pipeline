@@ -650,7 +650,7 @@ Return JSON only:
       "so_what": "the whole story in at most 15 plain words: what it means and who gains or loses",
       "headline": "one sentence takeaway, max 140 chars",
       "points": ["exactly 4 short bullets in this order: (1) what is happening, with numbers and names; (2) why it happens - the first-principles mechanism; (3) what is likely next, as an if-then; (4) what to watch for and what would prove this wrong. Max 120 chars each"],
-      "for_you": {{"India": "max 100 chars", "US": "max 100 chars", "Canada": "max 100 chars"}},
+      "for_you": {{"India": {{"dir": "up|down|neutral", "why": "at most 4 words"}}, "US": {{"dir": "up|down|neutral", "why": "at most 4 words"}}, "Canada": {{"dir": "up|down|neutral", "why": "at most 4 words"}}}},
       "currency": {{"INR": {{"dir": "stronger|weaker|flat", "why": "max 100 chars"}}, "CAD": {{"dir": "stronger|weaker|flat", "why": "..."}}, "USD": {{"dir": "stronger|weaker|flat", "why": "..."}}}},
       "predictions": [{{"if": "max 90 chars", "then": "max 110 chars", "odds": "low|medium|high", "horizon": "days|weeks", "reasoning": "first principles: because X must lead to Y unless Z, max 170 chars", "watch": "signpost, max 100 chars", "wrong_if": "what would prove it wrong, max 100 chars"}}],
       "against": ["signal that cuts against the story, max 110 chars"],
@@ -705,7 +705,17 @@ def sanitize_cards(res, g, hubs):
         if so_what:
             card["so_what"] = so_what
         fy = c.get("for_you") if isinstance(c.get("for_you"), dict) else {}
-        card["for_you"] = {k: txt(fy.get(k), 100) for k in ("India", "US", "Canada") if txt(fy.get(k), 100)}
+        card["for_you"] = {}
+        for k in ("India", "US", "Canada"):
+            v = fy.get(k)
+            if isinstance(v, dict):
+                d = str(v.get("dir") or "").strip().lower()
+                d = d if d in ("up", "down", "neutral") else "neutral"
+                why = txt(v.get("why"), 40)
+                if why or d != "neutral":
+                    card["for_you"][k] = {"dir": d, "why": why}
+            elif txt(v, 100):
+                card["for_you"][k] = {"dir": "neutral", "why": txt(v, 40)}
         cur = c.get("currency") if isinstance(c.get("currency"), dict) else {}
         card["currency"] = {}
         for k in ("INR", "CAD", "USD"):
@@ -818,6 +828,62 @@ def add_focus_cards(g, snapshot, themes=""):
     return g
 
 
+def compute_impact(g):
+    """No-AI relevance for each node: size (small/medium/big), how sure, how soon, and the top 5 for the reader."""
+    try:
+        nodes = g["nodes"]
+        edges = g["edges"]
+        deg, strong, conf, lags = {}, {}, {}, {}
+        weight = {"low": 1, "medium": 2, "high": 3}
+        for e in edges:
+            for k in (e["from"], e["to"]):
+                deg[k] = deg.get(k, 0) + 1
+                if e.get("strength", 1) >= 3:
+                    strong[k] = strong.get(k, 0) + 1
+                conf.setdefault(k, []).append(weight.get(e.get("confidence", "medium"), 2))
+                if e.get("lag"):
+                    lags.setdefault(k, []).append(e["lag"])
+        scores = {}
+        for n in nodes:
+            nid = n["id"]
+            mk = n.get("market") if isinstance(n.get("market"), dict) else {}
+            cur = (n.get("card") or {}).get("currency") or {}
+            score = deg.get(nid, 0) + 2 * strong.get(nid, 0)
+            if mk:
+                score += 3
+                if abs(mk.get("change_pct") or 0) >= 1:
+                    score += 2
+            if n.get("region") in ("India", "US", "Canada"):
+                score += 2
+            score += 2 * len([k for k in ("INR", "CAD", "USD") if k in cur])
+            if n.get("card") and not n["card"].get("light"):
+                score += 1
+            scores[nid] = score
+        ordered = sorted(nodes, key=lambda n: (-scores[n["id"]], n["label"]))
+        total = max(1, len(ordered))
+        rank = {n["id"]: i for i, n in enumerate(ordered)}
+        for n in nodes:
+            nid = n["id"]
+            pos = rank[nid] / total
+            size = "big" if pos < 0.15 else "medium" if pos < 0.5 else "small"
+            if deg.get(nid, 0) <= 1 and not n.get("market"):
+                size = "small"
+            c = conf.get(nid, [2])
+            avg = sum(c) / len(c)
+            sure = "high" if avg >= 2.5 else "medium" if avg >= 1.7 else "low"
+            ls = lags.get(nid, [])
+            when = "days"
+            if ls:
+                when = max(set(ls), key=ls.count)
+                when = {"hours": "days", "days": "days", "weeks": "weeks"}.get(when, "days")
+            n["impact"] = {"score": scores[nid], "size": size, "sure": sure, "when": when, "top5": 0}
+        for i, n in enumerate([n for n in ordered if n["impact"]["size"] != "small"][:5], 1):
+            n["impact"]["top5"] = i
+    except Exception as e:
+        print(f"[IMPACT ERROR] {type(e).__name__}: {e}")
+    return g
+
+
 def finish_graph(g, snapshot):
     """Shared by the AI and backup graphs: market numbers, history stats, light cards."""
     attach_market(g, snapshot)
@@ -826,6 +892,7 @@ def finish_graph(g, snapshot):
             patterns.enrich_nodes_with_stats(g, NOW)
     except Exception as e:
         print(f"[HISTORY ERROR] {e}")
+    compute_impact(g)
     return g
 
 
@@ -1536,6 +1603,7 @@ def main():
         if intel_lite:
             finish_graph(intel_lite["graph"], snapshot)
             light_cards(intel_lite["graph"])
+            compute_impact(intel_lite["graph"])
     except Exception as e:
         print(f"[GRAPH LITE ERROR] {e}")
 
