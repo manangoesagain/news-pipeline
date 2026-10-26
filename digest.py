@@ -969,7 +969,7 @@ def sanitize_graph(g):
             ktoks = archive.tokens(k["label"])
             same_mkt = n.get("market") and n.get("market") == k.get("market")
             overlap = len(toks & ktoks) / max(1, len(toks | ktoks))
-            contained = len(toks) >= 2 and len(ktoks) >= 2 and (toks <= ktoks or ktoks <= toks) \
+            contained = len(toks) >= 1 and len(ktoks) >= 1 and (toks <= ktoks or ktoks <= toks) \
                 and n["type"] in ("index", "commodity") and k["type"] in ("index", "commodity")
             if same_mkt or contained or (overlap >= 0.75 and n["type"] == k["type"]) or n["label"].lower() == k["label"].lower():
                 twin = k
