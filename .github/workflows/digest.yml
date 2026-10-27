@@ -67,6 +67,7 @@ jobs:
           FORCE_RUN: ${{ inputs.force }}
           DRY_RUN: ${{ inputs.dry_run }}
           FORCE_INTEL: ${{ inputs.intel }}
+          LLM_SAVE_FAILURES: 'true'
         run: python digest.py
 
       - name: Build static HTML page
@@ -76,6 +77,14 @@ jobs:
           mkdir -p site
           cp index.html archive.html site/
           cp -r _data site/
+
+      - name: Keep failed AI replies for debugging (7 days, not shown on the site)
+        if: always() && hashFiles('preview/llm_fail_*') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: llm-failures
+          path: preview/llm_fail_*
+          retention-days: 7
 
       - name: Upload preview
         if: steps.digest.outputs.ran == 'true' && inputs.dry_run

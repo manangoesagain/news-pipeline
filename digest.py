@@ -568,7 +568,9 @@ Give 3-4 causal chains, 3-5 second-order effects, 3-4 scenarios and 2-3 contrari
 """
 
 
-GRAPH_PROMPT = """You are an intelligence analyst. Today's headlines (id | topic | region | sources | headline):
+GRAPH_PROMPT = """HARD LIMITS (a longer reply fails): 28-34 nodes, 36-50 edges, JSON only, no commentary. Node label max 28 chars, node detail max 100 chars, edge label max 4 words, each node's "ids" list max 2 numbers. Every node must have at least one link.
+
+You are an intelligence analyst. Today's headlines (id | topic | region | sources | headline):
 {lines}
 
 Market snapshot (price, daily change):
@@ -576,24 +578,68 @@ Market snapshot (price, daily change):
 
 Today is {today}. The evening brief already found these main themes: {themes}
 
-Return JSON only:
+Return JSON only, in exactly this shape:
 {{
   "graph": {{
-    "nodes": [{{"id": "n1", "label": "short name, max 28 chars", "type": "event|country|company|sector|commodity|index|institution", "domain": "one of: {domains}, or empty", "region": "India|US|Canada|China|Global", "detail": "one sentence with the key number or name, max 150 chars", "direction": "up|down|flat|none", "market": "exact label from the market snapshot if this node is that ticker/commodity/index, else empty", "ids": [3, 17]}}],
-    "edges": [{{"from": "n1", "to": "n2", "label": "the mechanism in at most 5 words, e.g. raises shipping costs", "effect": "up|down|mixed", "strength": 1, "confidence": "low|medium|high", "status": "reported|predicted", "order": 1, "kind": "causal|feedback|contradicts", "lag": "hours|days|weeks"}}]
+    "nodes": [{{"id": "n1", "label": "short name", "type": "event|country|company|sector|commodity|index|institution", "domain": "one of: {domains}, or empty", "region": "India|US|Canada|China|Global", "detail": "key number or name, max 100 chars", "direction": "up|down|flat|none", "market": "exact label from the market snapshot if this node is that ticker/commodity/index, else empty", "ids": [3, 17]}}],
+    "edges": [{{"from": "n1", "to": "n2", "label": "mechanism, max 4 words", "effect": "up|down|mixed", "strength": 1, "confidence": "low|medium|high", "status": "reported|predicted", "order": 1, "kind": "causal|feedback|contradicts"}}]
   }}
 }}
-Build a detailed connection map of tonight's news with 26-34 nodes and 40-56 edges (keep every text field short; every node must have at least one link, and most nodes two or more). Node types: event (something that happened), country, company, sector, commodity, index (stock index, currency, crypto), institution (central bank, regulator, policy, alliance). Cover EVERY domain and give every node a concrete short detail. Every edge is a cause->effect arrow (from causes to) whose label states the MECHANISM (not just "affects"), with effect = whether the target goes up or down (or mixed). status "reported" = the headlines directly report this link; "predicted" = your inference. order 1 = direct effect, 2 = second-order, 3 = third-order: build multi-step chains (A->B->C->D) and mark them with order. Use kind "feedback" for an edge that loops back to an earlier cause and "contradicts" where one development cuts against another. Make hub nodes (one cause with 3+ effects) where the news supports it; include India, US, Canada and China angles. strength 3 = strong/direct, 2 = moderate, 1 = weak spillover; confidence is how sure you are of the link. Put the headline ids that support a node in its ids list (the number at the start of each headline line). Every edge endpoint must be a node id; ids are n1, n2, ... Only draw a link when the headlines support a real mechanism: do not connect unrelated stories, never link A->B and B->A, and put each node in the topic it truly belongs to (a cyclone is not geopolitics). Keep every link label to at most 5 words.
+Build a connection map of tonight's news. Node types: event (something that happened), country, company, sector, commodity, index (stock index, currency, crypto), institution (central bank, regulator, policy, alliance). Cover EVERY domain. Every edge is a cause->effect arrow (from causes to) whose label states the MECHANISM (e.g. raises shipping costs), with effect = whether the target goes up or down (or mixed). status "reported" = the headlines directly report this link; "predicted" = your inference. order 1 = direct, 2 = second-order, 3 = third-order: build multi-step chains (A->B->C) and mark them with order. kind "feedback" = an edge looping back to an earlier cause; "contradicts" = one development cuts against another. Make hub nodes (one cause with 3+ effects) where the news supports it; include India, US, Canada and China angles. strength 3 = strong/direct, 2 = moderate, 1 = weak spillover. "ids" are the numbers at the start of the supporting headline lines (max 2). Every edge endpoint must be a node id (n1, n2, ...). Only draw a link when the headlines support a real mechanism, never link A->B and B->A, and put each node in the topic it truly belongs to.
 """
+
+GRAPH_LITE_PROMPT = """HARD LIMITS (a longer reply fails): 16-20 nodes, 20-28 edges, JSON only, no commentary. Node label max 24 chars, NO detail field, edge label max 3 words, no extra fields.
+
+You are an intelligence analyst. Today's headlines (id | topic | region | sources | headline):
+{lines}
+
+Market snapshot (price, daily change):
+{market}
+
+Today is {today}. Main themes: {themes}
+
+Return JSON only, in exactly this shape:
+{{"graph": {{"nodes": [{{"id": "n1", "label": "short name", "type": "event|country|company|sector|commodity|index|institution", "domain": "one of: {domains}, or empty", "market": "exact market snapshot label if this node is that instrument, else empty", "ids": [3]}}],
+"edges": [{{"from": "n1", "to": "n2", "label": "mechanism", "effect": "up|down|mixed", "strength": 2, "status": "reported|predicted"}}]}}}}
+Map the biggest cause->effect links in tonight's news (from causes to), covering the main domains and India, US, Canada and China where the news supports it. Every node needs at least one link; every edge endpoint must be a node id; never link A->B and B->A.
+"""
+
+
+def generate_graph(lines, mkt, themes, today, rows_n):
+    """Ask the AI for the connection map. Full request first; if it fails, one cheaper 'lite' request.
+    Returns a sanitized graph or None."""
+    fmt = dict(market=mkt, today=today, themes=themes or "n/a", domains="; ".join(DOMAIN_ORDER))
+    try:
+        gres = llm.generate_json(GRAPH_PROMPT.format(lines="\n".join(lines.split("\n")[:120]), **fmt), label="GRAPH",
+                                 require="graph", temperature=0.3, max_tokens=9000, budget_s=420, per_model_s=150)
+        g = sanitize_graph((gres or {}).get("graph"))
+        if g and len(g["edges"]) >= 8:  # a salvaged, node-only graph is not good enough
+            return g
+        print("[GRAPH] full request gave no valid graph")
+    except Exception as e:
+        print(f"[GRAPH] full request error: {e}")
+    try:
+        short = "\n".join(lines.split("\n")[:70])
+        gres = llm.generate_json(GRAPH_LITE_PROMPT.format(lines=short, **fmt), label="GRAPH-LITE", require="graph",
+                                 temperature=0.3, max_tokens=5000, budget_s=240, per_model_s=100)
+        g = sanitize_graph((gres or {}).get("graph"))
+        if g and len(g["edges"]) >= 5:
+            print("[GRAPH] lite fallback used")
+            return g
+        print("[GRAPH] lite request gave no valid graph")
+    except Exception as e:
+        print(f"[GRAPH] lite request error: {e}")
+    return None
 
 
 def build_intelligence(stories, articles_today, snapshot):
     pool = sorted(stories, key=lambda s: -s["score"])[:80]
     seen = {normalize_url(s["link"]) for s in pool}
     extra = [a for a in articles_today if normalize_url(a["link"]) not in seen]
-    rows = [(s["domain"], s["region"], ", ".join(s["sources"][:3]), s["title"]) for s in pool]
-    rows += [(a.get("domain", ""), a.get("region", ""), a.get("source", ""), a["title"]) for a in extra[:220]]
-    rows_meta = [(s["title"], s["link"]) for s in pool] + [(a["title"], a["link"]) for a in extra[:220]]
+    extra = extra[:220]
+    rows =[(s["domain"], s["region"], ", ".join(s["sources"][:3]), s["title"]) for s in pool]
+    rows += [(a.get("domain", ""), a.get("region", ""), a.get("source", ""), a["title"]) for a in extra]
+    rows_meta = [(s["title"], s["link"]) for s in pool] + [(a["title"], a["link"]) for a in extra]
     lines = "\n".join(f"{i} | {d} | {r} | {src} | {t}" for i, (d, r, src, t) in enumerate(rows))
     mkt = "\n".join(f"{m['label']}: {market.fmt_price(m)} {market.fmt_change(m)}" for m in snapshot) or "n/a"
     result = llm.generate_json(INTEL_PROMPT.format(lines=lines, market=mkt, today=NOW.strftime("%A, %B %d, %Y"),
@@ -604,10 +650,7 @@ def build_intelligence(stories, articles_today, snapshot):
     g = None
     try:
         themes = "; ".join(c.get("title", "") for c in (result.get("causal_chains") or []) if isinstance(c, dict))[:600]
-        gres = llm.generate_json(GRAPH_PROMPT.format(lines=lines, market=mkt, today=NOW.strftime("%A, %B %d, %Y"),
-                                                     themes=themes or "n/a", domains="; ".join(DOMAIN_ORDER)),
-                                 label="GRAPH", require="graph", temperature=0.3, budget_s=400, per_model_s=200)
-        g = sanitize_graph((gres or {}).get("graph"))
+        g = generate_graph(lines, mkt, themes, NOW.strftime("%A, %B %d, %Y"), len(rows))
     except Exception as e:
         print(f"[INTEL] graph validation error: {e}")
         g = None
@@ -931,7 +974,9 @@ def sanitize_graph(g):
     if not isinstance(g, dict):
         return None
     nodes, ids = [], set()
-    for n in g.get("nodes") or []:
+    raw_nodes = g.get("nodes") if isinstance(g.get("nodes"), list) else []
+    raw_edges = g.get("edges") if isinstance(g.get("edges"), list) else []
+    for n in raw_nodes:  # a truncated last node (missing fields) is simply skipped
         if not isinstance(n, dict):
             continue
         nid = _clean(n.get("id"), 12)
@@ -985,7 +1030,7 @@ def sanitize_graph(g):
     nodes = kept
     ids = {n["id"] for n in nodes}
     edges, seen = [], set()
-    for e in g.get("edges") or []:
+    for e in raw_edges:
         if not isinstance(e, dict):
             continue
         a, b = _clean(e.get("from"), 12), _clean(e.get("to"), 12)

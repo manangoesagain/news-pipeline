@@ -75,7 +75,7 @@ def item_html(it, extra_class=""):
     summary = f" &bull; {esc(it['summary'])}" if it.get("summary") else ""
     return f"""
         <div class="item {extra_class}">
-          <a href="{esc(it['link'])}" class="title" target="_blank" rel="noopener">{esc(it['title'])}</a>
+          <a href="{esc(it['link'] if str(it.get('link', '')).lower().startswith(('http://', 'https://')) else '#')}" class="title" target="_blank" rel="noopener">{esc(it['title'])}</a>
           <div class="meta">{esc(src)}{summary}</div>
           {why}
         </div>
