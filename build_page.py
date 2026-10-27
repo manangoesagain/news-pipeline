@@ -12,6 +12,7 @@ import re
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+from track_page import CSS as TRACK_CSS, track_record_html
 from graph_page import CSS as GRAPH_CSS, SCRIPT as GRAPH_SCRIPT, connection_map, scenario_tree, causal_flows
 
 ET = ZoneInfo("America/Toronto")
@@ -269,6 +270,30 @@ def digest_card(digest):
       {patterns_html(digest)}
     </section>
     """
+
+
+def _read_text(path):
+    try:
+        with open(path, "r", encoding="utf-8") as fh:
+            return fh.read()
+    except Exception:
+        return ""
+
+
+def track_strip():
+    """Track record strip from _data/_learning; missing files give the honest empty state."""
+    try:
+        sc = None
+        try:
+            sc = json.loads(_read_text(os.path.join(DATA_DIR, "_learning", "scorecard.json")) or "null")
+        except Exception:
+            sc = None
+        return track_record_html(sc if isinstance(sc, dict) else {},
+                                 _read_text(os.path.join(DATA_DIR, "_learning", "changelog.md")),
+                                 _read_text(os.path.join(DATA_DIR, "_learning", "lessons.md")))
+    except Exception as e:
+        print(f"[WARN] track record skipped: {type(e).__name__}: {e}")
+        return ""
 
 
 def generate_html(digests):
@@ -529,6 +554,8 @@ def generate_html(digests):
 
     {GRAPH_CSS}
 
+    {TRACK_CSS}
+
     @media (max-width: 480px) {{
       body {{ padding: 12px; }}
       .digest-card {{ padding: 16px; }}
@@ -547,6 +574,8 @@ def generate_html(digests):
     <p style="text-align:center;margin-bottom:14px"><a href="archive.html" style="color: var(--accent); text-decoration: none;">Archive, search &amp; story threads &rarr;</a></p>
 
     <div class="updated">Last updated: {esc(last_updated) if last_updated else '—'}</div>
+
+    {track_strip()}
 
     {cards}
 

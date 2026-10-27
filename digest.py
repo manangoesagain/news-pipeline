@@ -29,6 +29,36 @@ import graph_image
 import llm
 import market
 import patterns
+import learning_ledger
+import learning_memory
+import track_page
+
+def lctx(kind):
+    """What the digest has learned from its own graded predictions (empty until there is enough data)."""
+    try:
+        text = learning_memory.prompt_context(kind)
+        return ("\n\n" + text) if text else ""
+    except Exception as e:
+        print(f"[LEARN] prompt context failed: {type(e).__name__}")
+        return ""
+
+
+def learning_cycle(llm_step=False):
+    """Grade due calls and refresh the scoreboard; with llm_step=True also let the learning step update its
+    own notes (one extra AI call, run AFTER delivery so it can never delay or starve a digest). Never raises."""
+    try:
+        learning_ledger.grade_calls(NOW)
+        learning_ledger.scorecard(NOW)
+        if llm_step and llm.available():
+            if llm.HARD_STOP - time.time() < 400:
+                print("[LEARN] skipped the daily learning step: not enough time left")
+            else:
+                res = learning_memory.run_daily(NOW, llm)
+                print(f"[LEARN] daily step: {res}")
+                learning_ledger.scorecard(NOW)
+    except Exception as e:
+        print(f"[LEARN] cycle failed: {type(e).__name__}: {e}")
+
 
 # --- Secrets from GitHub Actions env ---
 BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
@@ -490,7 +520,7 @@ def rank_with_llm(clusters):
         lines.append(f"{i} | {age:.1f}h | {srcs} | {lead['domain']} | {lead['title']} | {snippet}")
 
     prompt = RANK_PROMPT.format(n=len(candidates), domains="; ".join(DOMAIN_ORDER),
-                                breaking_h=BREAKING_HOURS, lines="\n".join(lines))
+                                breaking_h=BREAKING_HOURS, lines="\n".join(lines)) + lctx("rank")
     result = llm.generate_json(prompt, label="RANK", require="stories", max_tokens=6000, budget_s=240)
     if not result or not isinstance(result.get("stories"), list):
         return None
@@ -610,7 +640,7 @@ def generate_graph(lines, mkt, themes, today, rows_n):
     Returns a sanitized graph or None."""
     fmt = dict(market=mkt, today=today, themes=themes or "n/a", domains="; ".join(DOMAIN_ORDER))
     try:
-        gres = llm.generate_json(GRAPH_PROMPT.format(lines="\n".join(lines.split("\n")[:120]), **fmt), label="GRAPH",
+        gres = llm.generate_json(GRAPH_PROMPT.format(lines="\n".join(lines.split("\n")[:120]), **fmt) + lctx("graph"), label="GRAPH",
                                  require="graph", temperature=0.3, max_tokens=9000, budget_s=420, per_model_s=150)
         g = sanitize_graph((gres or {}).get("graph"))
         if g and len(g["edges"]) >= 8:  # a salvaged, node-only graph is not good enough
@@ -620,7 +650,7 @@ def generate_graph(lines, mkt, themes, today, rows_n):
         print(f"[GRAPH] full request error: {e}")
     try:
         short = "\n".join(lines.split("\n")[:70])
-        gres = llm.generate_json(GRAPH_LITE_PROMPT.format(lines=short, **fmt), label="GRAPH-LITE", require="graph",
+        gres = llm.generate_json(GRAPH_LITE_PROMPT.format(lines=short, **fmt) + lctx("graph"), label="GRAPH-LITE", require="graph",
                                  temperature=0.3, max_tokens=5000, budget_s=240, per_model_s=100)
         g = sanitize_graph((gres or {}).get("graph"))
         if g and len(g["edges"]) >= 5:
@@ -643,7 +673,7 @@ def build_intelligence(stories, articles_today, snapshot):
     lines = "\n".join(f"{i} | {d} | {r} | {src} | {t}" for i, (d, r, src, t) in enumerate(rows))
     mkt = "\n".join(f"{m['label']}: {market.fmt_price(m)} {market.fmt_change(m)}" for m in snapshot) or "n/a"
     result = llm.generate_json(INTEL_PROMPT.format(lines=lines, market=mkt, today=NOW.strftime("%A, %B %d, %Y"),
-                                                       domains="; ".join(DOMAIN_ORDER)), label="INTEL", require="causal_chains",
+                                                       domains="; ".join(DOMAIN_ORDER)) + lctx("brief"), label="INTEL", require="causal_chains",
                               temperature=0.4, budget_s=300)
     if not result or not any(result.get(k) for k in ("causal_chains", "scenarios", "second_order")):
         return None
@@ -855,7 +885,7 @@ def add_focus_cards(g, snapshot, themes=""):
             keys = [f"{e['from']}>{e['to']}" for e in touching[:FOCUS_LINKS // 2]]
             try:
                 return llm.generate_json(CARDS_PROMPT.format(today=today, market=mkt, nodes=nodes_txt, links=links_txt,
-                                                             hub_ids=", ".join(batch), link_keys=", ".join(keys)),
+                                                             hub_ids=", ".join(batch), link_keys=", ".join(keys)) + lctx("cards"),
                                          label="CARDS", require="cards", temperature=0.3, budget_s=300, per_model_s=150)
             except Exception as e:
                 print(f"[CARDS] batch error {type(e).__name__}: {e}")
@@ -1628,6 +1658,8 @@ def main():
 
     print(f"[RUN] slot {slot}{' (forced)' if FORCE_RUN else ''}{' (dry run)' if DRY_RUN else ''}")
 
+    learning_cycle()  # grading only: no AI call before the digest is built
+
     items = fetch_rss() + fetch_google_news() + fetch_gnews() + fetch_newsdata()
     clusters = build_clusters(items)
 
@@ -1663,7 +1695,24 @@ def main():
     except Exception as e:
         print(f"[PATTERNS ERROR] {e}")
 
+    # Record today's checkable calls so they can be graded later (never blocks a delivery)
+    try:
+        if intel:
+            graph_now = intel.get("graph")
+            if graph_now:
+                learning_ledger.record_calls(graph_now, NOW)
+            learning_ledger.record_scenarios(intel.get("scenarios") or [], NOW)
+        learning_ledger.scorecard(NOW)
+    except Exception as e:
+        print(f"[LEARN] recording failed: {type(e).__name__}: {e}")
+
     message = build_telegram(domain_items, breaking, snapshot, intel)
+    try:
+        tline = track_page.telegram_line(learning_ledger.track_record())
+        if tline:
+            message += "\n\n\U0001F4CA " + t(tline)
+    except Exception as e:
+        print(f"[LEARN] track line failed: {type(e).__name__}")
     email_html = build_email_html(domain_items, breaking, snapshot, intel)
     email_subject = f"📰 News Brief — {NOW.strftime('%b %d')} {NOW.strftime('%I:%M %p ET')}"
     if intel:
@@ -1726,6 +1775,8 @@ def main():
             print("FATAL: both deliveries failed")
             sys.exit(1)
         save_state(slot)
+
+    learning_cycle(llm_step=True)  # after delivery: the learning step may use leftover time only
 
     set_output("ran", "true")
 
