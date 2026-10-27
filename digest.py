@@ -863,7 +863,13 @@ def add_focus_cards(g, snapshot, themes=""):
 
         with ThreadPoolExecutor(max_workers=len(batches) or 1) as ex:
             results = list(ex.map(run, batches))
-        kept = sum(sanitize_cards(res, g, batch) for res, batch in zip(results, batches))
+        kept = 0
+        for res, batch in zip(results, batches):
+            n = sanitize_cards(res, g, batch)
+            if n == 0:  # a whole batch failed (the free tier throttles parallel calls): try it again, one at a time
+                print("[CARDS] batch failed; retrying it alone")
+                n = sanitize_cards(run(batch), g, batch)
+            kept += n
         print(f"[CARDS] {kept} of {len(hubs)} focus cards kept ({len(batches)} batches)")
     except Exception as e:
         print(f"[CARDS ERROR] {type(e).__name__}: {e}")
