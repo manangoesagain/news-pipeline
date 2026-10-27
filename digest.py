@@ -866,8 +866,10 @@ def add_focus_cards(g, snapshot, themes=""):
         kept = 0
         for res, batch in zip(results, batches):
             n = sanitize_cards(res, g, batch)
-            if n == 0:  # a whole batch failed (the free tier throttles parallel calls): try it again, one at a time
-                print("[CARDS] batch failed; retrying it alone")
+            for attempt in range(2):  # a whole batch failed (the free tier is flaky): try it again, one at a time
+                if n or llm.HARD_STOP - time.time() < 240:
+                    break
+                print(f"[CARDS] batch failed; retrying it alone (try {attempt + 1})")
                 n = sanitize_cards(run(batch), g, batch)
             kept += n
         print(f"[CARDS] {kept} of {len(hubs)} focus cards kept ({len(batches)} batches)")
