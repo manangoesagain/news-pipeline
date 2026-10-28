@@ -214,7 +214,8 @@ class EndToEnd(TmpCwdCase):
         sc = L.scorecard(D0 + timedelta(days=25))
         self.assertTrue(sc["enough_data"], sc)
         self.assertGreaterEqual(sc["n_graded"], 20)
-        self.assertEqual(fake.calls, 1)
+        # one LEARN call, plus at most one LEARN-EXP experiment proposal (intended: learn() now also proposes)
+        self.assertIn(fake.calls, (1, 2))
 
         for name in ("lessons.md", "weights.json", "changelog.md", "scorecard.json",
                      os.path.join("playbooks", "oil-to-rupee.md")):
@@ -304,7 +305,7 @@ class EndToEnd(TmpCwdCase):
         self._record()
         self._cycle(25)
         line = track_page.telegram_line(L.track_record())
-        self.assertRegex(line, r"^Track record: \d+% of \d+ checked calls right")
+        self.assertRegex(line, r"^Learning: (building \(\d+ of 30 price-checked calls|\d+% right on \d+ price-checked calls)")
 
 
 if __name__ == "__main__":

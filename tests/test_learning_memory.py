@@ -94,11 +94,13 @@ class MemoryTests(TmpCwdCase):
 
     def test_weights_shrinkage(self):
         w = M.compute_weights(sc(), D)
-        assert w["topic"]["oil"] == {"n": 10, "hit_rate": 0.8, "trust": round((8 + 2.5) / 15, 3)}
+        # shrinkage strength k is now 8 and the prior is 0.5 when no history prior exists: (hits + 8*0.5) / (n + 8)
+        oil = w["topic"]["oil"]
+        assert oil["n"] == 10 and oil["hit_rate"] == 0.8 and oil["trust"] == round((8 + 4) / 18, 3)
         assert "rare" not in w["topic"]
-        assert w["confidence_scale"]["high"] == round(((3 + 2.5) / 15) / .5, 3)
+        assert w["confidence_scale"]["high"] == round(((3 + 4) / 18) / .5, 3)
         assert w["confidence_scale"]["low"] == 1.0
-        assert w["link_type"]["fx"]["trust"] == round(4.5 / 13, 3)
+        assert w["link_type"]["fx"]["trust"] == round(6 / 16, 3)
 
 
     def test_threshold_no_learning(self):
@@ -123,7 +125,11 @@ class MemoryTests(TmpCwdCase):
         llm = FakeLLM(GOOD)
         M.learn(D, llm)
         assert M.learn(D + timedelta(hours=3), llm)["ran"] is False and llm.calls == 1
-        assert M.learn(D + timedelta(days=1), llm)["ran"] is True and llm.calls == 2
+        # same graded count the next day: nothing new to learn from, so no second lesson pass
+        assert M.learn(D + timedelta(days=1), llm)["ran"] is False and llm.calls == 1
+        # enough new price-checked graded calls (>= lesson_min_new_calls): runs again
+        self.led.state["sc"] = sc(n=20 + M.settings_get()["lesson_min_new_calls"])
+        assert M.learn(D + timedelta(days=1, hours=1), llm)["ran"] is True and llm.calls == 2
 
 
     def test_playbook_rejected(self):

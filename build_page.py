@@ -283,14 +283,26 @@ def _read_text(path):
 def track_strip():
     """Track record strip from _data/_learning; missing files give the honest empty state."""
     try:
-        sc = None
-        try:
-            sc = json.loads(_read_text(os.path.join(DATA_DIR, "_learning", "scorecard.json")) or "null")
-        except Exception:
-            sc = None
-        return track_record_html(sc if isinstance(sc, dict) else {},
+        def _j(name):
+            try:
+                v = json.loads(_read_text(os.path.join(DATA_DIR, "_learning", name)) or "null")
+            except Exception:
+                return None
+            return v if isinstance(v, dict) else None
+
+        def _priors():
+            try:
+                import learning_priors
+                p = learning_priors.load_priors()
+                return p if isinstance(p, dict) and p else None
+            except Exception:
+                return None
+
+        return track_record_html(_j("scorecard.json") or {},
                                  _read_text(os.path.join(DATA_DIR, "_learning", "changelog.md")),
-                                 _read_text(os.path.join(DATA_DIR, "_learning", "lessons.md")))
+                                 _read_text(os.path.join(DATA_DIR, "_learning", "lessons.md")),
+                                 priors=_priors(), settings=_j("settings.json"),
+                                 experiments=_j("experiments.json"), state=_j("state.json"))
     except Exception as e:
         print(f"[WARN] track record skipped: {type(e).__name__}: {e}")
         return ""

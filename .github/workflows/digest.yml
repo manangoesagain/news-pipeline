@@ -64,6 +64,8 @@ jobs:
           NEWSDATA_API_KEY: ${{ secrets.NEWSDATA_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
+          LEARNING_ENABLED: ${{ vars.LEARNING_ENABLED }}
           FORCE_RUN: ${{ inputs.force }}
           DRY_RUN: ${{ inputs.dry_run }}
           FORCE_INTEL: ${{ inputs.intel }}

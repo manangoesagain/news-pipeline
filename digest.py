@@ -29,7 +29,9 @@ import graph_image
 import llm
 import market
 import patterns
+import jev_judge
 import learning_ledger
+import learning_priors
 import learning_memory
 import track_page
 
@@ -43,18 +45,73 @@ def lctx(kind):
         return ""
 
 
-def learning_cycle(llm_step=False):
-    """Grade due calls and refresh the scoreboard; with llm_step=True also let the learning step update its
-    own notes (one extra AI call, run AFTER delivery so it can never delay or starve a digest). Never raises."""
+def _recent_headlines(days=3, limit=600):
+    """Titles of the last few days of collected articles (for grading predictions against later news)."""
     try:
+        store = load_json(ARTICLE_STORE, {"articles": []})
+        cutoff = NOW - timedelta(days=days)
+        out = []
+        for a in store.get("articles", []):
+            when = parse_iso(a.get("published", ""))
+            if when and when >= cutoff and a.get("title"):
+                out.append(a["title"])
+        return out[:limit]
+    except Exception:
+        return []
+
+
+def jev_grade_soft_calls():
+    """Optional (TypeSafe/Jev): grade open soft predictions against recent headlines. Soft grades never feed learning."""
+    try:
+        if not jev_judge.available():
+            return
+        if not learning_memory.enabled():
+            return
+        calls = learning_ledger.open_soft_calls(2, 30, NOW)
+        heads = _recent_headlines()
+        if not calls or not heads:
+            return
+        getattr(jev_judge, "begin_phase", lambda *a, **k: None)("soft", 30, 15)
+        t0 = time.time()
+        grades, asked = {}, 0
+        for k in range(0, len(calls), 5):
+            chunk = calls[k:k + 5]
+            picked = []
+            for c in chunk:
+                want = archive.tokens(f"{c.get('if', '')} {c.get('then', '')}")
+                ranked = sorted(heads, key=lambda h: -len(want & archive.tokens(h)))[:3]
+                picked += [h for h in ranked if h not in picked]
+            probs = jev_judge.grade_soft([{"id": c["id"], "if": c.get("if", ""), "then": c.get("then", "")} for c in chunk],
+                                         picked[:12])
+            asked += len(chunk)
+            for cid, pr in (probs or {}).items():
+                grades[cid] = jev_judge.classify(pr)
+        done = learning_ledger.apply_external_soft_grades(grades, NOW, "jev") if grades else []
+        print(f"[JEV] soft predictions asked {asked}, graded {len(done)}, {time.time() - t0:.0f}s")
+    except Exception as e:
+        print(f"[JEV] soft grading failed: {type(e).__name__}")
+
+
+def learning_cycle(llm_step=False):
+    """Before the digest (llm_step=False): fetch history priors if there are none yet, grade due calls and refresh the
+    scoreboard. After delivery (llm_step=True): refresh priors, let Jev grade soft predictions, and let the learning
+    step update its own notes. Never raises, never starves a digest."""
+    try:
+        if not llm_step and not learning_priors.load_priors():
+            learning_priors.refresh_priors(NOW, budget_s=45)
         learning_ledger.grade_calls(NOW)
         learning_ledger.scorecard(NOW)
-        if llm_step and llm.available():
+        if llm_step:
             if llm.HARD_STOP - time.time() < 400:
-                print("[LEARN] skipped the daily learning step: not enough time left")
+                print("[LEARN] skipped the learning step: not enough time left")
             else:
-                res = learning_memory.run_daily(NOW, llm)
-                print(f"[LEARN] daily step: {res}")
+                learning_priors.refresh_priors(NOW, budget_s=45)
+                jev_grade_soft_calls()
+                if llm.available():
+                    getattr(jev_judge, "begin_phase", lambda *a, **k: None)("lessons", 20, 25)
+                    res = learning_memory.run_daily(NOW, llm)
+                    print(f"[LEARN] learning step: {res}")
+                learning_ledger.grade_calls(NOW)
                 learning_ledger.scorecard(NOW)
     except Exception as e:
         print(f"[LEARN] cycle failed: {type(e).__name__}: {e}")
@@ -662,6 +719,28 @@ def generate_graph(lines, mkt, themes, today, rows_n):
     return None
 
 
+def jev_filter_links(g):
+    """Optional second opinion (TypeSafe/Jev): drop map links the headlines do not support. Never raises."""
+    try:
+        if not jev_judge.available() or not g or not g.get("edges"):
+            return g
+        if llm.HARD_STOP - time.time() < 600:
+            print("[JEV] link check skipped: not enough time left")
+            return g
+        getattr(jev_judge, "begin_phase", lambda *a, **k: None)("links", 60, 40)
+        t0 = time.time()
+        probs = jev_judge.verify_links(g)
+        if not probs:
+            print("[JEV] links: no answers")
+            return g
+        g2, dropped = jev_judge.drop_unsupported(g, probs)
+        print(f"[JEV] links checked: {len(probs)} of {len(g['edges'])}, dropped {len(dropped)}, {time.time() - t0:.0f}s")
+        return g2 if g2 and len(g2.get("edges", [])) >= 8 else g
+    except Exception as e:
+        print(f"[JEV] link check failed: {type(e).__name__}")
+        return g
+
+
 def build_intelligence(stories, articles_today, snapshot):
     pool = sorted(stories, key=lambda s: -s["score"])[:80]
     seen = {normalize_url(s["link"]) for s in pool}
@@ -689,6 +768,7 @@ def build_intelligence(stories, articles_today, snapshot):
             g = enrich_graph(g, snapshot, load_json(archive.THREADS_FILE, {"threads": []}), rows_meta)
         except Exception as e:
             print(f"[INTEL] graph enrichment error: {e}")
+        g = jev_filter_links(g)  # optional: needs TYPESAFE_API_KEY; skipped silently otherwise
         try:
             attach_market(g, snapshot)
             add_focus_cards(g, snapshot)
@@ -877,6 +957,7 @@ def add_focus_cards(g, snapshot, themes=""):
         mkt = "\n".join(f"{m['label']}: {m['price']} {m['change']}" for m in g.get("market", [])) or "n/a"
         today = NOW.strftime("%A, %B %d, %Y")
         batches = [hubs[i:i + FOCUS_BATCH] for i in range(0, len(hubs), FOCUS_BATCH)]
+        by_id_arm = {n["id"]: n for n in g["nodes"]}
 
         def run(batch):
             bset = set(batch)
@@ -884,8 +965,19 @@ def add_focus_cards(g, snapshot, themes=""):
             touching.sort(key=lambda e: (-e.get("strength", 1), e["from"]))
             keys = [f"{e['from']}>{e['to']}" for e in touching[:FOCUS_LINKS // 2]]
             try:
+                arm = "control"
+                try:
+                    arm = learning_memory.assign_arm(f"{NOW:%Y%m%d%H}|" + "|".join(batch), "cards")
+                    hint = learning_memory.variant_text("cards", arm)
+                except Exception:
+                    hint = ""
+                for nid in batch:
+                    if nid in by_id_arm:
+                        by_id_arm[nid]["arm"] = arm
+                extra = f"\n\nStyle hint: {hint}" if hint else ""
                 return llm.generate_json(CARDS_PROMPT.format(today=today, market=mkt, nodes=nodes_txt, links=links_txt,
-                                                             hub_ids=", ".join(batch), link_keys=", ".join(keys)) + lctx("cards"),
+                                                             hub_ids=", ".join(batch), link_keys=", ".join(keys))
+                                         + lctx("cards") + extra,
                                          label="CARDS", require="cards", temperature=0.3, budget_s=300, per_model_s=150)
             except Exception as e:
                 print(f"[CARDS] batch error {type(e).__name__}: {e}")
@@ -1700,6 +1792,7 @@ def main():
         if intel:
             graph_now = intel.get("graph")
             if graph_now:
+                learning_ledger.record_next_day_calls(graph_now, snapshot, NOW)
                 learning_ledger.record_calls(graph_now, NOW)
             learning_ledger.record_scenarios(intel.get("scenarios") or [], NOW)
         learning_ledger.scorecard(NOW)
@@ -1707,10 +1800,15 @@ def main():
         print(f"[LEARN] recording failed: {type(e).__name__}: {e}")
 
     message = build_telegram(domain_items, breaking, snapshot, intel)
+    note_pending = False
     try:
-        tline = track_page.telegram_line(learning_ledger.track_record())
+        tline = track_page.telegram_line(learning_ledger.track_record(), priors=learning_priors.load_priors() or None)
         if tline:
             message += "\n\n\U0001F4CA " + t(tline)
+        note = learning_memory.weekly_note(NOW, commit=False)
+        if note:
+            message += "\n" + "\n".join(t(line) for line in str(note).splitlines()[:3])
+            note_pending = True
     except Exception as e:
         print(f"[LEARN] track line failed: {type(e).__name__}")
     email_html = build_email_html(domain_items, breaking, snapshot, intel)
@@ -1768,6 +1866,11 @@ def main():
         print(message[:3000])
     else:
         sent_tg = send_telegram(message)
+        if sent_tg and note_pending:
+            try:
+                learning_memory.mark_note_sent(NOW)
+            except Exception as e:
+                print(f"[LEARN] could not mark the weekly note as sent: {type(e).__name__}")
         if sent_tg and map_png:
             send_telegram_photo(map_png, map_note)
         sent_mail = send_email(email_subject, email_html, attachments)

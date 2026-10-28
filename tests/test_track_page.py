@@ -45,7 +45,7 @@ class EmptyAndThin(unittest.TestCase):
         sc = {"n_graded": 4, "enough_data": True, "hit_rate": 1.0, "hit_rate_baseline": 1.0}
         h = T.track_record_html(sc)
         self.assertNotRegex(text_of(h), r"\d+%")
-        self.assertIn("4 of 20", h)
+        self.assertIn("4 of 30", h)
 
     def test_enough_data_flag_without_rate_is_not_trusted(self):
         sc = {"n_graded": 30, "enough_data": True, "hit_rate": None}
@@ -60,8 +60,9 @@ class Rich(unittest.TestCase):
     def test_rich_shows_numbers_and_sections(self):
         h = T.track_record_html(rich(), "- 2026-10-27 added oil playbook\n", "- Oil calls hit 75% (n=12)")
         txt = text_of(h)
-        self.assertIn("60% right across 40 graded calls", txt)
+        self.assertIn("60% right on 40 graded calls", txt)
         self.assertIn("momentum baseline 50%", txt)
+        self.assertIn("skill +10 points", txt)
         self.assertIn("Does high confidence beat low?", txt)
         self.assertIn("40 points more often", txt)
         self.assertIn("High-confidence calls beat low-confidence calls by at least 5 points", txt)
@@ -86,8 +87,8 @@ class Rich(unittest.TestCase):
         sc = rich()
         sc["n_price_graded"] = 30
         txt = text_of(T.track_record_html(sc))
-        self.assertIn("60% right across 30 checked calls", txt)
-        self.assertEqual(T.telegram_line(sc).split(" (")[0], "Track record: 60% of 30 checked calls right")
+        self.assertIn("60% right on 30 price-checked calls", txt)
+        self.assertEqual(T.telegram_line(sc).split(" (")[0], "Learning: 60% right on 30 price-checked calls")
         sc["n_price_graded"] = 3     # too few price-graded calls behind the rate: no percentage
         self.assertNotRegex(text_of(T.track_record_html(sc)), r"60%")
         self.assertIn("building", T.telegram_line(sc))
@@ -150,12 +151,12 @@ class Hostile(unittest.TestCase):
 
 class TelegramLine(unittest.TestCase):
     def test_building_wording(self):
-        self.assertEqual(T.telegram_line({}), "Track record: building (0 of 20 graded calls so far)")
-        self.assertEqual(T.telegram_line({"n_graded": 7}), "Track record: building (7 of 20 graded calls so far)")
+        self.assertEqual(T.telegram_line({}), "Learning: building (0 of 30 graded calls)")
+        self.assertEqual(T.telegram_line({"n_graded": 7}), "Learning: building (7 of 30 graded calls)")
 
     def test_rich_wording(self):
         self.assertEqual(T.telegram_line(rich()),
-                         "Track record: 60% of 40 graded calls right (momentum baseline 50%); high-confidence calls 80%")
+                         "Learning: 60% right on 40 graded calls (momentum baseline 50%, skill +10)")
 
     def test_small_high_bucket_omitted(self):
         sc = rich()

@@ -51,11 +51,11 @@ def _b64_repl(m):
     return s
 
 
-def redact(text) -> str:
+def redact(text, _secrets=None) -> str:
     text = str(text or "")
     for pat in _SPECIFIC:
         text = pat.sub("[key removed]", text)
-    for v in _env_secrets():
+    for v in (_env_secrets() if _secrets is None else _secrets):
         text = text.replace(v, "[secret removed]")
     text = _EMAIL.sub("[address removed]", text)
     text = _KEYLIKE.sub("[key removed]", text)
@@ -63,14 +63,17 @@ def redact(text) -> str:
     return _B64.sub(_b64_repl, text)
 
 
-def _redact_obj(o):
-    """Redact every string in a JSON-like object (so the result is always valid JSON)."""
+def _redact_obj(o, _secrets=None):
+    """Redact every string in a JSON-like object (so the result is always valid JSON).
+    The environment is scanned once per write, not once per string (that was the slow part)."""
+    if _secrets is None:
+        _secrets = _env_secrets()
     if isinstance(o, str):
-        return redact(o)
+        return redact(o, _secrets)
     if isinstance(o, dict):
-        return {(redact(k) if isinstance(k, str) else k): _redact_obj(v) for k, v in o.items()}
+        return {(redact(k, _secrets) if isinstance(k, str) else k): _redact_obj(v, _secrets) for k, v in o.items()}
     if isinstance(o, (list, tuple)):
-        return [_redact_obj(v) for v in o]
+        return [_redact_obj(v, _secrets) for v in o]
     return o
 
 
