@@ -18,7 +18,8 @@ NVIDIA_API_KEY = os.environ.get("NVIDIA_API_KEY")
 
 # Override the first choice with GEMINI_MODEL / NVIDIA_MODEL
 GEMINI_MODELS = [m for m in [os.environ.get("GEMINI_MODEL"),
-                             "gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-flash-lite"] if m]
+                             "gemini-2.5-flash-lite", "gemini-flash-latest", "gemini-flash-lite-latest",
+                             "gemini-2.5-flash", "gemini-2.0-flash"] if m]
 GEMINI_API = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 
 NVIDIA_MODELS = [m for m in [os.environ.get("NVIDIA_MODEL"),
@@ -298,15 +299,15 @@ def _save_failure(label: str, model: str, text: str, attempt: int = 1):
 
 def generate_json(prompt: str, label: str = "LLM", require: str = None,
                   max_tokens: int = 16384, temperature: float = 0.2, budget_s: int = 300,
-                  per_model_s: int = None):
+                  per_model_s: int = None, validate=None, prefer: str = None):
     """Try each configured model until one returns a JSON object (containing `require`).
     Gives up once `budget_s` seconds have been spent across all models."""
     global last_model
-    candidates = []
-    if GEMINI_API_KEY:
-        candidates += [(_gemini, m) for m in GEMINI_MODELS]
-    if NVIDIA_API_KEY:
-        candidates += [(_nvidia, m) for m in _nvidia_live_models()]
+    gem = [(_gemini, m) for m in GEMINI_MODELS] if GEMINI_API_KEY else []
+    nv = [(_nvidia, m) for m in _nvidia_live_models()] if NVIDIA_API_KEY else []
+    # prefer="nvidia": the bigger free models first for the heavy structured calls (map, cards, lessons);
+    # the default keeps the faster Gemini models first for the small ones (rank, brief)
+    candidates = (nv + gem) if prefer == "nvidia" else (gem + nv)
     if not candidates:
         print(f"[{label}] skipped — no GEMINI_API_KEY or NVIDIA_API_KEY set")
         return None
@@ -331,6 +332,15 @@ def generate_json(prompt: str, label: str = "LLM", require: str = None,
                 print(f"[{label}] {model} FAIL reason={getattr(_tls, 'reason', 'no reply')} secs={secs:.0f} chars=0")
                 break
             result = _extract_json(text, require)
+            if result is not None and validate is not None:
+                try:
+                    good = bool(validate(result))
+                except Exception:
+                    good = False
+                if not good:
+                    print(f"[{label}] {model} FAIL reason=rejected by the caller's checks secs={secs:.0f} chars={len(text)}")
+                    _save_failure(label + "-rejected", model, text, 1)
+                    break  # try the next model
             if result is not None:
                 last_model = model
                 _tls.model = model

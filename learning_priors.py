@@ -57,7 +57,7 @@ PRIORS_FILE = os.path.join(learning_io.LEARN_DIR, "priors.json")
 ALLOWED_HOSTS = ("fred.stlouisfed.org", "query1.finance.yahoo.com", "query2.finance.yahoo.com")
 MAX_RESPONSE_BYTES = 3_000_000
 USER_AGENT = "news-digest-learning/1.0 (read-only daily market history; contact via repo)"
-HTTP_TIMEOUT = 20
+HTTP_TIMEOUT = 10
 YEARS = 10
 REFRESH_AFTER_S = 20 * 3600
 MAX_HISTORY_BYTES = 190_000
@@ -368,21 +368,34 @@ def compute_priors(series):
 
 # ------------------------------------------------------------------ network (whitelisted, capped)
 
+_DOWN_HOSTS = set()   # hosts that timed out / refused a connection in this process: not tried again
+
+
 def _http_get(url, timeout):
-    """GET with a TOTAL time budget of `timeout` seconds (connect + every chunk), not just per-read."""
+    """GET with a TOTAL time budget of `timeout` seconds (connect + every chunk), not just per-read.
+    A timeout or connection failure marks the host as down for the rest of the process, so a blocked
+    host costs one timeout, not one per instrument."""
     import requests
     stop = time.monotonic() + float(timeout)
     m = re.match(r"https://([a-z0-9.-]+)/", url)
     if not m or m.group(1) not in ALLOWED_HOSTS:
         raise ValueError("host not allowed")
-    r = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=timeout,
-                     allow_redirects=False, stream=True)
+    host = m.group(1)
+    if host in _DOWN_HOSTS:
+        raise ConnectionError("host marked down for this run")
+    try:
+        r = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=timeout,
+                         allow_redirects=False, stream=True)
+    except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
+        _DOWN_HOSTS.add(host)
+        raise
     try:
         if r.status_code != 200:
             raise ValueError(f"http {r.status_code}")
         buf = bytearray()
         for chunk in r.iter_content(65536):
             if time.monotonic() > stop:
+                _DOWN_HOSTS.add(host)
                 raise TimeoutError("request deadline passed")
             buf.extend(chunk)
             if len(buf) > MAX_RESPONSE_BYTES:
@@ -605,6 +618,87 @@ def _learning_enabled():
 
 # ------------------------------------------------------------------ public API
 
+SEED_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "learning_seed")
+USE_SEED = True
+STALE_PRIORS_DAYS = 60
+_AGE_WARNED = []
+
+
+def _seed_json(name, max_bytes):
+    """A parsed .json file from the seed folder next to this module, or None. Data only: fixed names,
+    size-capped, parsed with json.load (nothing is ever executed)."""
+    try:
+        slugs = {v[0] + ".json" for v in INSTRUMENTS.values()}
+        parts = name.split("/")
+        if not (parts == ["priors.json"] or (len(parts) == 2 and parts[0] == "history" and parts[1] in slugs)):
+            return None
+        path = os.path.join(SEED_DIR, *parts)
+        if not os.path.isfile(path) or os.path.getsize(path) > max_bytes:
+            return None
+        with open(path, "r", encoding="utf-8") as f:
+            d = json.load(f)
+        return d if isinstance(d, dict) else None
+    except Exception:
+        return None
+
+
+def _seed_history(label, cache):
+    """Copy the seed history for `label` into the working folder when the working cache is missing or its
+    last data date is older than the seed's. Never overwrites a newer cache. True if copied."""
+    try:
+        raw = _seed_json("history/" + INSTRUMENTS[label][0] + ".json", MAX_HISTORY_BYTES + 10_000)
+        if raw is None or raw.get("label") != label:
+            return False
+        seed = _from_disk(raw)
+        if not _valid_cache(seed) or seed.get("thinned"):
+            return False
+        if cache is not None and str(cache["dates"][-1]) >= seed["dates"][-1]:
+            return False
+        learning_io.safe_write_json(_history_path(label), raw)
+        return True
+    except Exception as e:
+        _log(f"priors: seed history for {label} not used ({type(e).__name__})")
+        return False
+
+
+def _valid_priors(d):
+    try:
+        return (isinstance(d, dict) and isinstance(d.get("labels"), list) and isinstance(d.get("rows"), list)
+                and isinstance(d.get("generated"), str) and bool(date.fromisoformat(d["generated"])))
+    except Exception:
+        return False
+
+
+def _seed_priors():
+    """Copy the seed priors.json when the working one is missing or older. True if copied."""
+    try:
+        raw = _seed_json("priors.json", MAX_PRIORS_BYTES + 10_000)
+        if not _valid_priors(raw):
+            return False
+        cur = learning_io.load_json(PRIORS_FILE, None)
+        if _valid_priors(cur) and cur["generated"] >= raw["generated"]:
+            return False
+        if isinstance(cur, dict) and "patterns" in cur and str(cur.get("generated", "")) >= raw["generated"]:
+            return False
+        learning_io.safe_write_json(PRIORS_FILE, raw)
+        return True
+    except Exception as e:
+        _log(f"priors: seed priors not used ({type(e).__name__})")
+        return False
+
+
+def _warn_if_old(pri):
+    try:
+        if _AGE_WARNED or not isinstance(pri, dict) or not pri.get("generated"):
+            return
+        days = (date.today() - date.fromisoformat(pri["generated"])).days
+        if days > STALE_PRIORS_DAYS:
+            _AGE_WARNED.append(days)
+            _log(f"priors are {days} days old")
+    except Exception:
+        pass
+
+
 def refresh_priors(now=None, budget_s=90):
     """Refresh stale/missing history caches (bounded by budget_s overall), then recompute and write the
     priors. Returns True if priors.json was written. Does nothing at all (no network, no writes) when
@@ -618,16 +712,21 @@ def refresh_priors(now=None, budget_s=90):
         deadline = time.monotonic() + float(budget_s)
         skip_net = _recently_failed(now)
         series = {}
-        ok = fail = 0
+        ok = fail = seeded = 0
         for label in INSTRUMENTS:
             cache = _load_cache(label)
-            if not skip_net and (cache is None or _age_s(cache, now) >= REFRESH_AFTER_S):
+            r = None
+            stale = cache is None or _age_s(cache, now) >= REFRESH_AFTER_S
+            if not skip_net and stale:
                 r = _refresh_one(label, cache, now, deadline)
                 if r == "ok":
                     ok += 1
                     cache = _load_cache(label)
                 elif r == "fail":
                     fail += 1
+            if stale and r != "ok" and USE_SEED and _seed_history(label, cache):
+                seeded += 1
+                cache = _load_cache(label)
             if cache and cache.get("thinned"):
                 _log(f"priors: {label} cache is thinned (old format); excluded from patterns")
             elif cache:
@@ -638,10 +737,16 @@ def refresh_priors(now=None, budget_s=90):
             _set_failed(now, True)
         elif ok and os.path.exists(STATE_FILE):
             _set_failed(now, False)
+        if not ok and seeded:
+            _log(f"priors: network unavailable; used the shipped seed for {seeded} instrument(s)")
+            if _seed_priors():
+                _warn_if_old(load_priors())
+                return True
         if not series:
             return False
         pri = compute_priors(series)
         learning_io.safe_write_json(PRIORS_FILE, _pack(pri))
+        _warn_if_old(pri)
         return True
     except Exception as e:
         _log(f"priors: refresh failed ({type(e).__name__})")
@@ -691,9 +796,20 @@ def _unpack(d):
 
 def load_priors():
     try:
-        p = learning_io.load_json(PRIORS_FILE, {})
+        p = learning_io.load_json(PRIORS_FILE, None)
+        if p is None and USE_SEED and not os.path.exists(PRIORS_FILE):
+            p = _seed_json("priors.json", MAX_PRIORS_BYTES + 10_000)
+            if not _valid_priors(p):
+                p = None
+            elif _learning_enabled():
+                try:
+                    learning_io.safe_write_json(PRIORS_FILE, p)
+                except Exception:
+                    pass
         if isinstance(p, dict) and "rows" in p and "labels" in p:
             p = _unpack(p)
+        if isinstance(p, dict) and p:
+            _warn_if_old(p)
         return p if isinstance(p, dict) else {}
     except Exception:
         return {}
@@ -869,3 +985,62 @@ def history_summary():
         _log(f"priors: history_summary failed ({type(e).__name__})")
         return {"instruments": 0, "years": 0.0, "patterns": 0, "generated": None,
                 "history_days": {"min": 0, "max": 0}, "n_sig": 0, "per_instrument": {}}
+
+
+def make_seed(budget_s=170):
+    """Maintenance (needs network): refresh in a temp working folder, then write the history caches and
+    priors.json into learning_seed/ next to this file. Returns the list of (relative name, bytes)."""
+    import shutil
+    import tempfile
+    global USE_SEED
+    here = os.path.dirname(os.path.abspath(__file__))
+    out_dir = SEED_DIR
+    old_cwd, old_seed = os.getcwd(), USE_SEED
+    tmp = tempfile.mkdtemp(prefix="priors-seed-")
+    try:
+        USE_SEED = False
+        os.chdir(tmp)
+        if not refresh_priors(budget_s=budget_s):
+            raise RuntimeError("refresh produced no priors; seed not written")
+        files = {}
+        hdir = HISTORY_DIR
+        for label, (slug, _) in INSTRUMENTS.items():
+            path = os.path.join(hdir, slug + ".json")
+            if os.path.isfile(path):
+                files[os.path.join("history", slug + ".json")] = open(path, "rb").read()
+        files["priors.json"] = open(PRIORS_FILE, "rb").read()
+        for name, raw in files.items():
+            json.loads(raw.decode("utf-8"))
+        total = sum(len(b) for b in files.values())
+        if total > 700_000:
+            raise RuntimeError(f"seed too large ({total} bytes)")
+    finally:
+        os.chdir(old_cwd)
+        USE_SEED = old_seed
+    shutil.rmtree(os.path.join(out_dir, "history"), ignore_errors=True)
+    os.makedirs(os.path.join(out_dir, "history"), exist_ok=True)
+    for name, raw in files.items():
+        with open(os.path.join(out_dir, name), "wb") as f:
+            f.write(raw)
+    with open(os.path.join(out_dir, "README.txt"), "w", encoding="utf-8", newline="\n") as f:
+        f.write(SEED_README)
+    shutil.rmtree(tmp, ignore_errors=True)
+    return [(n, len(b)) for n, b in sorted(files.items())]
+
+
+SEED_README = (
+    "This folder is a snapshot of about ten years of daily market closes (history/*.json) and the "
+    "statistics computed from them (priors.json). The learning step copies it into _data/_learning only "
+    "when it cannot download fresh history (for example when the data sites are blocked from the build "
+    "machine) and never overwrites newer data. The files are plain data, never code. To regenerate on a "
+    "machine with internet access, run: python learning_priors.py --make-seed  and commit the result.\n")
+
+
+if __name__ == "__main__":
+    import sys
+    if "--make-seed" in sys.argv[1:]:
+        for n, size in make_seed():
+            print(f"{n}: {size} bytes")
+        print(f"[LEARN] seed written to {SEED_DIR}")
+    else:
+        print("usage: python learning_priors.py --make-seed")

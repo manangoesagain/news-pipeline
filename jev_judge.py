@@ -402,3 +402,23 @@ def is_safe_lesson(text, threshold=0.5, default=True) -> bool:
         return p < threshold
     except Exception:
         return default
+
+
+def ping():
+    """One tiny real question to confirm the key works. Returns (ok, model, seconds); logs one [JEV] line
+    (no key, no address). Used once per run so the Actions log shows that Jev was really called."""
+    import time as _t
+    t0 = _t.monotonic()
+    try:
+        if not available():
+            return False, None, 0.0
+        begin_phase("ping", 10, 3)
+        res = _ask("Oil prices rise sharply after tanker attack", {"headline": "Is this text a news headline?"})
+        secs = _t.monotonic() - t0
+        ok = bool(res) and "headline" in res
+        _log(f"ping {'ok' if ok else 'failed'} model={_state.get('model') or os.environ.get('JEV_MODEL') or '?'} "
+             f"p={res.get('headline') if ok else 'n/a'} {secs:.1f}s")
+        return ok, _state.get("model"), secs
+    except Exception as e:
+        _log(f"ping failed: {type(e).__name__}")
+        return False, None, _t.monotonic() - t0

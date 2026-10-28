@@ -97,6 +97,11 @@ def learning_cycle(llm_step=False):
     scoreboard. After delivery (llm_step=True): refresh priors, let Jev grade soft predictions, and let the learning
     step update its own notes. Never raises, never starves a digest."""
     try:
+        if not llm_step:
+            try:
+                jev_judge.ping()
+            except Exception:
+                pass
         if not llm_step and not learning_priors.load_priors():
             learning_priors.refresh_priors(NOW, budget_s=45)
         learning_ledger.grade_calls(NOW)
@@ -692,13 +697,25 @@ Map the biggest cause->effect links in tonight's news (from causes to), covering
 """
 
 
+def _graph_ok(res):
+    """Caller-side check: a model reply only counts when it really contains a usable map."""
+    g = sanitize_graph((res or {}).get("graph"))
+    return bool(g and len(g["edges"]) >= 8)
+
+
+def _graph_ok_lite(res):
+    g = sanitize_graph((res or {}).get("graph"))
+    return bool(g and len(g["edges"]) >= 5)
+
+
 def generate_graph(lines, mkt, themes, today, rows_n):
     """Ask the AI for the connection map. Full request first; if it fails, one cheaper 'lite' request.
     Returns a sanitized graph or None."""
     fmt = dict(market=mkt, today=today, themes=themes or "n/a", domains="; ".join(DOMAIN_ORDER))
     try:
         gres = llm.generate_json(GRAPH_PROMPT.format(lines="\n".join(lines.split("\n")[:120]), **fmt) + lctx("graph"), label="GRAPH",
-                                 require="graph", temperature=0.3, max_tokens=9000, budget_s=420, per_model_s=150)
+                                 require="graph", temperature=0.3, max_tokens=9000, budget_s=420, per_model_s=150,
+                                 prefer="nvidia", validate=_graph_ok)
         g = sanitize_graph((gres or {}).get("graph"))
         if g and len(g["edges"]) >= 8:  # a salvaged, node-only graph is not good enough
             return g
@@ -708,7 +725,8 @@ def generate_graph(lines, mkt, themes, today, rows_n):
     try:
         short = "\n".join(lines.split("\n")[:70])
         gres = llm.generate_json(GRAPH_LITE_PROMPT.format(lines=short, **fmt) + lctx("graph"), label="GRAPH-LITE", require="graph",
-                                 temperature=0.3, max_tokens=5000, budget_s=240, per_model_s=100)
+                                 temperature=0.3, max_tokens=5000, budget_s=240, per_model_s=100,
+                                 prefer="nvidia", validate=_graph_ok_lite)
         g = sanitize_graph((gres or {}).get("graph"))
         if g and len(g["edges"]) >= 5:
             print("[GRAPH] lite fallback used")
@@ -978,7 +996,8 @@ def add_focus_cards(g, snapshot, themes=""):
                 return llm.generate_json(CARDS_PROMPT.format(today=today, market=mkt, nodes=nodes_txt, links=links_txt,
                                                              hub_ids=", ".join(batch), link_keys=", ".join(keys))
                                          + lctx("cards") + extra,
-                                         label="CARDS", require="cards", temperature=0.3, budget_s=300, per_model_s=150)
+                                         label="CARDS", require="cards", temperature=0.3, budget_s=300, per_model_s=150,
+                                         prefer="nvidia")
             except Exception as e:
                 print(f"[CARDS] batch error {type(e).__name__}: {e}")
                 return None
