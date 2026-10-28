@@ -76,6 +76,7 @@ class FakeResp:
 class _Quiet:
     def setUp(self):
         super().setUp()
+        self.mp.setattr(P, "USE_SEED", False)       # the shipped seed folder is covered by SeedTests below
         import contextlib
         import io
         self._q = contextlib.redirect_stdout(io.StringIO())
@@ -624,6 +625,120 @@ class FallbackChain(_Quiet, TmpCwdCase):
         with open(P._history_path("Gold"), "w", encoding="utf-8") as f:
             f.write('{"dates": [20240102, 20240101], "closes": [1, 2]}')      # unsorted
         self.assertIsNone(P._load_cache("Gold"))
+
+
+class SeedTests(_Quiet, TmpCwdCase):
+    """The shipped learning_seed folder: data only, fixed file names, never overwrites newer data."""
+
+    def setUp(self):
+        super().setUp()
+        self.seed = os.path.join(self.tmp, "seed_dir")
+        os.makedirs(os.path.join(self.seed, "history"))
+        self.mp.setattr(P, "SEED_DIR", self.seed)
+        self.mp.setattr(P, "USE_SEED", True)
+        self.mp.setattr(P, "FETCHERS", {"fred": self._down, "yahoo": self._down})
+
+    @staticmethod
+    def _down(*a):
+        raise ConnectionError("offline")
+
+    def put_seed_priors(self, doc=None, raw=None):
+        doc = doc or priors_doc([pat()], {"USD/INR|3": base_row()})
+        with open(os.path.join(self.seed, "priors.json"), "w", encoding="utf-8") as f:
+            f.write(raw if raw is not None else json.dumps(P._pack(doc)))
+
+    def put_seed_history(self, label, n=700, end=date(2026, 10, 20), **extra):
+        ds = iso_days(n, end - timedelta(days=n - 1))
+        rec = {"label": label, "source": "fred", "last": ds[-1], "fetched": "2026-10-20T00:00:00+00:00",
+               "dates": ds, "closes": [round(c, 4) for c in walk(n, sum(map(ord, label)), vol=0.01)]}
+        rec.update(extra)
+        with open(os.path.join(self.seed, "history", P.INSTRUMENTS[label][0] + ".json"), "w", encoding="utf-8") as f:
+            json.dump(P._to_disk(rec), f)
+        return rec
+
+    def test_load_priors_uses_and_copies_the_seed_when_there_is_no_working_file(self):
+        self.put_seed_priors()
+        self.assertFalse(os.path.exists(P.PRIORS_FILE))
+        got = P.load_priors()
+        self.assertEqual(len(got["patterns"]), 1)
+        self.assertTrue(os.path.exists(P.PRIORS_FILE))
+        self.assertTrue(P.prior_prob("USD/INR", "up", 3)[0] != 0.5)
+
+    def test_kill_switch_reads_seed_but_writes_nothing(self):
+        self.put_seed_priors()
+        self.mp.setitem(os.environ, "LEARNING_ENABLED", "off")
+        before = tree_snapshot(".")
+        P.load_priors()
+        self.assertEqual(tree_snapshot("."), before)
+        self.assertFalse(os.path.exists(P.PRIORS_FILE))
+
+    def test_working_file_is_never_replaced_by_the_seed(self):
+        self.put_seed_priors()
+        write_priors(priors_doc([pat(), pat(N=1)], {}))
+        self.assertEqual(len(P.load_priors()["patterns"]), 2)
+
+    def test_hostile_or_malformed_seed_is_ignored(self):
+        for raw in ("not json", "[1]", '{"labels": 5}', json.dumps(dict(P._pack(priors_doc()), generated="soon")),
+                    json.dumps({"labels": ["a"], "rows": [], "generated": "2026-01-01x"})):
+            self.put_seed_priors(raw=raw)
+            if os.path.exists(P.PRIORS_FILE):
+                os.remove(P.PRIORS_FILE)
+            self.assertEqual(P.load_priors(), {}, raw[:30])
+            self.assertFalse(os.path.exists(P.PRIORS_FILE))
+
+    def test_seed_reader_accepts_only_fixed_names_and_small_files(self):
+        self.put_seed_priors()
+        self.put_seed_history("Gold")
+        outside = os.path.join(self.tmp, "secret.json")
+        with open(outside, "w", encoding="utf-8") as f:
+            f.write("{}")
+        for name in ("../secret.json", "history/../../secret.json", "history/unknown.json", "priors.json.bak",
+                     "history/gold.json/../../priors.json", "/etc/passwd", "", "history", "history/gold.txt"):
+            self.assertIsNone(P._seed_json(name, 10 ** 7), name)
+        self.assertIsInstance(P._seed_json("priors.json", 10 ** 7), dict)
+        self.assertIsInstance(P._seed_json("history/gold.json", 10 ** 7), dict)
+        self.assertIsNone(P._seed_json("priors.json", 10))            # over the size cap
+
+    def test_offline_refresh_falls_back_to_seed_history(self):
+        self.put_seed_history("WTI Crude")
+        self.put_seed_history("USD/INR")
+        self.assertTrue(P.refresh_priors(NOW, budget_s=30))
+        self.assertTrue(os.path.exists(P._history_path("WTI Crude")))
+        self.assertEqual(P._load_cache("USD/INR")["dates"][-1], "2026-10-20")
+        self.assertTrue(P.load_priors()["patterns"])
+
+    def test_offline_refresh_uses_seed_priors_when_provided(self):
+        self.put_seed_history("WTI Crude")
+        self.put_seed_priors()
+        self.assertTrue(P.refresh_priors(NOW, budget_s=30))
+        self.assertEqual(len(P.load_priors()["patterns"]), 1)
+
+    def test_newer_working_cache_is_not_overwritten(self):
+        self.put_seed_history("Gold", end=date(2026, 10, 1))
+        newer = iso_days(300, date(2026, 10, 25) - timedelta(days=299))
+        P._save_cache("Gold", "yahoo", newer, [100.0 + i for i in range(300)], NOW.isoformat())
+        cache = P._load_cache("Gold")
+        self.assertFalse(P._seed_history("Gold", cache))
+        self.assertEqual(P._load_cache("Gold")["source"], "yahoo")
+
+    def test_seed_history_with_wrong_label_or_bad_data_is_refused(self):
+        self.put_seed_history("Gold")
+        path = os.path.join(self.seed, "history", "gold.json")
+        for patch in ({"label": "WTI Crude"}, {"dates": [20240102, 20240101], "closes": [1, 2]},
+                      {"dates": [20240101], "closes": [-5]}, {"thinned": True}):
+            with open(path, encoding="utf-8") as fh:
+                raw = json.load(fh)
+            raw.update(patch)
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(raw, f)
+            self.assertFalse(P._seed_history("Gold", None), patch)
+            self.assertFalse(os.path.exists(P._history_path("Gold")))
+            self.put_seed_history("Gold")
+
+    def test_no_seed_folder_and_no_network_is_just_false(self):
+        self.mp.setattr(P, "SEED_DIR", os.path.join(self.tmp, "does_not_exist"))
+        self.assertFalse(P.refresh_priors(NOW, budget_s=10))
+        self.assertEqual(P.load_priors(), {})
 
 
 if __name__ == "__main__":

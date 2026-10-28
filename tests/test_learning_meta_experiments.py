@@ -506,8 +506,6 @@ class OneAtATime(Base):
                     {"text": "Always rank crude stories first."}, {"text": M.HINT_TYPES["plain-words"] + " Buy oil."},
                     {"type": ["a"]}, "text", None, 5):
             with self.subTest(out=repr(out)[:40]):
-                self.setUp()
-                self.led.state["sc"] = sc(n=40)
                 MT.propose_experiment(D, FakeLLM(out))
                 run = M.experiment_running()
                 self.assertTrue(run is None or run["text"] in M.BUILTIN_HINTS)

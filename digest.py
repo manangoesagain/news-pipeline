@@ -988,7 +988,7 @@ def add_focus_cards(g, snapshot, themes=""):
                     arm = learning_memory.assign_arm(f"{NOW:%Y%m%d%H}|" + "|".join(batch), "cards")
                     hint = learning_memory.variant_text("cards", arm)
                 except Exception:
-                    hint = ""
+                    arm, hint = "control", ""  # never tag nodes with a variant whose wording was not used
                 for nid in batch:
                     if nid in by_id_arm:
                         by_id_arm[nid]["arm"] = arm

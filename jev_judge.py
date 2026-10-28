@@ -264,11 +264,11 @@ def verify_links(graph, headlines=None, max_links=60) -> dict:
         for i, e in enumerate(graph.get("edges", [])):
             if not isinstance(e, dict) or e.get("kind") in ("contradicts", "feedback"):
                 continue
+            if len(todo) >= max(0, int(max_links)):
+                break
             a, b = nodes.get(e.get("from")), nodes.get(e.get("to"))
             if a and b:
                 todo.append((i, e, a, b))
-            if len(todo) >= max(0, int(max_links)):
-                break
         result = {}
         for s in range(0, len(todo), BATCH):
             chunk = todo[s:s + BATCH]
