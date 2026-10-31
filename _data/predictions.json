@@ -1,0 +1,244 @@
+{
+ "predictions": [
+  {
+   "id": "p20261025-1",
+   "if": "IDF chief continues to resist Netanyahu order for Iran strike before Israeli election",
+   "then": "Political crisis in Israel deepens, US may pressure for de-escalation, oil risk premium drops $10-15/bbl",
+   "likelihood": "medium",
+   "signpost": "Public statement from IDF chief or Netanyahu cabinet reshuffle",
+   "created": "2026-10-25",
+   "due": "2026-11-08",
+   "status": "open"
+  },
+  {
+   "id": "p20261025-2",
+   "if": "BoC raises rates Wednesday as expected",
+   "then": "CAD strengthens toward 1.38/USD, TSX financials outperform, mortgage delinquency watchlist expands",
+   "likelihood": "high",
+   "signpost": "BoC policy statement language on 'further hikes if needed'",
+   "created": "2026-10-25",
+   "due": "2026-11-08",
+   "status": "open"
+  },
+  {
+   "id": "p20261025-3",
+   "if": "FPI outflows from India exceed ₹60,000 cr in October",
+   "then": "RBI may intervene via FX reserves or hike rates, Nifty tests 22,000, USD/INR breaks 95.50",
+   "likelihood": "medium",
+   "signpost": "Daily FPI data from NSDL/CDSL showing acceleration",
+   "created": "2026-10-25",
+   "due": "2026-11-08",
+   "status": "open"
+  },
+  {
+   "id": "p20261025-4",
+   "if": "Nvidia announces China-specific AI chip compliant with new export controls",
+   "then": "Recaptures $5-10B TAM, stock re-rates, supply chain partners (Amkor, Infineon) see order visibility improve",
+   "likelihood": "low",
+   "signpost": "Commerce Department license approval leak or Nvidia earnings call commentary",
+   "created": "2026-10-25",
+   "due": "2026-11-08",
+   "status": "open"
+  },
+  {
+   "id": "p20261026-5",
+   "if": "Fed holds rates steady this week as widely expected",
+   "then": "USD/INR and USD/CAD stabilize near current levels, giving RBI and BoC room to pause; equity rally extends into month-end",
+   "likelihood": "high",
+   "signpost": "FOMC statement language on 'data-dependent' and 'patient' stance; dot-plot median unchanged",
+   "created": "2026-10-26",
+   "due": "2026-11-09",
+   "status": "open"
+  },
+  {
+   "id": "p20261026-6",
+   "if": "Anthropic IPO prices above $30B valuation in November",
+   "then": "Triggers re-rating of private AI unicorns (Databricks, Scale AI, Cohere) and lifts Nvidia/Broadcom multiples on inferred capex visibility",
+   "likelihood": "medium",
+   "signpost": "SEC S-1 effective date announcement; cornerstone investor commitments leaked",
+   "created": "2026-10-26",
+   "due": "2026-11-09",
+   "status": "open"
+  },
+  {
+   "id": "p20261026-7",
+   "if": "Saudi-Iran de-escalation holds and Hormuz diplomacy progresses",
+   "then": "WTI sustains sub-$100, easing global CPI prints; EM central banks (India, Brazil) gain cutting room; gold consolidates above $4,000",
+   "likelihood": "medium",
+   "signpost": "Joint Saudi-Iran statement on shipping security; IAEA verification of Iran compliance steps",
+   "created": "2026-10-26",
+   "due": "2026-11-09",
+   "status": "open"
+  },
+  {
+   "id": "p20261026-8",
+   "if": "Canada-US trade talks produce sectoral agreement on autos/lumber before US midterms",
+   "then": "TSX outperforms S&P 500 into year-end; CAD recovers toward 1.35; ConocoPhillips layoffs partially reversed",
+   "likelihood": "low",
+   "signpost": "USTR and Global Affairs Canada joint readout mentioning 'phase one' text exchange",
+   "created": "2026-10-26",
+   "due": "2026-11-09",
+   "status": "open"
+  },
+  {
+   "id": "p20261026-9",
+   "if": "Anthropic IPO prices above $30B valuation in next 2 weeks",
+   "then": "Triggers wave of AI startup IPO filings and SPAC reactivations, lifting Nasdaq 5-7%",
+   "likelihood": "medium",
+   "signpost": "SEC declares registration effective; cornerstone investors named",
+   "created": "2026-10-26",
+   "due": "2026-11-09",
+   "status": "open"
+  },
+  {
+   "id": "p20261026-10",
+   "if": "Fed holds rates steady but signals December hike at Oct 28 meeting",
+   "then": "Dollar strengthens further, USD/INR tests 96, Nifty corrects 2-3% as FPI outflows resume",
+   "likelihood": "high",
+   "signpost": "FOMC statement language on 'data-dependent' and 'inflation persistence'",
+   "created": "2026-10-26",
+   "due": "2026-11-09",
+   "status": "open"
+  },
+  {
+   "id": "p20261026-11",
+   "if": "Israel-Iran conflict escalates beyond current strikes before US midterms",
+   "then": "Oil spikes above $120, gold breaks $4,100, global risk-off hits Indian equities hardest among EMs",
+   "likelihood": "low",
+   "signpost": "Iran closes Strait of Hormuz or Israel strikes Iranian nuclear sites",
+   "created": "2026-10-26",
+   "due": "2026-11-09",
+   "status": "open"
+  },
+  {
+   "id": "p20261026-12",
+   "if": "Canada-US trade deal announced before Nov 3 midterms",
+   "then": "CAD rallies to 1.37, TSX energy and auto outperform, Trudeau/Liberal polling improves",
+   "likelihood": "medium",
+   "signpost": "Joint statement from Carney and USTR on auto rules of origin or dairy access",
+   "created": "2026-10-26",
+   "due": "2026-11-09",
+   "status": "open"
+  },
+  {
+   "id": "p20261027-13",
+   "if": "Fed holds rates steady but signals December hike via Warsh commentary",
+   "then": "USD strengthens further pressuring INR (95.10) and CAD (1.4048), triggering RBI/BoC defensive interventions",
+   "likelihood": "medium",
+   "signpost": "FOMC statement language on 'data dependency' and Warsh media appearances",
+   "created": "2026-10-27",
+   "due": "2026-11-10",
+   "status": "open"
+  },
+  {
+   "id": "p20261027-14",
+   "if": "Cyclone Arnab damages Andhra Pradesh port infrastructure and power grid",
+   "then": "Disrupts coal imports and steel production, lifting global metallurgical coal prices and Indian industrial output forecasts",
+   "likelihood": "high",
+   "signpost": "Damage assessments from Vizag port and NTPC power plants within 72 hours",
+   "created": "2026-10-27",
+   "due": "2026-11-10",
+   "status": "open"
+  },
+  {
+   "id": "p20261027-15",
+   "if": "Israeli opposition fails to form coalition despite plurality",
+   "then": "Netanyahu remains caretaker PM, prolonging policy paralysis on Gaza/Lebanon and emboldening Houthi/Iran proxy attacks",
+   "likelihood": "medium",
+   "signpost": "Coalition negotiation deadlines and Lapid's mandate from President Herzog",
+   "created": "2026-10-27",
+   "due": "2026-11-10",
+   "status": "open"
+  },
+  {
+   "id": "p20261027-16",
+   "if": "Trump administration allows more Russian diesel onto global market",
+   "then": "Undermines G7 price cap enforcement, depresses refining margins in India/US Gulf Coast, complicates EU energy security",
+   "likelihood": "low",
+   "signpost": "OFAC license announcements and Russian seaborne diesel flows to Turkey/India",
+   "created": "2026-10-27",
+   "due": "2026-11-10",
+   "status": "open"
+  },
+  {
+   "id": "p20261028-17",
+   "if": "The US DOJ's scrutiny of Nvidia's Hugging Face deal leads to a blocked acquisition.",
+   "then": "Nvidia may pursue alternative AI acquisition targets or focus on organic growth, while Hugging Face could seek other strategic partnerships, potentially altering the competitive landscape in AI.",
+   "likelihood": "medium",
+   "signpost": "DOJ files a lawsuit to block the deal or requests significant divestitures.",
+   "created": "2026-10-28",
+   "due": "2026-11-11",
+   "status": "open"
+  },
+  {
+   "id": "p20261028-18",
+   "if": "Commodity prices surge by the projected 23% and Middle East tensions escalate further.",
+   "then": "This could trigger significant global inflation, impacting central bank policies and potentially leading to a recession in major economies, while also increasing pressure on governments to secure energy supplies.",
+   "likelihood": "medium",
+   "signpost": "Further escalation of the Middle East conflict, with direct impacts on major oil production facilities or shipping lanes.",
+   "created": "2026-10-28",
+   "due": "2026-11-11",
+   "status": "open"
+  },
+  {
+   "id": "p20261028-19",
+   "if": "Canada's stance on the US trade deal hardens, leading to a complete breakdown in negotiations.",
+   "then": "This could result in retaliatory tariffs or trade barriers between the two countries, significantly impacting Canadian exports, particularly in sectors like agriculture and automotive, and potentially leading to a shift in Canada's trade diversification efforts.",
+   "likelihood": "low",
+   "signpost": "Formal announcement of Canada withdrawing from trade talks or imposition of new tariffs by either side.",
+   "created": "2026-10-28",
+   "due": "2026-11-11",
+   "status": "open"
+  },
+  {
+   "id": "p20261028-20",
+   "if": "Google's Gemini 4 Carbon demonstrates a 'significant leap' in cybersecurity capabilities that is widely adopted.",
+   "then": "This could set a new industry standard for AI-driven cybersecurity, potentially leading to a race among tech giants to develop similar advanced AI security solutions and a significant shift in how cyber threats are managed.",
+   "likelihood": "high",
+   "signpost": "Widespread adoption of Gemini 4 Carbon by major corporations and government agencies for cybersecurity.",
+   "created": "2026-10-28",
+   "due": "2026-11-11",
+   "status": "open"
+  },
+  {
+   "id": "p20261029-21",
+   "if": "US-Iran tensions escalate significantly following mid-term elections.",
+   "then": "Oil prices could surge, impacting global inflation and potentially leading to increased military spending and geopolitical instability.",
+   "likelihood": "medium",
+   "signpost": "Further troop movements or bellicose rhetoric from either the US or Iran.",
+   "created": "2026-10-29",
+   "due": "2026-11-12",
+   "status": "open"
+  },
+  {
+   "id": "p20261029-22",
+   "if": "AI disruption fears continue to weigh heavily on major tech stocks.",
+   "then": "A broader market downturn could occur, affecting investor confidence and potentially slowing down AI development and adoption due to funding constraints.",
+   "likelihood": "medium",
+   "signpost": "Continued significant drops in the valuations of major tech companies like Alphabet and Microsoft.",
+   "created": "2026-10-29",
+   "due": "2026-11-12",
+   "status": "open"
+  },
+  {
+   "id": "p20261029-23",
+   "if": "China intensifies efforts to acquire advanced semiconductor technology through espionage.",
+   "then": "This could lead to increased international sanctions, further fracturing the global tech supply chain and prompting more stringent export controls from countries like the US.",
+   "likelihood": "medium",
+   "signpost": "Formal accusations and evidence presented by multiple governments regarding Chinese espionage in the semiconductor sector.",
+   "created": "2026-10-29",
+   "due": "2026-11-12",
+   "status": "open"
+  },
+  {
+   "id": "p20261029-24",
+   "if": "The Indian stock market continues its rally driven by domestic factors.",
+   "then": "This could attract significant foreign investment, boosting India's economic growth and potentially positioning it as a more attractive investment destination compared to other emerging markets.",
+   "likelihood": "high",
+   "signpost": "Sustained positive performance of the Nifty 50 and Sensex over several weeks.",
+   "created": "2026-10-29",
+   "due": "2026-11-12",
+   "status": "open"
+  }
+ ]
+}

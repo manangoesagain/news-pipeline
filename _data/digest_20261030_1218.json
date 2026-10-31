@@ -1,0 +1,2914 @@
+{
+  "timestamp": "20261030_1218",
+  "datetime": "2026-10-30T12:18:43.235219-04:00",
+  "ranked_by": "gemini-2.5-flash-lite",
+  "breaking": [],
+  "domains": {
+    "AI & ML": [
+      {
+        "title": "OpenAI Rewrites Rulebook, 5 Core Values, Human Intent To Lead New Models",
+        "summary": "The revised framework says models should minimise harm and be transparent.",
+        "link": "https://www.ndtv.com/world-news/as-ai-agents-go-rogue-openai-to-update-new-models-with-human-intent-5-core-values-12257766#publisher=newsstand",
+        "source": "NDTV",
+        "sources": [
+          "NDTV",
+          "The Next Web"
+        ],
+        "published": "2026-10-30T03:57:10-04:00",
+        "domain": "AI & ML",
+        "region": "Global",
+        "score": 9.1,
+        "why": ""
+      },
+      {
+        "title": "Japan asks Anthropic, OpenAI for more access to advanced models",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMiygFBVV95cUxNblF0dzUtdkZyalRKaDU3MG5oWVRxY2JWRThRZEN0a0Zwa1Q1ZTE1bVhIcWhMM2J2Sm9JejhrNmRLNGQ3TlIzS0JzRzh4VDZsaXdyVmd5cHN1ek5xLWQwd0dxZ2FlTDZfVDdtdTgzZ0YxOUJBMlh6R2VYNDY1N3RXSkh6VF9DV1VILUtzOGZIcGZucnpoenp1ZDlrMzdCM1hrUXU5SWVPS3o1MnJpWjIweDdPUlRwSTlpcUltcWhldFJ2Z0JQWGZXZ0Fn?oc=5",
+        "source": "Nikkei Asia",
+        "sources": [
+          "Nikkei Asia"
+        ],
+        "published": "2026-10-30T11:10:00-04:00",
+        "domain": "AI & ML",
+        "region": "Global",
+        "score": 6.8,
+        "why": "Japan seeks greater access to advanced AI models from OpenAI and Anthropic."
+      },
+      {
+        "title": "Musk and Zuckerberg echo Trump's push to rebrand AI as 'super intelligence' on earnings calls. Others do not",
+        "summary": "Meta's Mark Zuckerberg and Elon Musk of Tesla and SpaceX adopted President Trump's preferred \"super intelligence\" term on their third-quarter earnings calls.",
+        "link": "https://www.cnbc.com/2026/10/30/trump-tech-allies-swap-ai-for-super-intelligence-in-earnings-calls.html",
+        "source": "CNBC",
+        "sources": [
+          "CNBC"
+        ],
+        "published": "2026-10-30T11:14:27-04:00",
+        "domain": "AI & ML",
+        "region": "US",
+        "score": 6.6,
+        "why": "Musk and Zuckerberg echo Trump's 'super intelligence' rebranding of AI."
+      },
+      {
+        "title": "Theranos whistleblower Tyler Shultz warns that the AI boom is ‘a great opportunity to go deceive people’",
+        "summary": "The cautionary Theranos tale takes on a new significance in the AI era, when companies that have never turned a profit are raising capital at trillion-dollar valuations.",
+        "link": "https://techcrunch.com/2026/10/30/theranos-whistleblower-tyler-shultz-warns-that-the-ai-boom-is-a-great-opportunity-to-go-deceive-people/",
+        "source": "TechCrunch",
+        "sources": [
+          "TechCrunch"
+        ],
+        "published": "2026-10-30T12:03:45-04:00",
+        "domain": "AI & ML",
+        "region": "Global",
+        "score": 0.55,
+        "why": ""
+      },
+      {
+        "title": "Ghost in the machine: how AI is haunting the search for the supernatural",
+        "summary": "Ghost hunting has changed in recent years due to AI chatbots, and paranormal enthusiasts are concerned Ghost hunting is a tech-heavy pursuit. When Amy Waine and Jarrad Cutting investigate haunted locations, they’re…",
+        "link": "https://www.theguardian.com/technology/ng-interactive/2026/oct/30/ai-ghost-hunting",
+        "source": "The Guardian",
+        "sources": [
+          "The Guardian"
+        ],
+        "published": "2026-10-30T11:00:16-04:00",
+        "domain": "AI & ML",
+        "region": "Global",
+        "score": 0.53,
+        "why": ""
+      }
+    ],
+    "Technology & Semiconductors": [
+      {
+        "title": "NVIDIA Stock: Analyst Estimates & Ratings",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMiigFBVV95cUxPUmtaX09vY0lvNDRSS196b0l5UFNXbEx0eVp4RmhQT2E0UTVrT2x0MWJQZ1ZLSTMzTk9PbEF1cmNub3laQ1JkaUxnMEJFY0luc0IxUDZvS1V0V21WRnU0RmZpZmtlUDdZUGs0MjdQeVRGMG1kcDkyTmhVOEVtNUlpZ2F6RUFURG5iQkE?oc=5",
+        "source": "Barchart.com",
+        "sources": [
+          "Barchart.com",
+          "Yahoo Finance"
+        ],
+        "published": "2026-10-30T11:42:30-04:00",
+        "domain": "Technology & Semiconductors",
+        "region": "Global",
+        "score": 8.1,
+        "why": ""
+      },
+      {
+        "title": "The touchscreen MacBook Pro is just a MacBook Pro with a touchscreen",
+        "summary": "Apple's long-awaited touchscreen MacBook Pro is finally here. I got to try this MacBook that, according to the last two Apple CEOs, shouldn't exist. The most surprising thing is how normal it is. The MacBook Pro with…",
+        "link": "https://www.theverge.com/tech/1022628/apple-macbook-pro-proled-xdr-touchscreen-oled-impressions-totally-normal",
+        "source": "The Verge",
+        "sources": [
+          "The Verge",
+          "New York Post"
+        ],
+        "published": "2026-10-30T08:00:00-04:00",
+        "domain": "Technology & Semiconductors",
+        "region": "US",
+        "score": 7.9,
+        "why": "Apple's long-awaited touchscreen MacBook Pro is finally available."
+      },
+      {
+        "title": "Google’s latest Nest Learning Thermostat is $60 off just in time for sweater weather",
+        "summary": "As the weather cools, it may be worth investing in a smart thermostat to help lower your energy bills. Right now, Google’s fourth-gen Nest Learning Thermostat is on sale in all three colors for $219.99 ($60 off) at…",
+        "link": "https://www.theverge.com/gadgets/1022819/google-nest-learning-thermostat-4th-gen-casio-ws-b1000-watch-deal-sale",
+        "source": "The Verge",
+        "sources": [
+          "The Verge"
+        ],
+        "published": "2026-10-30T11:29:02-04:00",
+        "domain": "Technology & Semiconductors",
+        "region": "US",
+        "score": 5.6,
+        "why": "Google's Nest Learning Thermostat is on sale, offering energy savings."
+      },
+      {
+        "title": "US tech stocks see sharp falls over AI cost fears",
+        "summary": "Shares in Intel continue to fall while the tech-heavy Nasdaq opens at its lowest level in more than two months.",
+        "link": "https://www.bbc.co.uk/news/articles/cvwy72e0n72yo?at_medium=RSS&at_campaign=rss",
+        "source": "BBC World",
+        "sources": [
+          "BBC World"
+        ],
+        "published": "2026-10-30T11:46:28-04:00",
+        "domain": "Technology & Semiconductors",
+        "region": "US",
+        "score": 0.62,
+        "why": ""
+      },
+      {
+        "title": "Build Specialized Agents on a Stack You Control with NVIDIA NemoClaw",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMipgFBVV95cUxNV2dVWll1WVY4NUd3ZnZLRnprWVIzSS1CNGxhakp0cnZzYldYR29LbTNEQ2xrdmNycmdoRy1CWW14QURLeFhUdEVPNjJKOFl4dDRjMFFWZHVIdy1xRHU1UlRGY1VtengxTE9pT3lmd3hHajFkMGxrSVAza0tJMWI1MGhMSjFQQVpRSTFORW1iTXB5RC0xYVFTUTM3NnNENkRHM2tYcTFn?oc=5",
+        "source": "NVIDIA Developer",
+        "sources": [
+          "NVIDIA Developer"
+        ],
+        "published": "2026-10-30T12:17:19-04:00",
+        "domain": "Technology & Semiconductors",
+        "region": "Global",
+        "score": 0.55,
+        "why": ""
+      }
+    ],
+    "Finance & Banking": [
+      {
+        "title": "What does shake-up of future Federal Reserve meetings mean for interest rates?",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMiugFBVV95cUxNOFBUN2E2OXM5Ymc1RzBaXzVQWmJMNXVkVE5sRGREZXV5Rm1rc0x5ZFl5ajd0Y2YxRmdrcEpzR2x0aUZEVWdHektLTVhsaVFwVE5zNXdJN0JuT1VrYnoxUUV4WGVXQXZMTkNmcE9DeFdfczZEa2ZQRzdDQTNoRGJZOThxZ1VhM0VTeXczekNvampuQkdSVkZIekhjenJTM2VOWklmdXNyY0ROMlRjaUw4SnlKWmlqb0VLaHc?oc=5",
+        "source": "Baltimore Sun",
+        "sources": [
+          "Baltimore Sun",
+          "Hardware Retailing",
+          "BBC"
+        ],
+        "published": "2026-10-30T07:37:51-04:00",
+        "domain": "Finance & Banking",
+        "region": "Global",
+        "score": 8.4,
+        "why": ""
+      },
+      {
+        "title": "Bank of Baroda Q2 profit jumps 36% to Rs 6,532 crore on NSE stake sale",
+        "summary": "Bank of Baroda reported 36% year-on-year profit growth to Rs 6,532 crore in Q2FY27, boosted by NSE stake sale gains and higher interest income. The lender raised annual credit and deposit growth guidance amid strong…",
+        "link": "https://economictimes.indiatimes.com/markets/stocks/earnings/bank-of-baroda-q2-profit-jumps-36-to-rs-6532-crore-on-nse-stake-sale/articleshow/135369087.cms",
+        "source": "Economic Times Markets",
+        "sources": [
+          "Economic Times Markets"
+        ],
+        "published": "2026-10-30T12:02:22-04:00",
+        "domain": "Finance & Banking",
+        "region": "India",
+        "score": 7.8,
+        "why": "Bank of Baroda Q2 profit jumps 36% on NSE stake sale."
+      },
+      {
+        "title": "Yorkshire Water boss resigns after firm downgraded",
+        "summary": "Nicola Shaw, who has led the company since 2022, will step down in January, it is announced.",
+        "link": "https://www.bbc.co.uk/news/articles/ckzd623pldqgo?at_medium=RSS&at_campaign=rss",
+        "source": "BBC Business",
+        "sources": [
+          "BBC Business"
+        ],
+        "published": "2026-10-30T12:04:55-04:00",
+        "domain": "Finance & Banking",
+        "region": "Other",
+        "score": 5.3,
+        "why": "Yorkshire Water boss resigns after firm's downgrade."
+      },
+      {
+        "title": "India constitutes high-level committee for banking reforms",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMixwFBVV95cUxQd3NtSjBtRFdacVk2MkM4N2VTLW8wV3FlQnZjVUJSMEhUaVNIaVlHcW8xTHl0VVp4cWZPbVpXOU5RWnRSZmdGVkpMN1A0dnIwOHNYTmozNTNqTF9uUUdxdDlWYjA4ZmgyckZQanpoeDloWXpldDJMV1JyMGsxM1ZwYUd5RDRadUc2eU5OVDNUWjdWWDlBbWxZRzRHdjQtLTdSZ1NtMUZWcTFlcm1pWHBsaVc1WWxjZTY5TVByQzRqUnlOMG5CQzRv?oc=5",
+        "source": "TradingView",
+        "sources": [
+          "TradingView"
+        ],
+        "published": "2026-10-30T11:20:50-04:00",
+        "domain": "Finance & Banking",
+        "region": "India",
+        "score": 0.64,
+        "why": ""
+      },
+      {
+        "title": "Class action lawsuit blames Trump officials for student loan forgiveness delays",
+        "summary": "The American Federation of Teachers sued the Trump administration, alleging it unlawfully blocked student loan forgiveness for tens of thousands of borrowers.",
+        "link": "https://www.cnbc.com/2026/10/30/lawsuit-blames-trump-officials-for-student-loan-forgiveness-delays.html",
+        "source": "CNBC",
+        "sources": [
+          "CNBC"
+        ],
+        "published": "2026-10-30T12:04:59-04:00",
+        "domain": "Finance & Banking",
+        "region": "US",
+        "score": 0.63,
+        "why": ""
+      }
+    ],
+    "Stock Markets & Trading": [
+      {
+        "title": "Market wrap: Shriram Finance, Nestle India, Trent, InterGlobe top gainers and losers on Nifty and Sensex on Friday",
+        "summary": "The Nifty 50 rose 0.51% to close at 23,053.10 on Friday, while the Sensex gained 308 points to 74,459.53. Trent and InterGlobe led the gainers, while Shriram Finance and Nestle India topped the Nifty losers. Broader…",
+        "link": "https://economictimes.indiatimes.com/markets/stocks/news/market-wrap-shriram-finance-nestle-india-trent-interglobe-top-gainers-and-losers-on-nifty-and-sensex-on-friday/articleshow/135357312.cms",
+        "source": "Economic Times Markets",
+        "sources": [
+          "Economic Times Markets",
+          "The Indian Awaaz",
+          "TradingView",
+          "The Economic Times",
+          "APAC Media",
+          "Telegraph India",
+          "India Today",
+          "NDTV Profit"
+        ],
+        "published": "2026-10-30T12:07:00-04:00",
+        "domain": "Stock Markets & Trading",
+        "region": "India",
+        "score": 10.0,
+        "why": ""
+      },
+      {
+        "title": "$6.3 billion Binance hack is largest crypto theft on record",
+        "summary": "Binance says a security breach impacted about $6.3 billion in assets. The exchange says roughly $3 billion has been frozen and losses will be covered.",
+        "link": "https://www.cnbc.com/2026/10/29/circle-tether-freeze-funds-impacted-by-potential-binance-security-issue.html",
+        "source": "CNBC",
+        "sources": [
+          "CNBC",
+          "Al Jazeera",
+          "BBC World",
+          "NPR",
+          "Economic Times Markets",
+          "Reuters",
+          "AP News"
+        ],
+        "published": "2026-10-30T12:01:51-04:00",
+        "domain": "Stock Markets & Trading",
+        "region": "Global",
+        "score": 10.0,
+        "why": ""
+      },
+      {
+        "title": "Intel heads for worst day on Wall Street in more than 50 years on weak guidance",
+        "summary": "Investors are nervous about the massive AI spending from the tech giants and whether that will pay off.",
+        "link": "https://www.cnbc.com/2026/10/30/amazon-intel-earnings-big-tech-ai-spending-concerns.html",
+        "source": "CNBC",
+        "sources": [
+          "CNBC",
+          "AP News"
+        ],
+        "published": "2026-10-30T12:00:00-04:00",
+        "domain": "Stock Markets & Trading",
+        "region": "US",
+        "score": 9.9,
+        "why": ""
+      },
+      {
+        "title": "Rupee rises 33 paise to close at 94.93 against US dollar",
+        "summary": "The rupee closed at 94.93 against the US dollar, marking a gain of 33 paise. Positive trends in domestic markets contributed to this improvement, despite elevated crude oil prices. Foreign Institutional Investors sold…",
+        "link": "https://economictimes.indiatimes.com/markets/forex/rupee-rises-33-paise-to-close-at-94-93-against-us-dollar/articleshow/135357047.cms",
+        "source": "Economic Times Markets",
+        "sources": [
+          "Economic Times Markets",
+          "The Hindu Business",
+          "The Free Press Journal"
+        ],
+        "published": "2026-10-30T06:41:59-04:00",
+        "domain": "Stock Markets & Trading",
+        "region": "India",
+        "score": 0.98,
+        "why": ""
+      },
+      {
+        "title": "India stocks higher at close of trade; Nifty 50 up 0.51%",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMirwFBVV95cUxPdzdTanlFNkxKMHhlVTduOGRSY1pKMXo2S0h5dFZVbEtoZGlHVkRGQncxalpadzFGT0VDVFFPenhJM3NhczZ6ZUxiaUhwUUM1ZzF4WjhmdVRkOVpmeWxibVpTRmdCdkszeXZDSUw0MDFkRlRPU2NtLUM5UUQ5UWVOSHBYTUVfN1VQSl94Z3lkM3o0T1dyd0pjX1hORDJPUXdTbzBEdXlXMl9nRklOdkNr?oc=5",
+        "source": "Investing.com",
+        "sources": [
+          "Investing.com",
+          "Investing.com India"
+        ],
+        "published": "2026-10-30T06:49:48-04:00",
+        "domain": "Stock Markets & Trading",
+        "region": "India",
+        "score": 0.78,
+        "why": ""
+      }
+    ],
+    "Geopolitics & Diplomacy": [
+      {
+        "title": "PM Modi Outlines Projects Worth Rs 14,000 Crore In Gujarat",
+        "summary": "PM Modi spoke of his commitment to serving the country.",
+        "link": "https://www.ndtv.com/india-news/pm-narendra-modi-outlines-projects-worth-rs-14-000-crore-in-gujarat-12259506#publisher=newsstand",
+        "source": "NDTV",
+        "sources": [
+          "NDTV",
+          "The News Mill"
+        ],
+        "published": "2026-10-30T08:57:06-04:00",
+        "domain": "Geopolitics & Diplomacy",
+        "region": "India",
+        "score": 9.1,
+        "why": ""
+      },
+      {
+        "title": "Trump rallies in Kansas and Iowa are back on after RNC said they were canceled: Source",
+        "summary": "Trump and Vance had canceled planned appearances across three states, reducing in-person campaigning in the final days before the midterm election.",
+        "link": "https://www.cnbc.com/2026/10/30/trump-vance-rally-midterm-elections-.html",
+        "source": "CNBC",
+        "sources": [
+          "CNBC",
+          "Al Jazeera",
+          "The Guardian"
+        ],
+        "published": "2026-10-30T11:52:35-04:00",
+        "domain": "Geopolitics & Diplomacy",
+        "region": "US",
+        "score": 8.2,
+        "why": "Trump reverses course, reinstates cancelled campaign rallies before midterms."
+      },
+      {
+        "title": "Russia back in ice hockey world championships after sport court ruling",
+        "summary": "Court of Arbitration for Sport overturned IIHF decisions that excluded Russia from events in the 2026-27 season.",
+        "link": "https://www.aljazeera.com/sports/2026/10/30/russia-back-in-ice-hockey-world-championships-after-sport-court-ruling?traffic_source=rss",
+        "source": "Al Jazeera",
+        "sources": [
+          "Al Jazeera",
+          "AP News"
+        ],
+        "published": "2026-10-30T11:27:00-04:00",
+        "domain": "Geopolitics & Diplomacy",
+        "region": "Global",
+        "score": 8.1,
+        "why": ""
+      },
+      {
+        "title": "Nvidia denies report that its CEO was allegedly targeted in Chinese spy plot",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMingFBVV95cUxNc0ZmOFFSRW9GWFVnVnhxYkNlUnpDNWYxdHBVWllKUUcxa3JvUzBaTUtOYl9pMXRzOUVuZkZCMG9sal84T245YVR6UkZsVmJqU002OTdqTFJKeWpCcTZqOENqb1FfYnhVay1sMmlUdnl1MjBFdEZvalpncmY3SUQwdDhaRWZweEZGSWZvOUxzazhIUmdraENZd1F3WG02QdIBowFBVV95cUxOc3M5UzJYS2tweVEyYXhwWnV2RUJLSXdzbXJ1ZWFNNjFrMnI0T092bTBUV3pKakVsTTZYc3BSbXpEX04tdGt6Z3ZxM3Z5Y3liV0dPUzM3YWFLcldtVURsVmNKczhVUldYamltZEY2NXlscjA3X1lhRGF2cUJQSEh5anlCak93WlFsMUtBZlB0a09pdmxncDJKRWVMV2lRTEFsaHk0?oc=5",
+        "source": "ABC News - Breaking News, Latest News and Videos",
+        "sources": [
+          "ABC News - Breaking News, Latest News and Videos",
+          "Yahoo Finance",
+          "The New York Times"
+        ],
+        "published": "2026-10-30T12:07:51-04:00",
+        "domain": "Geopolitics & Diplomacy",
+        "region": "China",
+        "score": 7.6,
+        "why": "Nvidia denies Chinese spy plot targeting CEO, complicating US-China tech relations."
+      },
+      {
+        "title": "Russian society being ‘systematically crushed’ says Novaya Gazeta as newspaper announces closure",
+        "summary": "Independent outlet, whose former editor Dmitry Muratov won Nobel prize, cites intolerable pressure from authorities Europe live – latest updates Novaya Gazeta, one of Russia’s best-known independent media outlets, has…",
+        "link": "https://www.theguardian.com/world/2026/oct/30/novaya-gazeta-russia-independent-newspaper-to-close",
+        "source": "The Guardian",
+        "sources": [
+          "The Guardian"
+        ],
+        "published": "2026-10-30T11:52:51-04:00",
+        "domain": "Geopolitics & Diplomacy",
+        "region": "Other",
+        "score": 5.3,
+        "why": "Novaya Gazeta announces closure due to intolerable pressure from Russian authorities."
+      }
+    ],
+    "Wars & Conflicts": [
+      {
+        "title": "Senators briefed on Trump’s ‘insane’ plan to restart war on Iran",
+        "summary": "Senator Chris Murphy says he’s been briefed on Trump’s plan to restart the war on Iran.",
+        "link": "https://www.aljazeera.com/video/newsfeed/2026/10/30/senators-briefed-on-trumps-insane-plan-to-restart-war-on-iran-2?traffic_source=rss",
+        "source": "Al Jazeera",
+        "sources": [
+          "Al Jazeera",
+          "NDTV",
+          "Air & Space Forces Magazine",
+          "Drop Site News",
+          "Reuters",
+          "Arab News"
+        ],
+        "published": "2026-10-30T11:00:00-04:00",
+        "domain": "Wars & Conflicts",
+        "region": "US",
+        "score": 9.8,
+        "why": "Trump's potential plans to restart war with Iran raise geopolitical tensions."
+      },
+      {
+        "title": "Democratic senator blames Egypt press crackdown on US military aid decision",
+        "summary": "Chris Murphy said waiving a human rights condition on aid paved the way for arrests of journalists.",
+        "link": "https://www.bbc.co.uk/news/articles/c63r529wn2vzo?at_medium=RSS&at_campaign=rss",
+        "source": "BBC World",
+        "sources": [
+          "BBC World"
+        ],
+        "published": "2026-10-30T11:17:11-04:00",
+        "domain": "Wars & Conflicts",
+        "region": "US",
+        "score": 7.6,
+        "why": "US military aid decision linked to Egypt press crackdown, impacting human rights."
+      },
+      {
+        "title": "Uttarakhand chopper crash: All six on board killed, says Chamoli District Magistrate",
+        "summary": "Five pilgrims from Karnataka and pilot from Delhi killed as helicopter from Badrinath crash amid adverse weather conditions; Congress alleges government negligence and poor safety measures; govt. grounds entire chopper…",
+        "link": "https://www.thehindu.com/news/national/uttarakhand/uttarakhand-chopper-crash-casualties-badrinath-to-dehradun-updates-october-30-2026/article71644516.ece",
+        "source": "The Hindu",
+        "sources": [
+          "The Hindu",
+          "NDTV"
+        ],
+        "published": "2026-10-30T12:06:07-04:00",
+        "domain": "Wars & Conflicts",
+        "region": "India",
+        "score": 7.1,
+        "why": ""
+      },
+      {
+        "title": "I will serve the people of India till my last breath: PM Modi",
+        "summary": "Modi accused the Opposition of rejoicing when the country faces a crisis and spreading panic over the availability of fertilisers and cooking gas amid the ongoing conflict in West Asia",
+        "link": "https://www.thehindu.com/news/national/i-will-serve-the-people-of-india-till-my-last-breath-pm-modi/article71644303.ece",
+        "source": "The Hindu",
+        "sources": [
+          "The Hindu"
+        ],
+        "published": "2026-10-30T11:34:39-04:00",
+        "domain": "Wars & Conflicts",
+        "region": "India",
+        "score": 0.64,
+        "why": ""
+      },
+      {
+        "title": "Andhra Pradesh SEC gears up for polls in 100 Urban Local Bodies on November 1",
+        "summary": "36,351 police personnel, drones and CCTV cameras deployed to ensure peaceful polling; 400-plus flying squads to enforce Model Code of Conduct; counting of votes on November 3",
+        "link": "https://www.thehindu.com/news/national/andhra-pradesh/andhra-pradesh-sec-gears-up-for-polls-in-100-urban-local-bodies-on-november-1/article71645533.ece",
+        "source": "The Hindu",
+        "sources": [
+          "The Hindu"
+        ],
+        "published": "2026-10-30T12:08:11-04:00",
+        "domain": "Wars & Conflicts",
+        "region": "Global",
+        "score": 0.55,
+        "why": ""
+      }
+    ],
+    "Commodities & Prices": [
+      {
+        "title": "RIL Q2 profit jumps 41% to ₹25,548 crore on O2C, Jio strength",
+        "summary": "The O2C business emerged as a key growth driver, with revenue surging 44.2% YoY, reflecting a sharp rise in crude and product price.",
+        "link": "https://www.thehindu.com/business/Industry/ril-q2-profit-jumps-41-to-25548-crore-on-o2c-jio-strength/article71646038.ece",
+        "source": "The Hindu",
+        "sources": [
+          "The Hindu",
+          "Economic Times Markets"
+        ],
+        "published": "2026-10-30T11:25:41-04:00",
+        "domain": "Commodities & Prices",
+        "region": "India",
+        "score": 9.1,
+        "why": ""
+      },
+      {
+        "title": "Chevron and Exxon hit all-time highs as refining profits soar in reaction to Iran and Ukraine wars",
+        "summary": "Global diesel prices surged as Ukraine and Iran struck refineries in Russia and the Middle East.",
+        "link": "https://www.cnbc.com/2026/10/30/chevron-exxon-cvx-xom-earnings-q3-2026.html",
+        "source": "CNBC",
+        "sources": [
+          "CNBC"
+        ],
+        "published": "2026-10-30T12:01:11-04:00",
+        "domain": "Commodities & Prices",
+        "region": "Global",
+        "score": 8.8,
+        "why": ""
+      },
+      {
+        "title": "Panama-flagged oil tanker targeted in Strait of Hormuz; all Indian seafarers safe, assures govt",
+        "summary": "",
+        "link": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxNUF93bmNPWUhHNGZPaktZR1lmTDdobHZfYUJSSXFPSGhlaDNoNERJcVBpQV9yb24tQTA2Mk92SFlVM1A5N3FRN05nUzBqd3ZTdnR5TWdmZm1CWHgyaGFBcTRyNmt0YXlqekNhazhBUEdDVXhTb2VzZHNLTDRBeERCRTRXOGdObFdGUDRZY25MQkQzTmhrS3BoaklJZjJlV1JRb2JlbndraUNrOExLNFl0NTZhczBsSjY5anc0?oc=5",
+        "source": "News On AIR",
+        "sources": [
+          "News On AIR",
+          "WSJ",
+          "EnergyNow.com"
+        ],
+        "published": "2026-10-30T11:17:33-04:00",
+        "domain": "Commodities & Prices",
+        "region": "Global",
+        "score": 8.4,
+        "why": "Tanker attack in Hormuz and Houthi claims stoke oil supply fears."
+      },
+      {
+        "title": "North Korean hackers blamed for stealing record $6.3B in Binance breach",
+        "summary": "Hackers working for North Korea are suspected of hacking a Binance employee's laptop, which allowed the theft of billions in crypto.",
+        "link": "https://techcrunch.com/2026/10/30/north-korean-hackers-blamed-for-stealing-record-6-3b-in-binance-breach/",
+        "source": "TechCrunch",
+        "sources": [
+          "TechCrunch",
+          "Reuters"
+        ],
+        "published": "2026-10-30T10:00:25-04:00",
+        "domain": "Commodities & Prices",
+        "region": "Global",
+        "score": 0.72,
+        "why": ""
+      },
+      {
+        "title": "IOC Q2 profit soars 184% on higher refining margins",
+        "summary": "Indian Oil’s gross refining margins, after subtracting for special additional excise duty (SAED), during the reported quarter stood at $18.52 per barrel.",
+        "link": "https://www.thehindu.com/business/Industry/ioc-q2-profit-soars-184-on-higher-refining-margins/article71646254.ece",
+        "source": "The Hindu",
+        "sources": [
+          "The Hindu"
+        ],
+        "published": "2026-10-30T12:03:51-04:00",
+        "domain": "Commodities & Prices",
+        "region": "India",
+        "score": 0.65,
+        "why": ""
+      }
+    ]
+  },
+  "market": [
+    {
+      "label": "S&P 500",
+      "price": 7595.34,
+      "change_pct": -1.6197385689617174,
+      "decimals": 2
+    },
+    {
+      "label": "Nasdaq",
+      "price": 25488.988,
+      "change_pct": -2.6570178502685615,
+      "decimals": 2
+    },
+    {
+      "label": "Nifty 50",
+      "price": 23053.1,
+      "change_pct": 0.507264542709837,
+      "decimals": 2
+    },
+    {
+      "label": "TSX",
+      "price": 35552.49,
+      "change_pct": -1.9214599023421393,
+      "decimals": 2
+    },
+    {
+      "label": "USD/INR",
+      "price": 94.94,
+      "change_pct": -0.2830633128460755,
+      "decimals": 3
+    },
+    {
+      "label": "USD/CAD",
+      "price": 1.3949,
+      "change_pct": -0.2709667842887028,
+      "decimals": 4
+    },
+    {
+      "label": "US Dollar Index",
+      "price": 101.851,
+      "change_pct": -0.18522237733397015,
+      "decimals": 2
+    },
+    {
+      "label": "Gold",
+      "price": 3911.3,
+      "change_pct": -2.9791116052249467,
+      "decimals": 2
+    },
+    {
+      "label": "WTI Crude",
+      "price": 104.11,
+      "change_pct": 2.0686274509803915,
+      "decimals": 2
+    },
+    {
+      "label": "BTC",
+      "price": 77527.0,
+      "change_pct": -4.836335467597693,
+      "decimals": 0
+    }
+  ],
+  "intelligence": null,
+  "intel_lite": {
+    "graph": {
+      "nodes": [
+        {
+          "id": "n2",
+          "label": "Global oil prices jump as…",
+          "type": "event",
+          "domain": "Commodities & Prices",
+          "region": "Global",
+          "detail": "11 stories across Commodities & Prices, Wars & Conflicts. Latest: World Bank sees commodity prices up 23% in 2026 due to Middle East war, other shocks",
+          "sources": [
+            {
+              "title": "World Bank sees commodity prices up 23% in 2026 due to Middle East war, other shocks",
+              "link": "https://news.google.com/rss/articles/CBMivgFBVV95cUxPMTJhV1NKSG4wRUJLZHpFdGRjTmdWM2VxWGhRQVFCa0Q2NGhKMHVEMEYtQU5jVTRpTnA5VWRXQWlRQ01rUE9MVF9FbEtLd1IxcTA2MGVvYTNfUFpnaGVwWEttRkJoUjYyLTFqZ2lrUUdJdTVqNEhqdFgyV0ZzR3JjOXFKZ0VHUUFXYzVsRnIwZGRZVG5UNHh3anhMZzRoanVUUjRySEpINGlpeXY2VC1YOFJxblVGRklIZi1ERXJB?oc=5"
+            },
+            {
+              "title": "World Bank sees commodity prices surging 23% in 2026 on Middle East war",
+              "link": "https://economictimes.indiatimes.com/markets/us-stocks/wall-street-guide/world-bank-sees-commodity-prices-surging-23-in-2026-on-middle-east-war/articleshow/135274754.cms"
+            },
+            {
+              "title": "Global stocks hold gains after Fed decision, oil prices jump",
+              "link": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxPaW5YcHUzQ2RTcmIxR2IwTDhQNWxmeFFYZ1FUOFhGYkQxUlNhajlGdUgtTXNDSVAtOVRSb09kbkZxMjNxZjJtNFg3ZWhiU01UenI1SFptdm51eHBROTJMR0VwY29PRldnZnQ4QU9sLUJyZEpDS3BCSEdxcm5fTVpPb3JlOG8xQUN4U0Vvbkk4dk1FNmh1bWRpYkx5QmhBbDVjLXRQVDBqU1RvRnBMWnRIcy14OEdVclhhMmhXZkMzME05dUxNX0hrRQ?oc=5"
+            }
+          ],
+          "thread": {
+            "id": 16,
+            "stories": 11,
+            "days": 6,
+            "first_seen": "2026-10-24"
+          },
+          "history": {
+            "days_running": 6,
+            "stories": 46,
+            "last7": 46,
+            "prev7": 0,
+            "trend": "new",
+            "first_seen": "2026-10-24",
+            "past_predictions": [
+              {
+                "if": "US-Iran tensions escalate significantly following mid-term elections.",
+                "then": "Oil prices could surge, impacting global inflation and potentially leading to increased military spending and geopolitical instability.",
+                "status": "open",
+                "created": "2026-10-29",
+                "evidence": ""
+              },
+              {
+                "if": "Commodity prices surge by the projected 23% and Middle East tensions escalate further.",
+                "then": "This could trigger significant global inflation, impacting central bank policies and potentially leading to a recession in major economies, while also increasing pressure on governments to secure energy supplies.",
+                "status": "open",
+                "created": "2026-10-28",
+                "evidence": ""
+              },
+              {
+                "if": "Cyclone Arnab damages Andhra Pradesh port infrastructure and power grid",
+                "then": "Disrupts coal imports and steel production, lifting global metallurgical coal prices and Indian industrial output forecasts",
+                "status": "open",
+                "created": "2026-10-27",
+                "evidence": ""
+              }
+            ],
+            "hit_rate": null,
+            "note": "New: first seen 6 days ago, 46 stories so far."
+          },
+          "impact": {
+            "score": 5,
+            "size": "small",
+            "sure": "low",
+            "when": "days",
+            "top5": 0
+          },
+          "card": {
+            "so_what": "Global oil prices jump as… lifts WTI Crude",
+            "headline": "11 stories across Commodities & Prices, Wars & Conflicts. Latest: World Bank sees commodity prices up 23% in 2026 due to Middle East war,…",
+            "points": [
+              "11 stories across Commodities & Prices, Wars & Conflicts. Latest: World Bank sees commodity prices up 23% in 2026 due…",
+              "Driven by: Wall Street loses ground… (shares: oil, prices); FPIs withdraw ₹48,056 cr… (shares: oil, prices)",
+              "Leads to: WTI Crude (moves the market); Gold Falls to Three-Month… (shares: oil, prices); Houthis Claim They Targeted……"
+            ],
+            "for_you": {},
+            "currency": {},
+            "predictions": [],
+            "against": [],
+            "pattern": "",
+            "light": true
+          }
+        },
+        {
+          "id": "n3",
+          "label": "Federal Reserve Interest…",
+          "type": "event",
+          "domain": "Finance & Banking",
+          "region": "Global",
+          "detail": "9 stories across Finance & Banking, Stock Markets & Trading. Latest: What does shake-up of future Federal Reserve meetings mean for interest rates?",
+          "sources": [
+            {
+              "title": "What does shake-up of future Federal Reserve meetings mean for interest rates?",
+              "link": "https://news.google.com/rss/articles/CBMiugFBVV95cUxNOFBUN2E2OXM5Ymc1RzBaXzVQWmJMNXVkVE5sRGREZXV5Rm1rc0x5ZFl5ajd0Y2YxRmdrcEpzR2x0aUZEVWdHektLTVhsaVFwVE5zNXdJN0JuT1VrYnoxUUV4WGVXQXZMTkNmcE9DeFdfczZEa2ZQRzdDQTNoRGJZOThxZ1VhM0VTeXczekNvampuQkdSVkZIekhjenJTM2VOWklmdXNyY0ROMlRjaUw4SnlKWmlqb0VLaHc?oc=5"
+            },
+            {
+              "title": "U.S. stocks edge higher ahead of Federal Reserve decision on interest rates",
+              "link": "https://news.google.com/rss/articles/CBMirwFBVV95cUxOMG5sbDJYY2Y0YUo1bXItVXdRTkk5RlJHSVBDS0NVUk9wOVI2c2hZUXlIaWpRM09vOHVPazV2SHJKSGlxMmdnVUQ2SExVZVNJMUs4VWczZ0pWWHZtQ0dycGtlVUxURkF6cUp2NmQzUm5WS3MtT09NbmEyQVR3cDYzamlkaC14VTVHekNLRHNRUzdPdFE5X2lzeWR0d1VhUkVsb3JUTDJ2M2Y2OFUtVndR?oc=5"
+            },
+            {
+              "title": "Federal Reserve interest rate decision looms as inflation and gas prices impact consumers",
+              "link": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE83c1dNSW44NGxSVkxfbnRRX2dUZmZDLUNic2dic2tObjkzS1JZa1BkVHNPRWZ4VHlWWmpOVUtJcDltUFpCNUVwNzh3SVREdVMxWEdlakwxR2VIXzg?oc=5"
+            }
+          ],
+          "thread": {
+            "id": 130,
+            "stories": 9,
+            "days": 5,
+            "first_seen": "2026-10-25"
+          },
+          "history": {
+            "days_running": 6,
+            "stories": 19,
+            "last7": 19,
+            "prev7": 0,
+            "trend": "new",
+            "first_seen": "2026-10-24",
+            "past_predictions": [],
+            "hit_rate": null,
+            "note": "New: first seen 6 days ago, 19 stories so far."
+          },
+          "impact": {
+            "score": 3,
+            "size": "small",
+            "sure": "low",
+            "when": "days",
+            "top5": 0
+          },
+          "card": {
+            "so_what": "",
+            "headline": "9 stories across Finance & Banking, Stock Markets & Trading. Latest: What does shake-up of future Federal Reserve meetings mean for…",
+            "points": [
+              "9 stories across Finance & Banking, Stock Markets & Trading. Latest: What does shake-up of future Federal Reserve…",
+              "Leads to: US Stock Markets this week:… (shares: decision, rate, week); Bank of Canada to raise… (shares: 2026, october,…"
+            ],
+            "for_you": {},
+            "currency": {},
+            "predictions": [],
+            "against": [],
+            "pattern": "",
+            "light": true
+          }
+        },
+        {
+          "id": "n4",
+          "label": "Israeli PM pledges massive…",
+          "type": "event",
+          "domain": "Finance & Banking",
+          "region": "Other",
+          "detail": "8 stories across Finance & Banking, Wars & Conflicts. Latest: Israel bans travel for Brad Lander after detention in occupied West Bank",
+          "sources": [
+            {
+              "title": "Israel bans travel for Brad Lander after detention in occupied West Bank",
+              "link": "https://www.aljazeera.com/video/newsfeed/2026/10/29/israel-bans-travel-for-brad-lander-after-detention-in-occupied-west-bank?traffic_source=rss"
+            },
+            {
+              "title": "Israeli forces turn Hebron homes into military posts amid lockdown",
+              "link": "https://www.aljazeera.com/news/2026/10/25/israeli-forces-turn-hebron-homes-into-military-posts-amid-lockdown?traffic_source=rss"
+            },
+            {
+              "title": "Israel presses ahead with West Bank operation as election approaches",
+              "link": "https://www.thehindu.com/news/international/israel-presses-ahead-with-west-bank-operation-as-election-approaches/article71624374.ece"
+            }
+          ],
+          "thread": {
+            "id": 9,
+            "stories": 8,
+            "days": 6,
+            "first_seen": "2026-10-24"
+          },
+          "history": {
+            "days_running": 6,
+            "stories": 14,
+            "last7": 14,
+            "prev7": 0,
+            "trend": "new",
+            "first_seen": "2026-10-24",
+            "past_predictions": [],
+            "hit_rate": null,
+            "note": "New: first seen 6 days ago, 14 stories so far."
+          },
+          "impact": {
+            "score": 3,
+            "size": "small",
+            "sure": "low",
+            "when": "days",
+            "top5": 0
+          },
+          "card": {
+            "so_what": "",
+            "headline": "8 stories across Finance & Banking, Wars & Conflicts. Latest: Israel bans travel for Brad Lander after detention in occupied West Bank",
+            "points": [
+              "8 stories across Finance & Banking, Wars & Conflicts. Latest: Israel bans travel for Brad Lander after detention in…",
+              "Leads to: Iran warns of response… (shares: military, operation); Jordan’s King Abdullah… (shares: attack, deadly); Bank…"
+            ],
+            "for_you": {},
+            "currency": {},
+            "predictions": [],
+            "against": [],
+            "pattern": "",
+            "light": true
+          }
+        },
+        {
+          "id": "n5",
+          "label": "Wall Street loses ground…",
+          "type": "event",
+          "domain": "Commodities & Prices",
+          "region": "Global",
+          "detail": "7 stories across Commodities & Prices, Stock Markets & Trading. Latest: Iran poses a threat beyond rising oil prices: Lt Gen Keith Kellogg",
+          "sources": [
+            {
+              "title": "Iran poses a threat beyond rising oil prices: Lt Gen Keith Kellogg",
+              "link": "https://news.google.com/rss/articles/CBMiW0FVX3lxTFBqOEJFTXFiQ0ZUNG83OGlTb1NHNjIwNmN1akFFN0E0V3JQRGN4aUNYRGl0VXhBZWNtdS1GUFVPeHZDbkFfWjFVNWlJZEpSVWJhaHdqOEZFbDBBZUU?oc=5"
+            },
+            {
+              "title": "Broadcom and other AI stocks lift Wall Street closer to its record",
+              "link": "https://news.google.com/rss/articles/CBMilAFBVV95cUxNalA1YWp3MHd0dHNjRGRDaG05a1dLczBwNjE3RjVLU1JRSU1GaGVKRVFHdFBrU2ZxaDZmckMtVVVEUGpjLTQxNkxkNzhVVmlUUVQtTUxUeE9CaUtZNVU2Y1AwWk1aY0VOcHNwclpBdUg2VkdHd2RTcVFOcllaSlRBaksxVklzWTEtYnEyZ2NQVy1KTFIx?oc=5"
+            },
+            {
+              "title": "World stocks gain ahead of 'formidable' week for risk; oil prices fall",
+              "link": "https://news.google.com/rss/articles/CBMi-gFBVV95cUxPTlRJYmJCNUtQYVVvUEk3WEVYYVVDMUVmVEtxMkRiUXBhV0kwU2dDRFB4bHZiMEtJOUhTRjBSRHlWZnRlY1dGcXN5MmtnM0sxQlB3aFZickNDb1RGYk91WDRNbDJZckRZR0hwck1lRUJna1FpWFJFbmdBSXdYeU1jYzJoSGNXWnRCWE5adEVDRWw4cmVWUDBBdFdhbXVQRGt5QUpqWVd4MmJuV28zYnREc0hsV3VIWXpUZ0FzTGxrbmt5bkdkRWxjN3ZCdm1PVVR2TlBKVFFFU0t6VmE1QUo4X3pqQVlFSkowMVVaNmJVckFXdzFlRVhaaFd3?oc=5"
+            }
+          ],
+          "thread": {
+            "id": 3,
+            "stories": 7,
+            "days": 6,
+            "first_seen": "2026-10-23"
+          },
+          "history": {
+            "days_running": 7,
+            "stories": 54,
+            "last7": 54,
+            "prev7": 0,
+            "trend": "heating",
+            "first_seen": "2026-10-23",
+            "past_predictions": [],
+            "hit_rate": null,
+            "note": "Heating up: 54 stories in the last week vs 0 the week before (first seen 7 days ago)."
+          },
+          "impact": {
+            "score": 9,
+            "size": "big",
+            "sure": "low",
+            "when": "days",
+            "top5": 2
+          },
+          "card": {
+            "so_what": "Wall Street loses ground… lifts WTI Crude but hurts S&P 500",
+            "headline": "7 stories across Commodities & Prices, Stock Markets & Trading. Latest: Iran poses a threat beyond rising oil prices: Lt Gen Keith Kellogg",
+            "points": [
+              "7 stories across Commodities & Prices, Stock Markets & Trading. Latest: Iran poses a threat beyond rising oil prices:…",
+              "Driven by: Intel stock plunges 16% as… (shares: street, wall)",
+              "Leads to: FPIs withdraw ₹48,056 cr… (shares: oil, prices, stocks); S&P 500 (moves the market); WTI Crude (moves the…"
+            ],
+            "for_you": {},
+            "currency": {},
+            "predictions": [],
+            "against": [],
+            "pattern": "",
+            "light": true
+          }
+        },
+        {
+          "id": "n6",
+          "label": "FPIs withdraw ₹48,056 cr…",
+          "type": "event",
+          "domain": "Commodities & Prices",
+          "region": "Global",
+          "detail": "7 stories across Commodities & Prices, Stock Markets & Trading. Latest: Global stocks hold gains after Fed decision, oil prices rise",
+          "sources": [
+            {
+              "title": "Global stocks hold gains after Fed decision, oil prices rise",
+              "link": "https://news.google.com/rss/articles/CBMi7wFBVV95cUxNTWhSMy1kVWZYQ0xpc2ZCY0ZoVXkzWDY1UGhXdk5KaThOV0I4NG85U0JGSVgyNEgzNW9pWTduVE8zOVVFWXExQ2hIUElvclN1Y3ZaeW4yc2d6bFJIQ2xXaHIxeXIteGpmaGphYkhOb3BabHpHWHB1aE5nRUdoRUdleWZiSTEySlAxTmkybktJaFRZeUdGMzg2VklEMUVWNUpReFpvejBtLTFZRktmNVVOQi1IcVItd2lmVy13d3JIUkRJZkJlUTZtRlVRR3V3X1VnMjNRd0N2bDNBVHFBdld3eFVEN1BCTVpyMHBNYzMyYw?oc=5"
+            },
+            {
+              "title": "Stock markets end largely unchanged amid elevated crude oil prices, selling in bank stocks",
+              "link": "https://www.thehindu.com/business/Industry/stock-markets-end-largely-unchanged-amid-elevated-crude-oil-prices-selling-in-bank-stocks/article71631186.ece"
+            },
+            {
+              "title": "Sensex, Nifty End Nearly Flat as Crude Oil, Fed Caution Weigh on Sentiment",
+              "link": "https://news.google.com/rss/articles/CBMiogFBVV95cUxOVzA5ZTA0UkM0N2M1UGFuR01icXJpRWU4R29LZHAxbVk1TWFPRkdENHNsNHc3bk9CREhqaXMzcmxDZTR5bGZXMDd0ZjVvWllNWXQ1c0RiWkJ6RGFoNWlyQzFxWnZESXc4QnRaRUpMNGt6alplSkN2WjJHMExUZ1Q3SGxMcnl0MWg0N1h1ZzE5Y0Z5clZrZHZIdVFLZTNnR2xsclE?oc=5"
+            }
+          ],
+          "thread": {
+            "id": 98,
+            "stories": 7,
+            "days": 5,
+            "first_seen": "2026-10-25"
+          },
+          "history": {
+            "days_running": 7,
+            "stories": 59,
+            "last7": 59,
+            "prev7": 0,
+            "trend": "heating",
+            "first_seen": "2026-10-23",
+            "past_predictions": [],
+            "hit_rate": null,
+            "note": "Heating up: 59 stories in the last week vs 0 the week before (first seen 7 days ago)."
+          },
+          "impact": {
+            "score": 11,
+            "size": "big",
+            "sure": "low",
+            "when": "days",
+            "top5": 1
+          },
+          "card": {
+            "so_what": "FPIs withdraw ₹48,056 cr… hurts S&P 500 and Nasdaq",
+            "headline": "7 stories across Commodities & Prices, Stock Markets & Trading. Latest: Global stocks hold gains after Fed decision, oil prices rise",
+            "points": [
+              "7 stories across Commodities & Prices, Stock Markets & Trading. Latest: Global stocks hold gains after Fed decision,…",
+              "Driven by: Bank of Canada to raise… (shares: end, fed, october); Wall Street loses ground… (shares: oil, prices, stocks)",
+              "Leads to: Gold Falls to Three-Month… (shares: fed, oil, prices); S&P 500 (moves the market); Nasdaq (moves the market)"
+            ],
+            "for_you": {},
+            "currency": {},
+            "predictions": [],
+            "against": [],
+            "pattern": "",
+            "light": true
+          }
+        },
+        {
+          "id": "n8",
+          "label": "Gold Falls to Three-Month…",
+          "type": "event",
+          "domain": "Commodities & Prices",
+          "region": "Global",
+          "detail": "6 stories across Commodities & Prices, Stock Markets & Trading. Latest: Gold slips on higher oil prices ahead of Fed decision",
+          "sources": [
+            {
+              "title": "Gold slips on higher oil prices ahead of Fed decision",
+              "link": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxOTDFlUGVCY1JNODB5dHN6RHNIM2wySnlfWTdGdjQtV3YtTEtnT1FiN1FNd28xSmlsaUNWVl90Q3hrYW5wdWJNN3RNNGFuOGNRZlYwZ1JqUW1MWk5ENGYya3pxek9XM3JpaGRXOFdkeGliclotWWdNOU16aWZoLXNSTW03N2JEbTR2WEhkUE9YdFdPeHJ4ZVRLUUxLY1lRWmlWS29VdFU2WlNpMm9NY2VQRUlrUnp1SlZGS3JEczJ6TWE?oc=5"
+            },
+            {
+              "title": "Oil prices slide for second straight day as inflation concerns ease",
+              "link": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE9oUVBiZVdqYzNRbU5Zc2hlR3dNMTVoWGUzSkRDXzhJVHQtY215c3N4bENPSV9SSkU1ZWVrZ0FUQ2lReUxZekt6QmZVWlY3SnJXbk5xWUx3UEg0dDg?oc=5"
+            },
+            {
+              "title": "Gold futures turn higher as crude oil prices pull back",
+              "link": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxQVUotQ1ZYd01Vc3ZUbTh5V2xzM05sZElTb3JEUzIyOUcyRVF4dXdSejczRk53N1prRFdMZnl2Uzh0YXZJcWNrYURLNGhDdzZjV0lheXhYeXo1d0JLeFZNbTN4cE9hS1VKZDQ2MmxxUWtOSVo5NTRvVmg0MnZ6NzBxQzhuRkJqaE52bmRSWVkxWGFOcTVLVHhQWU15d2ZBVTFWc3djeXllQ256bW1BUENFdlpja25WTmJJ?oc=5"
+            }
+          ],
+          "thread": {
+            "id": 74,
+            "stories": 6,
+            "days": 5,
+            "first_seen": "2026-10-24"
+          },
+          "history": {
+            "days_running": 6,
+            "stories": 63,
+            "last7": 63,
+            "prev7": 0,
+            "trend": "new",
+            "first_seen": "2026-10-24",
+            "past_predictions": [],
+            "hit_rate": null,
+            "note": "New: first seen 6 days ago, 63 stories so far."
+          },
+          "impact": {
+            "score": 7,
+            "size": "medium",
+            "sure": "low",
+            "when": "days",
+            "top5": 0
+          },
+          "card": {
+            "so_what": "Gold Falls to Three-Month… hurts Gold",
+            "headline": "6 stories across Commodities & Prices, Stock Markets & Trading. Latest: Gold slips on higher oil prices ahead of Fed decision",
+            "points": [
+              "6 stories across Commodities & Prices, Stock Markets & Trading. Latest: Gold slips on higher oil prices ahead of Fed…",
+              "Driven by: FPIs withdraw ₹48,056 cr… (shares: fed, oil, prices); Global oil prices jump as… (shares: oil, prices)",
+              "Leads to: Gold (moves the market)"
+            ],
+            "for_you": {},
+            "currency": {},
+            "predictions": [],
+            "against": [],
+            "pattern": "",
+            "light": true
+          }
+        },
+        {
+          "id": "n9",
+          "label": "Iran warns of response…",
+          "type": "event",
+          "domain": "Geopolitics & Diplomacy",
+          "region": "Global",
+          "detail": "6 stories across Geopolitics & Diplomacy, Wars & Conflicts. Latest: Israel election puts Netanyahu’s wartime leadership on the line as Trump urges voters to return him to power",
+          "sources": [
+            {
+              "title": "Israel election puts Netanyahu’s wartime leadership on the line as Trump urges voters to return him to power",
+              "link": "https://www.cnbc.com/2026/10/26/israel-election-netanyahu-iran-gaza-palestine.html"
+            },
+            {
+              "title": "Netanyahu pushed for Iran strike before election but Trump refused, CNN says",
+              "link": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxOSllVZTRWSlotR3pRbDliYldYLWFOMy1jNUtSRHVCVDNUQWN4MTFPYVdzUEU0T2ZhZE95czU2aWVLd3FXNU1fX2ZqMTVTdDdmQnQwYjFBQ3ZxbmRNU1NVM2J6Wk10d0RIWEYyT2hobzlyblNfSmRDN0hPZmx4RGxDaWN0MERQWVREa3JKVVdNbW4yZ21qWGtraURZcEh1YTZNZGhLSDktV2J5d9IBrwFBVV95cUxPdHRXNUhRc213aVBLeVkwWlBWTlZQMTBxTmYwS2NpRnF3dFZfTVpmcXN4aGdiRFBBakdxMFFfLXozd25MVzRFbmNnVmlaTXJRcWs4cV9WbFlac0VrMENjYlZIS3VfR0x5YzAxTHIzNTR5SmJhbnVxUUsySE4zb1FORllTWkdtWE5oeXVsMHBiYklvbGVuem5EQ0RmMlJESWtHbU5ES0tqdWpvX0dLMFM4?oc=5"
+            },
+            {
+              "title": "Netanyahu reportedly pressured military to attack Iran in run-up to election",
+              "link": "https://news.google.com/rss/articles/CBMivwFBVV95cUxPMGg3NmRYX3RhRXpOMk5ONlBEd25EMjcwN3NIRlFOTThTVGVCZmxsRlFRRGw5WUttTDByVVkyYU91Qm1XSUVLSjFHcVdQUkYwY0JPUFlMbWE2MWFOSXdMNUROelpLME1OWnZZWmdfc0ZHbl9BdGFaLWhqTTdGSkJIeXJ5VjlHUlNsMGZDX05CZ2t3WE9YTElNZzBIVTdmQkJrWTFVZ0h0aDhEb0dkYlhPQWYyTUNUZHoxRm84STRVbw?oc=5"
+            }
+          ],
+          "thread": {
+            "id": 42,
+            "stories": 6,
+            "days": 6,
+            "first_seen": "2026-10-24"
+          },
+          "history": {
+            "days_running": 6,
+            "stories": 38,
+            "last7": 38,
+            "prev7": 0,
+            "trend": "new",
+            "first_seen": "2026-10-24",
+            "past_predictions": [],
+            "hit_rate": null,
+            "note": "New: first seen 6 days ago, 38 stories so far."
+          },
+          "impact": {
+            "score": 4,
+            "size": "small",
+            "sure": "low",
+            "when": "days",
+            "top5": 0
+          },
+          "card": {
+            "so_what": "",
+            "headline": "6 stories across Geopolitics & Diplomacy, Wars & Conflicts. Latest: Israel election puts Netanyahu’s wartime leadership on the line as…",
+            "points": [
+              "6 stories across Geopolitics & Diplomacy, Wars & Conflicts. Latest: Israel election puts Netanyahu’s wartime leadership…",
+              "Driven by: Trump mocks reporter asking… (shares: iran, military, trump); Israeli PM pledges massive… (shares: military,…",
+              "Leads to: Iran says won’t allow US… (shares: iran, trump)"
+            ],
+            "for_you": {},
+            "currency": {},
+            "predictions": [],
+            "against": [],
+            "pattern": "",
+            "light": true
+          }
+        },
+        {
+          "id": "n10",
+          "label": "After months of threats by…",
+          "type": "event",
+          "domain": "Commodities & Prices",
+          "region": "US",
+          "detail": "5 stories across Commodities & Prices, Wars & Conflicts. Latest: Senators briefed on Trump’s ‘insane’ plan to restart war on Iran",
+          "sources": [
+            {
+              "title": "Senators briefed on Trump’s ‘insane’ plan to restart war on Iran",
+              "link": "https://www.aljazeera.com/video/newsfeed/2026/10/30/senators-briefed-on-trumps-insane-plan-to-restart-war-on-iran-2?traffic_source=rss"
+            },
+            {
+              "title": "Trump says Iran war will end 'when I want it to' as costs reportedly balloon to $47 billion",
+              "link": "https://www.cnbc.com/2026/10/28/us-iran-war-trump-hormuz-costs-centcom.html"
+            },
+            {
+              "title": "Trump, campaigning in Texas for Republicans, touts Iran war and ‘51st state’ Venezuela: ‘I knew that oil would go up’ – live",
+              "link": "https://www.theguardian.com/us-news/live/2026/oct/27/comey-trump-rubio-texas-vance-israel-midterms-politics-latest-news-updates"
+            }
+          ],
+          "thread": {
+            "id": 259,
+            "stories": 5,
+            "days": 3,
+            "first_seen": "2026-10-26"
+          },
+          "history": {
+            "days_running": 6,
+            "stories": 43,
+            "last7": 43,
+            "prev7": 0,
+            "trend": "new",
+            "first_seen": "2026-10-24",
+            "past_predictions": [],
+            "hit_rate": null,
+            "note": "New: first seen 6 days ago, 43 stories so far."
+          },
+          "impact": {
+            "score": 5,
+            "size": "small",
+            "sure": "low",
+            "when": "days",
+            "top5": 0
+          },
+          "card": {
+            "so_what": "",
+            "headline": "5 stories across Commodities & Prices, Wars & Conflicts. Latest: Senators briefed on Trump’s ‘insane’ plan to restart war on Iran",
+            "points": [
+              "5 stories across Commodities & Prices, Wars & Conflicts. Latest: Senators briefed on Trump’s ‘insane’ plan to restart…",
+              "Leads to: Iran warns of response… (shares: iran, trump); Trump mocks reporter asking… (shares: iran, trump); Iran says…"
+            ],
+            "for_you": {},
+            "currency": {},
+            "predictions": [],
+            "against": [],
+            "pattern": "",
+            "light": true
+          }
+        },
+        {
+          "id": "n11",
+          "label": "Trump mocks reporter asking…",
+          "type": "event",
+          "domain": "Geopolitics & Diplomacy",
+          "region": "US",
+          "detail": "5 stories across Geopolitics & Diplomacy, Wars & Conflicts. Latest: Hegseth reportedly fires U.S. top military planner as Trump downplays Iran peace talks",
+          "sources": [
+            {
+              "title": "Hegseth reportedly fires U.S. top military planner as Trump downplays Iran peace talks",
+              "link": "https://www.cnbc.com/2026/10/29/us-iran-war-trump-hormuz.html"
+            },
+            {
+              "title": "Trump mocks reporter asking about Iran strikes, as Tehran says US derailed",
+              "link": "https://www.aljazeera.com/video/newsfeed/2026/10/25/trump-mocks-reporter-asking-about-iran-strikes-as-tehran-says-us-derailed?traffic_source=rss"
+            },
+            {
+              "title": "CENTCOM reportedly has plans for Iran strikes: Will Trump approve them?",
+              "link": "https://www.aljazeera.com/news/2026/10/25/centcom-reportedly-has-plans-for-iran-strikes-will-trump-approve-them?traffic_source=rss"
+            }
+          ],
+          "thread": {
+            "id": 101,
+            "stories": 5,
+            "days": 5,
+            "first_seen": "2026-10-25"
+          },
+          "history": {
+            "days_running": 6,
+            "stories": 27,
+            "last7": 27,
+            "prev7": 0,
+            "trend": "new",
+            "first_seen": "2026-10-24",
+            "past_predictions": [],
+            "hit_rate": null,
+            "note": "New: first seen 6 days ago, 27 stories so far."
+          },
+          "impact": {
+            "score": 5,
+            "size": "small",
+            "sure": "low",
+            "when": "days",
+            "top5": 0
+          }
+        },
+        {
+          "id": "n12",
+          "label": "US Fed expected to hold…",
+          "type": "event",
+          "domain": "Commodities & Prices",
+          "region": "India",
+          "detail": "5 stories across Commodities & Prices, Finance & Banking, Stock Markets & Trading. Latest: US Market: Fed holds rates steady, but bond investors remain concerned over inflation",
+          "sources": [
+            {
+              "title": "US Market: Fed holds rates steady, but bond investors remain concerned over inflation",
+              "link": "https://economictimes.indiatimes.com/markets/us-stocks/wall-street-guide/us-market-fed-holds-rates-steady-but-bond-investors-remain-concerned-over-inflation/articleshow/135296667.cms"
+            },
+            {
+              "title": "Fed leaves interest rates unchanged despite inflation in the US",
+              "link": "https://www.aljazeera.com/economy/2026/10/28/fed-leaves-interest-rates-unchanged-despite-inflation-in-the-us?traffic_source=rss"
+            },
+            {
+              "title": "Fed expected to hold rates steady, but Warsh may point way to more hikes",
+              "link": "https://www.cnbc.com/2026/10/27/federal-reserve-rates-kevin-warsh.html"
+            }
+          ],
+          "thread": {
+            "id": 123,
+            "stories": 5,
+            "days": 5,
+            "first_seen": "2026-10-24"
+          },
+          "history": {
+            "days_running": 6,
+            "stories": 40,
+            "last7": 40,
+            "prev7": 0,
+            "trend": "new",
+            "first_seen": "2026-10-24",
+            "past_predictions": [
+              {
+                "if": "Fed holds rates steady this week as widely expected",
+                "then": "USD/INR and USD/CAD stabilize near current levels, giving RBI and BoC room to pause; equity rally extends into month-end",
+                "status": "open",
+                "created": "2026-10-26",
+                "evidence": ""
+              }
+            ],
+            "hit_rate": null,
+            "note": "New: first seen 6 days ago, 40 stories so far."
+          },
+          "impact": {
+            "score": 6,
+            "size": "medium",
+            "sure": "low",
+            "when": "days",
+            "top5": 0
+          },
+          "card": {
+            "so_what": "",
+            "headline": "5 stories across Commodities & Prices, Finance & Banking, Stock Markets & Trading. Latest: US Market: Fed holds rates steady, but bond…",
+            "points": [
+              "5 stories across Commodities & Prices, Finance & Banking, Stock Markets & Trading. Latest: US Market: Fed holds rates…",
+              "Driven by: Federal Reserve Interest… (shares: midterms, rates); Bank of Canada to raise… (shares: fed, rates)",
+              "Leads to: Gold Falls to Three-Month… (shares: expected, fed); Canada-U.S. talks gain more… (shares: ahead, midterms)"
+            ],
+            "for_you": {},
+            "currency": {},
+            "predictions": [],
+            "against": [],
+            "pattern": "",
+            "light": true
+          }
+        },
+        {
+          "id": "n13",
+          "label": "Houthis Claim They Targeted…",
+          "type": "event",
+          "domain": "Commodities & Prices",
+          "region": "Global",
+          "detail": "5 stories across Commodities & Prices, Wars & Conflicts. Latest: Oil prices climb after Houthis claim strike on Saudi Arabia's biggest refinery",
+          "sources": [
+            {
+              "title": "Oil prices climb after Houthis claim strike on Saudi Arabia's biggest refinery",
+              "link": "https://news.google.com/rss/articles/CBMidkFVX3lxTE1FNjdwU0VoYnFNU2dtSDRuZnRCUW9BdFZTVVh6UElIMXlYV2RLZFZUQ3RsUEVmdExsN3ppdGZPMUNEb1F0QWE5WEYzbFoyWkhfcDB0cFlKMm9UUzJYc29vd1lLYWtIbmlPZW5hclc0Mlg3MkxnbHc?oc=5"
+            },
+            {
+              "title": "Oil prices rise on Yemen fighting, Saudi refinery attack",
+              "link": "https://news.google.com/rss/articles/CBMi6gFBVV95cUxORGZlS0lkb1QxRXk3aUVzV0JMUm5aQWdRZnRkS0JldEFvZkdyd3FLMGxVYUtwaGdUVGxQak9yYmNxbm5BNlM2aTlnanJ5VWdsRF9mSmo5WUFwR3pFMEk4a1NrdUJaMEtyVVRTSzl3U0c3dTZCRUhlMG94bFZLMllNdlNtS3BNUk5PVlAyTlZIR1hFWlNnU2RmNHM1aTloeEFBVXkxRVQ3cV9xU1pwSFA5bm5SdTJBbnpjOVpyR2dfMlZzQlhNa1FaLVo3elJicUdKMEdjQVg2TkpCUU9haElKaWZabkRiZElIb1E?oc=5"
+            },
+            {
+              "title": "Yemen’s Houthis attack Saudi Arabia’s largest oil refinery",
+              "link": "https://www.semafor.com/article/10/28/2026/yemens-houthis-attack-saudi-arabias-largest-oil-refinery"
+            }
+          ],
+          "thread": {
+            "id": 56,
+            "stories": 5,
+            "days": 5,
+            "first_seen": "2026-10-24"
+          },
+          "history": {
+            "days_running": 6,
+            "stories": 45,
+            "last7": 45,
+            "prev7": 0,
+            "trend": "new",
+            "first_seen": "2026-10-24",
+            "past_predictions": [],
+            "hit_rate": null,
+            "note": "New: first seen 6 days ago, 45 stories so far."
+          },
+          "impact": {
+            "score": 7,
+            "size": "medium",
+            "sure": "low",
+            "when": "days",
+            "top5": 0
+          },
+          "card": {
+            "so_what": "",
+            "headline": "5 stories across Commodities & Prices, Wars & Conflicts. Latest: Oil prices climb after Houthis claim strike on Saudi Arabia's biggest…",
+            "points": [
+              "5 stories across Commodities & Prices, Wars & Conflicts. Latest: Oil prices climb after Houthis claim strike on Saudi…",
+              "Driven by: Global oil prices jump as… (shares: oil, prices); Wall Street loses ground… (shares: oil, prices)",
+              "Leads to: Saudi Launches Deadly… (shares: arabia, houthis, saudi); Gold Falls to Three-Month… (shares: oil, prices)"
+            ],
+            "for_you": {},
+            "currency": {},
+            "predictions": [],
+            "against": [],
+            "pattern": "",
+            "light": true
+          }
+        },
+        {
+          "id": "n15",
+          "label": "US Stock Markets this week:…",
+          "type": "event",
+          "domain": "Commodities & Prices",
+          "region": "US",
+          "detail": "4 stories across Commodities & Prices, Stock Markets & Trading, Technology & Semiconductors. Latest: Wall Street mostly rises as Fed holds key rate steady, deferring next likely hike to December",
+          "sources": [
+            {
+              "title": "Wall Street mostly rises as Fed holds key rate steady, deferring next likely hike to December",
+              "link": "https://www.livemint.com/market/wall-street-mostly-rises-as-fed-holds-key-rate-steady-deferring-next-likely-hike-to-december-11793213973901.html"
+            },
+            {
+              "title": "Bitcoin trades near $79,000 as Fed rate uncertainty, selling pressure weigh on crypto markets",
+              "link": "https://economictimes.indiatimes.com/markets/cryptocurrency/bitcoin-trades-near-79000-as-fed-rate-uncertainty-selling-pressure-weigh-on-crypto-markets/articleshow/135232578.cms"
+            },
+            {
+              "title": "Not Nvidia. This Chip Stock Has More Upside, According to Wall Street.",
+              "link": "https://news.google.com/rss/articles/CBMimAFBVV95cUxPUlpTMy1iMkV0QS1RWHFfV191dXoxR0xxMjAyUTdmanFlRmUtUjREcWhMUXNFcDBLclBBVHd4SWZvSUI4TWhPN0pMNnBGUnE1bUJ2UHpxSk5QY1p4Q1BrMkdkQWhxRUhxUDM1WVduOFR5eGlXOFZzd0d2NzZaNVg1VEdIU2FnR0dkSk5SMXRZX0F1ZmxlVnFkaA?oc=5"
+            }
+          ],
+          "thread": {
+            "id": 155,
+            "stories": 4,
+            "days": 4,
+            "first_seen": "2026-10-25"
+          },
+          "history": {
+            "days_running": 7,
+            "stories": 61,
+            "last7": 61,
+            "prev7": 0,
+            "trend": "heating",
+            "first_seen": "2026-10-23",
+            "past_predictions": [
+              {
+                "if": "The Indian stock market continues its rally driven by domestic factors.",
+                "then": "This could attract significant foreign investment, boosting India's economic growth and potentially positioning it as a more attractive investment destination compared to other emerging markets.",
+                "status": "open",
+                "created": "2026-10-29",
+                "evidence": ""
+              }
+            ],
+            "hit_rate": null,
+            "note": "Heating up: 61 stories in the last week vs 0 the week before (first seen 7 days ago)."
+          },
+          "impact": {
+            "score": 7,
+            "size": "medium",
+            "sure": "low",
+            "when": "days",
+            "top5": 0
+          },
+          "card": {
+            "so_what": "US Stock Markets this week:… hurts S&P 500",
+            "headline": "4 stories across Commodities & Prices, Stock Markets & Trading, Technology & Semiconductors. Latest: Wall Street mostly rises as Fed holds…",
+            "points": [
+              "4 stories across Commodities & Prices, Stock Markets & Trading, Technology & Semiconductors. Latest: Wall Street mostly…",
+              "Driven by: Federal Reserve Interest… (shares: decision, rate, week); Intel stock plunges 16% as… (shares: stock,…",
+              "Leads to: S&P 500 (moves the market); Gold Falls to Three-Month… (shares: fed, rate)"
+            ],
+            "for_you": {},
+            "currency": {},
+            "predictions": [],
+            "against": [],
+            "pattern": "",
+            "light": true
+          }
+        },
+        {
+          "id": "n16",
+          "label": "Canada-U.S. talks gain more…",
+          "type": "event",
+          "domain": "Geopolitics & Diplomacy",
+          "region": "Canada",
+          "detail": "4 stories across Geopolitics & Diplomacy, Stock Markets & Trading. Latest: Canada not in a 'position right now' to agree to U.S. trade deal, Carney says",
+          "sources": [
+            {
+              "title": "Canada not in a 'position right now' to agree to U.S. trade deal, Carney says",
+              "link": "https://news.google.com/rss/articles/CBMiakFVX3lxTFBicmYzRU44dU5TSWNqVmU1VDRSWml2MGFLUGxudmZLeUZBY0hZYVJ6LUhZcWxnOU5EdWx6R0VUeTBFSzJPWWx1Q20yektxZFNhbEN5dHpjU1NZYnhYaUlCMi1wZnZJXzZhTWc?oc=5"
+            },
+            {
+              "title": "Canada-U.S. trade talks intensifying but wide gap remains, sources say",
+              "link": "https://news.google.com/rss/articles/CBMijAFBVV95cUxOSkVjeTN4TVNzcnFfbnZrcHZYSF9vRHFTQUV0bV9pcHlLWlNacVJqeW90Z2tFQ3htLUF6YlRYMEdxWE9OTDU2YXloMW9Uc1d5dFN4MnA3UWFQRmZfN2xjSmE1eUhQMFBkWk5sWVR2UE5tUDBiem95REF4akIteEh2bFY1X0dnSUl4Y0h2dg?oc=5"
+            },
+            {
+              "title": "PM Carney says ‘U.S. is coming closer to our position’ as trade talks gain momentum",
+              "link": "https://news.google.com/rss/articles/CBMi1gFBVV95cUxNLW9vYTlQLWN4T19ZRlFWME11WmVubENyZ0M4V1VnekVRSWdfM1Q0Y3lnZmVlemtTb0VvT09XQzEyOGVpSExBRnFHS1hrN1Z4bUMwZlZWOG9OWHd1Ujl2Zl94b3gwU1hVQU5Hc2R0Z0FFUU9ETWNJanRWZF9mY0FPUkVvM0JOMjNBa0R6eVJ2UmVyUzJxSS1yM09qeG9QMEhPWXRxXzg3YXZOZEZxU2REbG1SYVI4eDdINTJrdUliTE85Wm02Zk9wR3ZLNjRfRXdDYWFMRnJ3?oc=5"
+            }
+          ],
+          "thread": {
+            "id": 184,
+            "stories": 4,
+            "days": 4,
+            "first_seen": "2026-10-25"
+          },
+          "history": {
+            "days_running": 5,
+            "stories": 13,
+            "last7": 13,
+            "prev7": 0,
+            "trend": "new",
+            "first_seen": "2026-10-25",
+            "past_predictions": [
+              {
+                "if": "Canada-US trade talks produce sectoral agreement on autos/lumber before US midterms",
+                "then": "TSX outperforms S&P 500 into year-end; CAD recovers toward 1.35; ConocoPhillips layoffs partially reversed",
+                "status": "open",
+                "created": "2026-10-26",
+                "evidence": ""
+              }
+            ],
+            "hit_rate": null,
+            "note": "New: first seen 5 days ago, 13 stories so far."
+          },
+          "impact": {
+            "score": 3,
+            "size": "small",
+            "sure": "low",
+            "when": "days",
+            "top5": 0
+          }
+        },
+        {
+          "id": "n18",
+          "label": "Jordan’s King Abdullah…",
+          "type": "event",
+          "domain": "Geopolitics & Diplomacy",
+          "region": "Other",
+          "detail": "4 stories across Geopolitics & Diplomacy, Wars & Conflicts. Latest: Jordan attacks militants in Syria in retaliation for last week’s church attack",
+          "sources": [
+            {
+              "title": "Jordan attacks militants in Syria in retaliation for last week’s church attack",
+              "link": "https://www.theguardian.com/world/2026/oct/26/jordan-attacks-militants-syria-retaliation-for-last-week-church-attack"
+            },
+            {
+              "title": "Jordan strikes militant groups in Syria after church attack",
+              "link": "https://www.thehindu.com/news/international/jordan-strikes-militant-groups-in-syria-after-church-attack/article71629645.ece"
+            },
+            {
+              "title": "Jordan carries out deadly strike in Syria in retaliation for church attack",
+              "link": "https://www.bbc.co.uk/news/articles/cq8ezg6dy6xlo?at_medium=RSS&at_campaign=rss"
+            }
+          ],
+          "thread": {
+            "id": 13,
+            "stories": 4,
+            "days": 6,
+            "first_seen": "2026-10-24"
+          },
+          "history": {
+            "days_running": 6,
+            "stories": 6,
+            "last7": 6,
+            "prev7": 0,
+            "trend": "new",
+            "first_seen": "2026-10-24",
+            "past_predictions": [],
+            "hit_rate": null,
+            "note": "New: first seen 6 days ago, 6 stories so far."
+          },
+          "impact": {
+            "score": 2,
+            "size": "small",
+            "sure": "low",
+            "when": "days",
+            "top5": 0
+          }
+        },
+        {
+          "id": "n19",
+          "label": "Iran says won’t allow US…",
+          "type": "event",
+          "domain": "Geopolitics & Diplomacy",
+          "region": "Global",
+          "detail": "4 stories across Geopolitics & Diplomacy, Wars & Conflicts. Latest: Trump says he may attack Iran or make a deal",
+          "sources": [
+            {
+              "title": "Trump says he may attack Iran or make a deal",
+              "link": "https://www.thehindu.com/videos/shorts/trump-says-he-may-attack-iran-or-make-a-deal/article71622837.ece"
+            },
+            {
+              "title": "Iran says won’t allow US warships to get close as Trump ponders new attacks",
+              "link": "https://www.aljazeera.com/news/2026/10/24/iran-says-wont-allow-us-warships-to-get-close-as-trump-ponders-new-attacks?traffic_source=rss"
+            },
+            {
+              "title": "Trump: We May Attack Iran Tomorrow Or We May Get A Great Deal, Either Way We Win",
+              "link": "https://news.google.com/rss/articles/CBMivwFBVV95cUxNUzExcmJMTjBPUXVWR3BVUnRCYnJtRmJ5dGlMMmFEQl91Z2w2WFdJcy1TZWdITk8zbzdDcWNucEZoY28tUndTcnotRTJSS3RrTWg1SmxnR0M5Z0NrdjFtUlZ2NVprME95RGhONmpHdWVCUUFHSGZYUWoyYVhNZ0ZyTExhZkphUXg4Z2t3ZHlaQnZBNGR1VWlPb1dwWm91eTBkM1A1YjdadUQ5V1FtSjNJQzl3TGhSZ0R4ajBzMC1MOA?oc=5"
+            }
+          ],
+          "thread": {
+            "id": 27,
+            "stories": 4,
+            "days": 6,
+            "first_seen": "2026-10-24"
+          },
+          "history": {
+            "days_running": 6,
+            "stories": 30,
+            "last7": 30,
+            "prev7": 0,
+            "trend": "new",
+            "first_seen": "2026-10-24",
+            "past_predictions": [],
+            "hit_rate": null,
+            "note": "New: first seen 6 days ago, 30 stories so far."
+          },
+          "impact": {
+            "score": 4,
+            "size": "small",
+            "sure": "low",
+            "when": "days",
+            "top5": 0
+          },
+          "card": {
+            "so_what": "",
+            "headline": "4 stories across Geopolitics & Diplomacy, Wars & Conflicts. Latest: Trump says he may attack Iran or make a deal",
+            "points": [
+              "4 stories across Geopolitics & Diplomacy, Wars & Conflicts. Latest: Trump says he may attack Iran or make a deal",
+              "Driven by: Iran warns of response… (shares: iran, trump); After months of threats by… (shares: iran, trump)"
+            ],
+            "for_you": {},
+            "currency": {},
+            "predictions": [],
+            "against": [],
+            "pattern": "",
+            "light": true
+          }
+        },
+        {
+          "id": "n24",
+          "label": "Bank of Canada to raise…",
+          "type": "event",
+          "domain": "Finance & Banking",
+          "region": "Canada",
+          "detail": "3 stories across Finance & Banking, Technology & Semiconductors. Latest: Fasken’s Noteworthy News: Privacy & Cybersecurity in Canada, the US, and the EU (October 2026)",
+          "sources": [
+            {
+              "title": "Fasken’s Noteworthy News: Privacy & Cybersecurity in Canada, the US, and the EU (October 2026)",
+              "link": "https://news.google.com/rss/articles/CBMiygFBVV95cUxQVGYzcDlLNmhlNFZ0TzBQUk1rQUVCLW1xN0YxaHEzQ09OMkl1OVdQTnVQY2gydjBrRVJsUVhna0UxQ2x2c0prYVgtVFFka3h1RzhZdkVkTFljOS1mWjM0MHVEd2cxWjlRU0FDeV9UMU9RV2JqRjJfVDhrWUo4Rmk1N3gzMmNmeXl0d2ZjTzFEOVk0LUtZdlBqQlM5dDVlWDJmVzJWVnlIcFdRS3BqcjRRZGZkRVVDXzdYT1c2Y3JLNVVmRVBYTldkUENB?oc=5"
+            },
+            {
+              "title": "October 2026 FOMC Meeting Preview: Will the Fed Raise Rates Again? What Does This Mean for US Stocks?",
+              "link": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxNTmNSdDB4VzhxMnpPSENiZWFBNzQ1ODlmM0pIazRwVEc3VzlBd1AwdzFxQlFVNTcwUlFPWUoybFVnUDFOamtmOWgxeFloTnFiNHZCOE5IUC1IZkdTQ0R0aXJycEdGSXNST1AzY3ZISjVHRng3eXlpMlY3aGlOZFNzb1dWWFVpb1VqcVM2WlJicXdnR0lsTXhhWjZ6ZEFMSk1sU0dLVVY5bmRUUEF0MVphRDJHRjMyMDVFY1NObGxGRXZ3Zw?oc=5"
+            },
+            {
+              "title": "Bank of Canada to raise rates to 2.50% on October 28 and once again by end-March",
+              "link": "https://news.google.com/rss/articles/CBMi4wFBVV95cUxNQkczNHZldDdxazMwSVota0l0cXl2OWthSXlPaG5PYkpWR0xLWGFHcTNzYTk1Um5XODBZZG5fSEM1dm1vdW9WY2FSMGJUSld4NjBJelZRdkIxWkJsOGo1aXFjODRzdnpZMkRUaGF2aV9TTl8xSUpibDFMbGg0dUhQc3o4eVh2UXhzNlplQkJOMHRqXzFJUjc5UGJjbW5QSUlLLW41TjNoVXJhZ2pVWnB0dmtzc2gxVE5zbGtIdXZRa0pMejJsZmNSODJWUlk4SXJ5QUVUcy16YjVNSTRkNC0zcERpOA?oc=5"
+            }
+          ],
+          "thread": {
+            "id": 1,
+            "stories": 3,
+            "days": 6,
+            "first_seen": "2026-10-23"
+          },
+          "history": {
+            "days_running": 7,
+            "stories": 17,
+            "last7": 17,
+            "prev7": 0,
+            "trend": "heating",
+            "first_seen": "2026-10-23",
+            "past_predictions": [],
+            "hit_rate": null,
+            "note": "Heating up: 17 stories in the last week vs 0 the week before (first seen 7 days ago)."
+          },
+          "impact": {
+            "score": 8,
+            "size": "big",
+            "sure": "low",
+            "when": "days",
+            "top5": 3
+          },
+          "card": {
+            "so_what": "",
+            "headline": "3 stories across Finance & Banking, Technology & Semiconductors. Latest: Fasken’s Noteworthy News: Privacy & Cybersecurity in Canada, the…",
+            "points": [
+              "3 stories across Finance & Banking, Technology & Semiconductors. Latest: Fasken’s Noteworthy News: Privacy &…",
+              "Driven by: Federal Reserve Interest… (shares: 2026, october, rates)",
+              "Leads to: FPIs withdraw ₹48,056 cr… (shares: end, fed, october); US Fed expected to hold… (shares: fed, rates); Bank…"
+            ],
+            "for_you": {},
+            "currency": {},
+            "predictions": [],
+            "against": [],
+            "pattern": "",
+            "light": true
+          }
+        },
+        {
+          "id": "n25",
+          "label": "Bank Nifty tumbles nearly…",
+          "type": "event",
+          "domain": "Finance & Banking",
+          "region": "US",
+          "detail": "3 stories across Finance & Banking, Stock Markets & Trading. Latest: Yen slips ahead of central bank bonanza, dollar firms on tech rebound",
+          "sources": [
+            {
+              "title": "Yen slips ahead of central bank bonanza, dollar firms on tech rebound",
+              "link": "https://economictimes.indiatimes.com/markets/forex/forex-news/yen-slips-ahead-of-central-bank-bonanza-dollar-firms-on-tech-rebound/articleshow/135222721.cms"
+            },
+            {
+              "title": "Bank Nifty tumbles nearly 3%, slips below 55k: More selling pressure ahead for banking stocks? Check key levels to watch",
+              "link": "https://www.livemint.com/market/stock-market-news/bank-nifty-tumbles-nearly-3-slips-below-55k-more-selling-pressure-ahead-for-banking-stocks-check-key-levels-to-watch-11792920838777.html"
+            },
+            {
+              "title": "Stock market prediction for Monday Oct 26: Sensex, Nifty levels, top stocks to watch - Will bulls dance again?",
+              "link": "https://www.livemint.com/market/stock-market-news/stock-market-prediction-for-monday-oct-26-sensex-nifty-levels-top-stocks-to-watch-will-bulls-dance-again-11792934825551.html"
+            }
+          ],
+          "thread": {
+            "id": 100,
+            "stories": 3,
+            "days": 5,
+            "first_seen": "2026-10-25"
+          },
+          "history": {
+            "days_running": 6,
+            "stories": 25,
+            "last7": 25,
+            "prev7": 0,
+            "trend": "new",
+            "first_seen": "2026-10-24",
+            "past_predictions": [],
+            "hit_rate": null,
+            "note": "New: first seen 6 days ago, 25 stories so far."
+          },
+          "impact": {
+            "score": 7,
+            "size": "medium",
+            "sure": "low",
+            "when": "days",
+            "top5": 0
+          },
+          "card": {
+            "so_what": "Bank Nifty tumbles nearly… hurts Nasdaq",
+            "headline": "3 stories across Finance & Banking, Stock Markets & Trading. Latest: Yen slips ahead of central bank bonanza, dollar firms on tech rebound",
+            "points": [
+              "3 stories across Finance & Banking, Stock Markets & Trading. Latest: Yen slips ahead of central bank bonanza, dollar…",
+              "Driven by: Israeli PM pledges massive… (shares: ahead, bank); Wall Street loses ground… (shares: pressure, stocks)",
+              "Leads to: Nasdaq (moves the market)"
+            ],
+            "for_you": {},
+            "currency": {},
+            "predictions": [],
+            "against": [],
+            "pattern": "",
+            "light": true
+          }
+        },
+        {
+          "id": "n27",
+          "label": "Saudi Launches Deadly…",
+          "type": "event",
+          "domain": "Geopolitics & Diplomacy",
+          "region": "Global",
+          "detail": "3 stories across Geopolitics & Diplomacy, Wars & Conflicts. Latest: Saudi Arabia says it intercepted missiles and drones from Iran-backed Houthis",
+          "sources": [
+            {
+              "title": "Saudi Arabia says it intercepted missiles and drones from Iran-backed Houthis",
+              "link": "https://www.cnbc.com/2026/10/25/saudi-arabia-houthi-missile-drone-interceptions.html"
+            },
+            {
+              "title": "Saudi Launches Deadly Strikes On Houthi-Controlled Yemen Cities: Report",
+              "link": "https://www.ndtv.com/world-news/saudi-launches-deadly-strikes-on-yemen-cities-says-houthi-backed-media-12230221#publisher=newsstand"
+            },
+            {
+              "title": "Houthis say attacked Saudi Arabia, Yemen’s Aden after deadly strikes",
+              "link": "https://www.thehindu.com/news/international/houthis-attack-yemens-aden-say-saudi-strikes-kill-16/article71620895.ece"
+            }
+          ],
+          "thread": {
+            "id": 25,
+            "stories": 3,
+            "days": 6,
+            "first_seen": "2026-10-24"
+          },
+          "history": {
+            "days_running": 6,
+            "stories": 11,
+            "last7": 11,
+            "prev7": 0,
+            "trend": "new",
+            "first_seen": "2026-10-24",
+            "past_predictions": [],
+            "hit_rate": null,
+            "note": "New: first seen 6 days ago, 11 stories so far."
+          },
+          "impact": {
+            "score": 3,
+            "size": "small",
+            "sure": "low",
+            "when": "days",
+            "top5": 0
+          }
+        },
+        {
+          "id": "n29",
+          "label": "Intel stock plunges 16% as…",
+          "type": "event",
+          "domain": "Stock Markets & Trading",
+          "region": "US",
+          "detail": "2 stories across Stock Markets & Trading, Technology & Semiconductors. Latest: Intel heads for worst day on Wall Street in more than 50 years on weak guidance",
+          "sources": [
+            {
+              "title": "Intel heads for worst day on Wall Street in more than 50 years on weak guidance",
+              "link": "https://www.cnbc.com/2026/10/30/amazon-intel-earnings-big-tech-ai-spending-concerns.html"
+            },
+            {
+              "title": "Intel stock plunges 16% as chipmaker blames PC slowdown for weak guidance",
+              "link": "https://www.cnbc.com/2026/10/29/intel-intc-q3-earnings-report-2026-.html"
+            }
+          ],
+          "thread": {
+            "id": 414,
+            "stories": 2,
+            "days": 1,
+            "first_seen": "2026-10-29"
+          },
+          "history": {
+            "days_running": 6,
+            "stories": 21,
+            "last7": 21,
+            "prev7": 0,
+            "trend": "new",
+            "first_seen": "2026-10-24",
+            "past_predictions": [],
+            "hit_rate": null,
+            "note": "New: first seen 6 days ago, 21 stories so far."
+          },
+          "impact": {
+            "score": 4,
+            "size": "small",
+            "sure": "low",
+            "when": "days",
+            "top5": 0
+          }
+        },
+        {
+          "id": "n31",
+          "label": "S&P 500",
+          "type": "index",
+          "domain": "",
+          "direction": "down",
+          "detail": "S&P 500 moved ▼ -1.62% to 7,595.34.",
+          "market": {
+            "label": "S&P 500",
+            "price": "7,595.34",
+            "change": "▼ -1.62%",
+            "change_pct": -1.6197385689617174
+          },
+          "history": {
+            "days_running": null,
+            "stories": 0,
+            "last7": 0,
+            "prev7": 0,
+            "trend": "unknown",
+            "first_seen": null,
+            "past_predictions": [
+              {
+                "if": "Canada-US trade talks produce sectoral agreement on autos/lumber before US midterms",
+                "then": "TSX outperforms S&P 500 into year-end; CAD recovers toward 1.35; ConocoPhillips layoffs partially reversed",
+                "status": "open",
+                "created": "2026-10-26",
+                "evidence": ""
+              }
+            ],
+            "hit_rate": null,
+            "note": "No earlier coverage of this found in the saved history."
+          },
+          "impact": {
+            "score": 8,
+            "size": "big",
+            "sure": "low",
+            "when": "days",
+            "top5": 4
+          },
+          "card": {
+            "so_what": "",
+            "headline": "S&P 500 moved ▼ -1.62% to 7,595.34.",
+            "points": [
+              "S&P 500 moved ▼ -1.62% to 7,595.34.",
+              "Driven by: Wall Street loses ground… (moves the market); FPIs withdraw ₹48,056 cr… (moves the market)"
+            ],
+            "for_you": {},
+            "currency": {},
+            "predictions": [],
+            "against": [],
+            "pattern": "",
+            "light": true
+          }
+        },
+        {
+          "id": "n32",
+          "label": "Nasdaq",
+          "type": "index",
+          "domain": "",
+          "direction": "down",
+          "detail": "Nasdaq moved ▼ -2.66% to 25,488.99.",
+          "market": {
+            "label": "Nasdaq",
+            "price": "25,488.99",
+            "change": "▼ -2.66%",
+            "change_pct": -2.6570178502685615
+          },
+          "history": {
+            "days_running": null,
+            "stories": 0,
+            "last7": 0,
+            "prev7": 0,
+            "trend": "unknown",
+            "first_seen": null,
+            "past_predictions": [
+              {
+                "if": "Anthropic IPO prices above $30B valuation in next 2 weeks",
+                "then": "Triggers wave of AI startup IPO filings and SPAC reactivations, lifting Nasdaq 5-7%",
+                "status": "open",
+                "created": "2026-10-26",
+                "evidence": ""
+              }
+            ],
+            "hit_rate": null,
+            "note": "No earlier coverage of this found in the saved history."
+          },
+          "impact": {
+            "score": 7,
+            "size": "medium",
+            "sure": "low",
+            "when": "days",
+            "top5": 0
+          }
+        },
+        {
+          "id": "n33",
+          "label": "Gold",
+          "type": "index",
+          "domain": "",
+          "direction": "down",
+          "detail": "Gold moved ▼ -2.98% to 3,911.30.",
+          "market": {
+            "label": "Gold",
+            "price": "3,911.30",
+            "change": "▼ -2.98%",
+            "change_pct": -2.9791116052249467
+          },
+          "history": {
+            "days_running": null,
+            "stories": 0,
+            "last7": 0,
+            "prev7": 0,
+            "trend": "unknown",
+            "first_seen": null,
+            "past_predictions": [
+              {
+                "if": "Saudi-Iran de-escalation holds and Hormuz diplomacy progresses",
+                "then": "WTI sustains sub-$100, easing global CPI prints; EM central banks (India, Brazil) gain cutting room; gold consolidates above $4,000",
+                "status": "open",
+                "created": "2026-10-26",
+                "evidence": ""
+              },
+              {
+                "if": "Israel-Iran conflict escalates beyond current strikes before US midterms",
+                "then": "Oil spikes above $120, gold breaks $4,100, global risk-off hits Indian equities hardest among EMs",
+                "status": "open",
+                "created": "2026-10-26",
+                "evidence": ""
+              }
+            ],
+            "hit_rate": null,
+            "note": "No earlier coverage of this found in the saved history."
+          },
+          "impact": {
+            "score": 6,
+            "size": "medium",
+            "sure": "low",
+            "when": "days",
+            "top5": 0
+          }
+        },
+        {
+          "id": "n34",
+          "label": "WTI Crude",
+          "type": "index",
+          "domain": "",
+          "direction": "up",
+          "detail": "WTI Crude moved ▲ +2.07% to 104.11.",
+          "market": {
+            "label": "WTI Crude",
+            "price": "104.11",
+            "change": "▲ +2.07%",
+            "change_pct": 2.0686274509803915
+          },
+          "history": {
+            "days_running": null,
+            "stories": 0,
+            "last7": 0,
+            "prev7": 0,
+            "trend": "unknown",
+            "first_seen": null,
+            "past_predictions": [],
+            "hit_rate": null,
+            "note": "No earlier coverage of this found in the saved history."
+          },
+          "impact": {
+            "score": 8,
+            "size": "medium",
+            "sure": "low",
+            "when": "days",
+            "top5": 5
+          }
+        }
+      ],
+      "edges": [
+        {
+          "from": "n24",
+          "to": "n6",
+          "label": "shares: end, fed, october",
+          "strength": 3,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n13",
+          "to": "n27",
+          "label": "shares: arabia, houthis, saudi",
+          "strength": 3,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n3",
+          "to": "n15",
+          "label": "shares: decision, rate, week",
+          "strength": 2,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n3",
+          "to": "n24",
+          "label": "shares: 2026, october, rates",
+          "strength": 2,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n5",
+          "to": "n6",
+          "label": "shares: oil, prices, stocks",
+          "strength": 2,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n6",
+          "to": "n8",
+          "label": "shares: fed, oil, prices",
+          "strength": 2,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n11",
+          "to": "n9",
+          "label": "shares: iran, military, trump",
+          "strength": 2,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n29",
+          "to": "n15",
+          "label": "shares: stock, street, wall",
+          "strength": 2,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n5",
+          "to": "n31",
+          "label": "moves the market",
+          "strength": 2,
+          "status": "predicted",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "down"
+        },
+        {
+          "from": "n6",
+          "to": "n31",
+          "label": "moves the market",
+          "strength": 2,
+          "status": "predicted",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "down"
+        },
+        {
+          "from": "n15",
+          "to": "n31",
+          "label": "moves the market",
+          "strength": 2,
+          "status": "predicted",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "down"
+        },
+        {
+          "from": "n6",
+          "to": "n32",
+          "label": "moves the market",
+          "strength": 2,
+          "status": "predicted",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "down"
+        },
+        {
+          "from": "n25",
+          "to": "n32",
+          "label": "moves the market",
+          "strength": 2,
+          "status": "predicted",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "down"
+        },
+        {
+          "from": "n8",
+          "to": "n33",
+          "label": "moves the market",
+          "strength": 2,
+          "status": "predicted",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "down"
+        },
+        {
+          "from": "n2",
+          "to": "n34",
+          "label": "moves the market",
+          "strength": 2,
+          "status": "predicted",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "up"
+        },
+        {
+          "from": "n5",
+          "to": "n34",
+          "label": "moves the market",
+          "strength": 2,
+          "status": "predicted",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "up"
+        },
+        {
+          "from": "n6",
+          "to": "n34",
+          "label": "moves the market",
+          "strength": 2,
+          "status": "predicted",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "up"
+        },
+        {
+          "from": "n5",
+          "to": "n2",
+          "label": "shares: oil, prices",
+          "strength": 1,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n6",
+          "to": "n2",
+          "label": "shares: oil, prices",
+          "strength": 1,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n2",
+          "to": "n8",
+          "label": "shares: oil, prices",
+          "strength": 1,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n2",
+          "to": "n13",
+          "label": "shares: oil, prices",
+          "strength": 1,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n3",
+          "to": "n12",
+          "label": "shares: midterms, rates",
+          "strength": 1,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n4",
+          "to": "n9",
+          "label": "shares: military, operation",
+          "strength": 1,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n4",
+          "to": "n18",
+          "label": "shares: attack, deadly",
+          "strength": 1,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n4",
+          "to": "n25",
+          "label": "shares: ahead, bank",
+          "strength": 1,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n5",
+          "to": "n8",
+          "label": "shares: oil, prices",
+          "strength": 1,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n5",
+          "to": "n13",
+          "label": "shares: oil, prices",
+          "strength": 1,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n5",
+          "to": "n15",
+          "label": "shares: street, wall",
+          "strength": 1,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n5",
+          "to": "n25",
+          "label": "shares: pressure, stocks",
+          "strength": 1,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n29",
+          "to": "n5",
+          "label": "shares: street, wall",
+          "strength": 1,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n6",
+          "to": "n13",
+          "label": "shares: oil, prices",
+          "strength": 1,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n6",
+          "to": "n25",
+          "label": "shares: key, stocks",
+          "strength": 1,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n12",
+          "to": "n8",
+          "label": "shares: expected, fed",
+          "strength": 1,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n13",
+          "to": "n8",
+          "label": "shares: oil, prices",
+          "strength": 1,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n15",
+          "to": "n8",
+          "label": "shares: fed, rate",
+          "strength": 1,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n10",
+          "to": "n9",
+          "label": "shares: iran, trump",
+          "strength": 1,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n9",
+          "to": "n19",
+          "label": "shares: iran, trump",
+          "strength": 1,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n10",
+          "to": "n11",
+          "label": "shares: iran, trump",
+          "strength": 1,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n10",
+          "to": "n19",
+          "label": "shares: iran, trump",
+          "strength": 1,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n11",
+          "to": "n19",
+          "label": "shares: iran, trump",
+          "strength": 1,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n12",
+          "to": "n16",
+          "label": "shares: ahead, midterms",
+          "strength": 1,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n24",
+          "to": "n12",
+          "label": "shares: fed, rates",
+          "strength": 1,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n18",
+          "to": "n19",
+          "label": "shares: attack, attacks",
+          "strength": 1,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        },
+        {
+          "from": "n24",
+          "to": "n25",
+          "label": "shares: bank, stocks",
+          "strength": 1,
+          "status": "reported",
+          "confidence": "low",
+          "order": 1,
+          "kind": "causal",
+          "effect": "mixed"
+        }
+      ],
+      "market": [
+        {
+          "label": "S&P 500",
+          "price": "7,595.34",
+          "change": "▼ -1.62%",
+          "change_pct": -1.6197385689617174
+        },
+        {
+          "label": "Nasdaq",
+          "price": "25,488.99",
+          "change": "▼ -2.66%",
+          "change_pct": -2.6570178502685615
+        },
+        {
+          "label": "Nifty 50",
+          "price": "23,053.10",
+          "change": "▲ +0.51%",
+          "change_pct": 0.507264542709837
+        },
+        {
+          "label": "TSX",
+          "price": "35,552.49",
+          "change": "▼ -1.92%",
+          "change_pct": -1.9214599023421393
+        },
+        {
+          "label": "USD/INR",
+          "price": "94.940",
+          "change": "▼ -0.28%",
+          "change_pct": -0.2830633128460755
+        },
+        {
+          "label": "USD/CAD",
+          "price": "1.3949",
+          "change": "▼ -0.27%",
+          "change_pct": -0.2709667842887028
+        },
+        {
+          "label": "US Dollar Index",
+          "price": "101.85",
+          "change": "▼ -0.19%",
+          "change_pct": -0.18522237733397015
+        },
+        {
+          "label": "Gold",
+          "price": "3,911.30",
+          "change": "▼ -2.98%",
+          "change_pct": -2.9791116052249467
+        },
+        {
+          "label": "WTI Crude",
+          "price": "104.11",
+          "change": "▲ +2.07%",
+          "change_pct": 2.0686274509803915
+        },
+        {
+          "label": "BTC",
+          "price": "77,527",
+          "change": "▼ -4.84%",
+          "change_pct": -4.836335467597693
+        }
+      ]
+    },
+    "source": "threads"
+  },
+  "patterns": {
+    "heating": [
+      {
+        "term": "google",
+        "thread_id": 348,
+        "delta": 13.5,
+        "domains": [
+          "AI & ML",
+          "Stock Markets & Trading",
+          "Technology & Semiconductors"
+        ]
+      },
+      {
+        "term": "fed",
+        "thread_id": 98,
+        "delta": 8.2,
+        "domains": [
+          "Commodities & Prices",
+          "Finance & Banking",
+          "Stock Markets & Trading"
+        ]
+      },
+      {
+        "term": "train",
+        "thread_id": 337,
+        "delta": 7.5,
+        "domains": [
+          "AI & ML",
+          "Geopolitics & Diplomacy",
+          "Stock Markets & Trading",
+          "Technology & Semiconductors",
+          "Wars & Conflicts"
+        ]
+      },
+      {
+        "term": "decision",
+        "thread_id": 130,
+        "delta": 7.5,
+        "domains": [
+          "Commodities & Prices",
+          "Finance & Banking",
+          "Stock Markets & Trading"
+        ]
+      },
+      {
+        "term": "interest",
+        "thread_id": 130,
+        "delta": 6.8,
+        "domains": [
+          "Commodities & Prices",
+          "Finance & Banking",
+          "Stock Markets & Trading",
+          "Wars & Conflicts"
+        ]
+      },
+      {
+        "term": "crash",
+        "thread_id": 337,
+        "delta": 6.8,
+        "domains": [
+          "Geopolitics & Diplomacy",
+          "Stock Markets & Trading",
+          "Wars & Conflicts"
+        ]
+      },
+      {
+        "term": "midterms",
+        "thread_id": 130,
+        "delta": 6.8,
+        "domains": [
+          "Commodities & Prices",
+          "Finance & Banking",
+          "Geopolitics & Diplomacy",
+          "Stock Markets & Trading",
+          "Wars & Conflicts"
+        ]
+      },
+      {
+        "term": "spain",
+        "thread_id": 337,
+        "delta": 6.8,
+        "domains": [
+          "Commodities & Prices",
+          "Geopolitics & Diplomacy",
+          "Stock Markets & Trading",
+          "Wars & Conflicts"
+        ]
+      }
+    ],
+    "cooling": [
+      {
+        "term": "trump",
+        "thread_id": 42,
+        "delta": -18.8,
+        "domains": [
+          "Commodities & Prices",
+          "Finance & Banking",
+          "Geopolitics & Diplomacy",
+          "Stock Markets & Trading",
+          "Technology & Semiconductors",
+          "Wars & Conflicts"
+        ]
+      },
+      {
+        "term": "anthropic",
+        "thread_id": 192,
+        "delta": -12.0,
+        "domains": [
+          "AI & ML",
+          "Stock Markets & Trading"
+        ]
+      },
+      {
+        "term": "iran",
+        "thread_id": 42,
+        "delta": -11.2,
+        "domains": [
+          "Commodities & Prices",
+          "Geopolitics & Diplomacy",
+          "Stock Markets & Trading",
+          "Wars & Conflicts"
+        ]
+      },
+      {
+        "term": "ahead",
+        "thread_id": 9,
+        "delta": -8.2,
+        "domains": [
+          "AI & ML",
+          "Commodities & Prices",
+          "Finance & Banking",
+          "Geopolitics & Diplomacy",
+          "Stock Markets & Trading",
+          "Technology & Semiconductors",
+          "Wars & Conflicts"
+        ]
+      },
+      {
+        "term": "india",
+        "thread_id": 300,
+        "delta": -8.2,
+        "domains": [
+          "AI & ML",
+          "Commodities & Prices",
+          "Finance & Banking",
+          "Geopolitics & Diplomacy",
+          "Stock Markets & Trading",
+          "Technology & Semiconductors",
+          "Wars & Conflicts"
+        ]
+      },
+      {
+        "term": "tech",
+        "thread_id": 3,
+        "delta": -7.5,
+        "domains": [
+          "Finance & Banking",
+          "Stock Markets & Trading",
+          "Technology & Semiconductors"
+        ]
+      },
+      {
+        "term": "stocks",
+        "thread_id": 3,
+        "delta": -7.5,
+        "domains": [
+          "Commodities & Prices",
+          "Finance & Banking",
+          "Stock Markets & Trading",
+          "Technology & Semiconductors"
+        ]
+      },
+      {
+        "term": "bank",
+        "thread_id": 57,
+        "delta": -7.5,
+        "domains": [
+          "Commodities & Prices",
+          "Finance & Banking",
+          "Geopolitics & Diplomacy",
+          "Stock Markets & Trading",
+          "Wars & Conflicts"
+        ]
+      }
+    ],
+    "cross_domain": [
+      {
+        "thread_id": 401,
+        "title": "As search traffic dries up, Reddit announces it’s shifting to a logged-in experience",
+        "domains": [
+          "AI & ML",
+          "Stock Markets & Trading"
+        ],
+        "last_seen": "2026-10-29T18:00:20-04:00"
+      },
+      {
+        "thread_id": 337,
+        "title": "At least 64 people dead in high-speed Spain train crash",
+        "domains": [
+          "Geopolitics & Diplomacy",
+          "Stock Markets & Trading",
+          "Wars & Conflicts"
+        ],
+        "last_seen": "2026-10-29T17:33:35-04:00"
+      },
+      {
+        "thread_id": 9,
+        "title": "Israeli PM pledges massive military operation after West Bank checkpoint attack",
+        "domains": [
+          "Finance & Banking",
+          "Wars & Conflicts"
+        ],
+        "last_seen": "2026-10-29T17:10:13-04:00"
+      },
+      {
+        "thread_id": 349,
+        "title": "DOJ Inquires About Nvidia’s Hugging Face Deal, Reuters Says",
+        "domains": [
+          "AI & ML",
+          "Technology & Semiconductors"
+        ],
+        "last_seen": "2026-10-29T16:37:00-04:00"
+      },
+      {
+        "thread_id": 348,
+        "title": "Google launches Gemini 4 Carbon with a focus on cybersecurity",
+        "domains": [
+          "AI & ML",
+          "Technology & Semiconductors"
+        ],
+        "last_seen": "2026-10-29T14:30:00-04:00"
+      },
+      {
+        "thread_id": 1,
+        "title": "Bank of Canada to raise rates to 2.50% on October 28 and once again by end-March",
+        "domains": [
+          "Finance & Banking",
+          "Technology & Semiconductors"
+        ],
+        "last_seen": "2026-10-29T13:10:00-04:00"
+      },
+      {
+        "thread_id": 91,
+        "title": "Elon Musk Just Gave Fantastic News for Nvidia Investors",
+        "domains": [
+          "AI & ML",
+          "Technology & Semiconductors"
+        ],
+        "last_seen": "2026-10-29T12:47:12-04:00"
+      },
+      {
+        "thread_id": 332,
+        "title": "SK Hynix shares jump 11% after record quarterly profit, outperforming broader market",
+        "domains": [
+          "Commodities & Prices",
+          "Stock Markets & Trading"
+        ],
+        "last_seen": "2026-10-29T12:13:38-04:00"
+      },
+      {
+        "thread_id": 101,
+        "title": "Trump mocks reporter asking about Iran strikes, as Tehran says US derailed",
+        "domains": [
+          "Geopolitics & Diplomacy",
+          "Wars & Conflicts"
+        ],
+        "last_seen": "2026-10-29T08:06:03-04:00"
+      },
+      {
+        "thread_id": 123,
+        "title": "US Fed expected to hold rates as inflation, energy costs weigh ahead of midterms",
+        "domains": [
+          "Commodities & Prices",
+          "Finance & Banking",
+          "Stock Markets & Trading"
+        ],
+        "last_seen": "2026-10-29T04:05:27-04:00"
+      }
+    ],
+    "heat": {
+      "Technology & Semiconductors": {
+        "China": {
+          "now": 5,
+          "prev": 0
+        },
+        "India": {
+          "now": 13,
+          "prev": 0
+        },
+        "US": {
+          "now": 44,
+          "prev": 0
+        },
+        "Global": {
+          "now": 27,
+          "prev": 0
+        },
+        "Canada": {
+          "now": 1,
+          "prev": 0
+        }
+      },
+      "Stock Markets & Trading": {
+        "US": {
+          "now": 41,
+          "prev": 0
+        },
+        "India": {
+          "now": 35,
+          "prev": 0
+        },
+        "Global": {
+          "now": 11,
+          "prev": 0
+        },
+        "Canada": {
+          "now": 1,
+          "prev": 0
+        },
+        "Other": {
+          "now": 1,
+          "prev": 0
+        }
+      },
+      "Finance & Banking": {
+        "Canada": {
+          "now": 20,
+          "prev": 0
+        },
+        "US": {
+          "now": 27,
+          "prev": 0
+        },
+        "India": {
+          "now": 25,
+          "prev": 0
+        },
+        "Global": {
+          "now": 8,
+          "prev": 0
+        },
+        "Other": {
+          "now": 5,
+          "prev": 0
+        }
+      },
+      "AI & ML": {
+        "Global": {
+          "now": 39,
+          "prev": 0
+        },
+        "US": {
+          "now": 33,
+          "prev": 0
+        },
+        "China": {
+          "now": 4,
+          "prev": 0
+        },
+        "India": {
+          "now": 6,
+          "prev": 0
+        }
+      },
+      "Wars & Conflicts": {
+        "Global": {
+          "now": 47,
+          "prev": 0
+        },
+        "US": {
+          "now": 18,
+          "prev": 0
+        },
+        "India": {
+          "now": 6,
+          "prev": 0
+        },
+        "Other": {
+          "now": 17,
+          "prev": 0
+        },
+        "Canada": {
+          "now": 1,
+          "prev": 0
+        },
+        "China": {
+          "now": 1,
+          "prev": 0
+        }
+      },
+      "Geopolitics & Diplomacy": {
+        "Canada": {
+          "now": 13,
+          "prev": 0
+        },
+        "Global": {
+          "now": 24,
+          "prev": 0
+        },
+        "US": {
+          "now": 16,
+          "prev": 0
+        },
+        "Other": {
+          "now": 10,
+          "prev": 0
+        },
+        "India": {
+          "now": 32,
+          "prev": 0
+        },
+        "China": {
+          "now": 8,
+          "prev": 0
+        }
+      },
+      "Commodities & Prices": {
+        "Global": {
+          "now": 46,
+          "prev": 0
+        },
+        "India": {
+          "now": 8,
+          "prev": 0
+        },
+        "US": {
+          "now": 17,
+          "prev": 0
+        },
+        "Canada": {
+          "now": 4,
+          "prev": 0
+        },
+        "Other": {
+          "now": 2,
+          "prev": 0
+        },
+        "China": {
+          "now": 3,
+          "prev": 0
+        }
+      }
+    }
+  },
+  "prediction_accuracy": {
+    "resolved": 0,
+    "happened": 0,
+    "partly": 0,
+    "missed": 0,
+    "hit_rate": null
+  }
+}
