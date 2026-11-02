@@ -109,7 +109,7 @@ Diff verified: `digest.py` (+9/-2) and new `tests/test_config_guards.py` (122 li
 1. The one-time gold set (about 50 past stories labelled junk or not, 20 minutes; recommended after the shadow week).
 2. Whether the `_data/_learning` folder stays public.
 
-The Jev design plan was written in the project's "Research Jev for news pipeline" thread. A condensed copy is in **`docs/jev-plan.md`** (design only, no code yet; next step is a "Phase 0 / PR 2" of Jev plumbing: pin model, reserve budgets, parallel requests, wall-clock guard). The plan estimates under $1 a month, inside the approved ceiling.
+The Jev design plan was written in the project's "Research Jev for news pipeline" thread. The full plan (copied from the sibling thread) is in **`docs/jev-plan.md`** (design only, no code yet; next step is a "Phase 0 / PR 2" of Jev plumbing: pin model, reserve budgets, parallel requests, wall-clock guard). The plan estimates under $1 a month, inside the approved ceiling.
 
 ## 7. History on disk (Manan's Windows machine)
 
