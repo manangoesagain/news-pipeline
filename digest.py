@@ -633,8 +633,15 @@ def select_digest(stories, breaking):
     for s in sorted(stories, key=lambda s: (-s["score"], -s["published"].timestamp())):
         if s["link"] in breaking_links:
             continue
-        if len(domain_items[s["domain"]]) < MAX_PER_DOMAIN:
-            domain_items[s["domain"]].append(s)
+        # A domain outside DOMAIN_ORDER must never sink the whole run: main() has no handler here,
+        # so a bare lookup would mean no digest, no delivery, no deploy and the loss of this slot's
+        # article store and learning writes. Skip the story and keep going.
+        bucket = domain_items.get(s["domain"])
+        if bucket is None:
+            print(f"[SELECT] skipped a story with unknown domain {s['domain']!r}")
+            continue
+        if len(bucket) < MAX_PER_DOMAIN:
+            bucket.append(s)
     return domain_items
 
 
