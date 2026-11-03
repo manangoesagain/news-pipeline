@@ -293,17 +293,59 @@ class Caps(Base):
 
     def test_deadline_is_capped_by_the_shared_hard_stop_and_the_phase_cap(self):
         self.mp.setattr(J, "_hard_stop", lambda: J.time.time() + 5)
-        J.begin_phase("x")
-        self.assertLessEqual(J._state["deadline"] - J.time.time(), 5.01)
+        J.begin_phase("links")
+        self.assertLessEqual(J._deadline() - J.time.time(), 5.01)
         self.mp.setattr(J, "_hard_stop", lambda: J.time.time() + 9999)
-        J.begin_phase("x")
-        self.assertLessEqual(J._state["deadline"] - J.time.time(), J.WALL_CAP_S + 0.01)
+        J.begin_phase("links")
+        self.assertLessEqual(J._deadline() - J.time.time(), J.WALL_CAP_S + 0.01)
 
     def test_hard_stop_already_passed_sends_nothing(self):
         self.mp.setattr(J, "_hard_stop", lambda: J.time.time() - 1)
         J.begin_phase("links")
         self.assertEqual(J.verify_links(chain_graph(5)), {})
         self.assertEqual(self.fake.n_calls, 0)
+
+    def test_lessons_and_default_phases_have_no_25s_cap(self):
+        for name in ("lessons", "default", "something-else"):
+            J.begin_phase(name, 20.0, 25)
+            self.assertIsNone(J._state["deadline"])
+        J.begin_phase("lessons")
+        self.mp.setattr(J.time, "time", lambda: 1e12)
+        self.mp.setattr(J, "_hard_stop", lambda: 2e12)             # far in the future: only the hard stop counts
+        self.assertIsNone(J._blocked())                            # minutes into the run, the fence still works
+
+    def test_bulk_phases_get_the_cap(self):
+        for name in J.WALL_CAPPED:
+            J.begin_phase(name)
+            self.assertIsNotNone(J._state["deadline"])
+
+    def test_overlapping_requests_are_counted_once_in_the_time_budget(self):
+        import threading
+        clock = {"t": 0.0}
+        self.mp.setattr(J.time, "monotonic", lambda: clock["t"])
+        gate = threading.Barrier(4)
+        real = self.fake.post
+
+        def slow(url, json=None, **kw):
+            gate.wait(timeout=5)                                   # all four requests are in flight together
+            clock["t"] = 3.0                                       # and they all finish three seconds later
+            return real(url, json=json, **kw)
+        self.fake.post = slow
+        J.begin_phase("soft", 60.0, 100)
+        done = []
+        threads = [threading.Thread(target=lambda: done.append(J._ask({"x": 1}, {"q": "?"}))) for _ in range(4)]
+        for th in threads:
+            th.start()
+        for th in threads:
+            th.join(5)
+        self.assertEqual(len(done), 4)
+        self.assertAlmostEqual(J._state["p_spent"], 3.0)           # three seconds of wall clock, not 4 x 3 s
+        self.assertAlmostEqual(J._state["g_spent"], 3.0)
+
+    def test_budget_used_up_is_logged_once_under_threads(self):
+        J.begin_phase("x", 60.0, 1)
+        J.verify_links(chain_graph(200), max_links=200)
+        self.assertEqual(self.out.getvalue().count("budget used up"), 1)
 
     def test_time_budget_spent_blocks_requests(self):
         J.begin_phase("slow", 0.2, 100)               # less than the half-second floor: nothing may be sent
@@ -362,11 +404,9 @@ class Failures(Base):
 
     def test_partial_batch_failure_keeps_earlier_results(self):
         real = self.fake.post
-        state = {"n": 0}
 
         def flaky(url, json=None, **kw):
-            state["n"] += 1
-            if state["n"] == 2:
+            if "e10" in json["questions"]:                       # the second chunk, whichever thread sends it
                 raise ConnectionError("blip")
             return real(url, json=json, **kw)
         self.fake.post = flaky
@@ -420,6 +460,12 @@ class KeyNeverLeaks(Base):
         J.verify_links(chain_graph(2))
         self.assertNotIn(KEY, self.out.getvalue())
         self.assertIn("[JEV]", self.out.getvalue())
+
+    def test_key_never_printed_when_threaded_requests_fail(self):
+        self.fake.post_resp = RuntimeError("boom " + KEY)
+        J.verify_links(chain_graph(60), max_links=60)
+        self.assertNotIn(KEY, self.out.getvalue())
+        self.assertNotIn(KEY, repr(J._state))
 
     def test_key_not_kept_in_module_state(self):
         J.verify_links(chain_graph(2))

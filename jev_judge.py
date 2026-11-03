@@ -44,7 +44,8 @@ MAX_HEADLINES = 12
 TEXT_CHARS = 1000
 BATCH = 10
 WORKERS = 8                  # chunks of one phase are sent in parallel, in a pool this big
-WALL_CAP_S = 25.0            # hard wall-clock cap per phase, on top of llm.HARD_STOP
+WALL_CAP_S = 25.0            # hard wall-clock cap for the bulk phases below, on top of llm.HARD_STOP
+WALL_CAPPED = ("links", "soft")   # lessons (spread over a long run) and unnamed phases only get llm.HARD_STOP
 
 GLOBAL_MAX_REQUESTS = 120
 GLOBAL_BUDGET_S = 150.0
@@ -71,7 +72,7 @@ def _hard_stop():
 def reset():
     """Reset all budgets/counters/model cache (used by tests)."""
     _state.clear()
-    _state.update({"model": None, "g_spent": 0.0, "g_reqs": 0, "warned": set()})
+    _state.update({"model": None, "g_spent": 0.0, "g_reqs": 0, "warned": set(), "inflight": 0, "busy_since": 0.0})
     _set_phase("default", None, None)
 
 
@@ -79,7 +80,7 @@ def _set_phase(name, budget_s, max_requests):
     _state.update({"phase": name, "p_spent": 0.0, "p_reqs": 0,
                    "p_budget": budget_s,
                    "p_max": max_requests if max_requests is not None else MAX_REQUESTS,
-                   "deadline": min(time.time() + WALL_CAP_S, _hard_stop())})
+                   "deadline": time.time() + WALL_CAP_S if name in WALL_CAPPED else None})
 
 
 def begin_phase(name, budget_s=None, max_requests=None):
@@ -122,6 +123,12 @@ def _pb():
     return _state["p_budget"] if _state["p_budget"] is not None else _env_budget()
 
 
+def _deadline():
+    """Wall-clock limit of the current phase: its own cap (bulk phases only) and always the shared hard stop."""
+    d = _state.get("deadline")
+    return min(d, _hard_stop()) if d is not None else _hard_stop()
+
+
 def _g_limits():
     """(max requests, max seconds) for the current phase out of the process-wide allowance."""
     if _state["phase"] == RESERVED_PHASE:
@@ -133,13 +140,13 @@ def _remaining():
     """Seconds left in the current phase: summed request durations against the budget, and wall clock
     against the phase deadline."""
     g_req, g_sec = _g_limits()
-    return min(_pb() - _state["p_spent"], g_sec - _state["g_spent"], _state["deadline"] - time.time())
+    return min(_pb() - _state["p_spent"], g_sec - _state["g_spent"], _deadline() - time.time())
 
 
 def _blocked():
     """None if a request may be made, else a reason. Logs ONE 'budget used up' line per phase."""
     g_req, g_sec = _g_limits()
-    if time.time() >= _state["deadline"]:
+    if time.time() >= _deadline():
         why = "deadline"
     elif _state["g_reqs"] >= g_req or g_sec - _state["g_spent"] <= 0.5:
         why = "process"
@@ -181,7 +188,9 @@ def _http(method, path, payload=None):
         left = _remaining()
         _state["p_reqs"] += 1
         _state["g_reqs"] += 1
-    t0 = time.monotonic()
+        if _state["inflight"] == 0:
+            _state["busy_since"] = time.monotonic()
+        _state["inflight"] += 1
     try:
         kw = dict(headers={"Authorization": "Bearer " + key, "Content-Type": "application/json"},
                   timeout=max(0.1, min(TIMEOUT_S, left)), allow_redirects=False)
@@ -197,10 +206,12 @@ def _http(method, path, payload=None):
         _log("%s %s failed: %s" % (method, path, type(e).__name__))
         return None
     finally:
-        dt = max(0.0, time.monotonic() - t0)
-        with _lock:
-            _state["p_spent"] += dt
-            _state["g_spent"] += dt
+        with _lock:                  # time is counted once while any request is in flight, not once per request
+            _state["inflight"] -= 1
+            if _state["inflight"] == 0:
+                dt = max(0.0, time.monotonic() - _state["busy_since"])
+                _state["p_spent"] += dt
+                _state["g_spent"] += dt
 
 
 def _model():
@@ -297,7 +308,9 @@ def _map_chunks(fn, chunks):
 
     def run(chunk):
         try:
-            return None if _blocked() else fn(chunk)
+            with _lock:
+                stop = _blocked()
+            return None if stop else fn(chunk)
         except Exception as e:
             _log("chunk failed: %s" % type(e).__name__)
             return None
