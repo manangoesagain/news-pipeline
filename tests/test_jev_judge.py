@@ -150,7 +150,7 @@ class VerifyLinks(Base):
     def test_batches_of_ten_and_one_model_lookup(self):
         res = J.verify_links(chain_graph(25))
         self.assertEqual(len(res), 25)
-        self.assertEqual([len(p[1]["questions"]) for p in self.fake.posts], [10, 10, 5])
+        self.assertEqual(sorted(len(p[1]["questions"]) for p in self.fake.posts), [5, 10, 10])   # sent in parallel: any order
         self.assertEqual(len(self.fake.gets), 1)                # model list is fetched once, then cached
 
     def test_max_links_limits_work(self):
@@ -251,11 +251,59 @@ class Caps(Base):
 
     def test_global_request_cap_spans_phases(self):
         self.mp.setattr(J, "GLOBAL_MAX_REQUESTS", 3)
+        self.mp.setattr(J, "RESERVE_REQUESTS", 0)     # the lessons reserve has its own tests below
         J.begin_phase("a", 60.0, 100)
         J.verify_links(chain_graph(50))
         J.begin_phase("b", 60.0, 100)
         J.verify_links(chain_graph(50))
         self.assertEqual(len(self.fake.posts), 3)
+
+    def test_lessons_allowance_is_reserved_from_earlier_phases(self):
+        J.begin_phase("links", 600.0, 1000)
+        J.verify_links(chain_graph(2000), max_links=2000)
+        self.assertEqual(len(self.fake.posts), J.GLOBAL_MAX_REQUESTS - J.RESERVE_REQUESTS)
+        J.begin_phase("lessons")                       # the fence can still ask, and may use the whole total
+        self.assertIsNotNone(J.injection_check("Plain observation about oil prices."))
+        self.assertEqual(len(self.fake.posts), J.GLOBAL_MAX_REQUESTS - J.RESERVE_REQUESTS + 1)
+
+    def test_lessons_time_is_reserved_from_earlier_phases(self):
+        J.begin_phase("soft", 600.0, 100)
+        J._state["g_spent"] = J.GLOBAL_BUDGET_S - J.RESERVE_SECONDS    # earlier phases used all they may
+        self.assertEqual(J.grade_soft([{"id": "1", "if": "a", "then": "b"}], ["h"]), {})
+        self.assertEqual(self.fake.posts, [])
+        J.begin_phase("lessons")
+        self.assertIsNotNone(J.injection_check("Plain observation."))
+
+    def test_parallel_requests_never_overshoot_the_cap(self):
+        J.begin_phase("x", 60.0, 5)
+        J.verify_links(chain_graph(200), max_links=200)
+        self.assertEqual(len(self.fake.posts), 5)
+
+    def test_results_keep_their_edge_indexes_under_parallelism(self):
+        self.fake.answer = lambda name, ins: int(name[1:]) / 100.0
+        res = J.verify_links(chain_graph(40), max_links=40)
+        self.assertEqual(res, {i: i / 100.0 for i in range(40)})
+
+    def test_wall_clock_deadline_blocks_requests(self):
+        J.begin_phase("slow", 60.0, 100)
+        J._state["deadline"] = J.time.time() - 1       # the phase's wall clock ran out
+        self.assertEqual(J.verify_links(chain_graph(5)), {})
+        self.assertEqual(self.fake.posts, [])
+        self.assertIn("budget used up for deadline", self.out.getvalue())
+
+    def test_deadline_is_capped_by_the_shared_hard_stop_and_the_phase_cap(self):
+        self.mp.setattr(J, "_hard_stop", lambda: J.time.time() + 5)
+        J.begin_phase("x")
+        self.assertLessEqual(J._state["deadline"] - J.time.time(), 5.01)
+        self.mp.setattr(J, "_hard_stop", lambda: J.time.time() + 9999)
+        J.begin_phase("x")
+        self.assertLessEqual(J._state["deadline"] - J.time.time(), J.WALL_CAP_S + 0.01)
+
+    def test_hard_stop_already_passed_sends_nothing(self):
+        self.mp.setattr(J, "_hard_stop", lambda: J.time.time() - 1)
+        J.begin_phase("links")
+        self.assertEqual(J.verify_links(chain_graph(5)), {})
+        self.assertEqual(self.fake.n_calls, 0)
 
     def test_time_budget_spent_blocks_requests(self):
         J.begin_phase("slow", 0.2, 100)               # less than the half-second floor: nothing may be sent
