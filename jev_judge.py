@@ -21,7 +21,9 @@ GET /v1/models lists models (response shape is not documented; parsed defensivel
 """
 
 import os
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 try:
     import requests
@@ -41,12 +43,29 @@ HEADLINE_CHARS = 200
 MAX_HEADLINES = 12
 TEXT_CHARS = 1000
 BATCH = 10
+WORKERS = 8                  # chunks of one phase are sent in parallel, in a pool this big
+WALL_CAP_S = 25.0            # hard wall-clock cap per phase, on top of llm.HARD_STOP
 
 GLOBAL_MAX_REQUESTS = 120
 GLOBAL_BUDGET_S = 150.0
 PHASES = {"links": (60.0, 40), "soft": (30.0, 15), "lessons": (20.0, 25)}
+# The lesson-safety fence runs last in the digest. Every other phase leaves this much of the process-wide
+# allowance untouched, so earlier stages can never make is_safe_lesson fail open by using everything up.
+RESERVED_PHASE = "lessons"
+RESERVE_REQUESTS = PHASES["lessons"][1]
+RESERVE_SECONDS = PHASES["lessons"][0]
 
 _state = {}
+_lock = threading.Lock()
+
+
+def _hard_stop():
+    """The shared process deadline (llm.HARD_STOP); no limit if llm cannot be imported."""
+    try:
+        import llm
+        return float(llm.HARD_STOP)
+    except Exception:
+        return float("inf")
 
 
 def reset():
@@ -59,7 +78,8 @@ def reset():
 def _set_phase(name, budget_s, max_requests):
     _state.update({"phase": name, "p_spent": 0.0, "p_reqs": 0,
                    "p_budget": budget_s,
-                   "p_max": max_requests if max_requests is not None else MAX_REQUESTS})
+                   "p_max": max_requests if max_requests is not None else MAX_REQUESTS,
+                   "deadline": min(time.time() + WALL_CAP_S, _hard_stop())})
 
 
 def begin_phase(name, budget_s=None, max_requests=None):
@@ -102,14 +122,26 @@ def _pb():
     return _state["p_budget"] if _state["p_budget"] is not None else _env_budget()
 
 
+def _g_limits():
+    """(max requests, max seconds) for the current phase out of the process-wide allowance."""
+    if _state["phase"] == RESERVED_PHASE:
+        return GLOBAL_MAX_REQUESTS, GLOBAL_BUDGET_S
+    return GLOBAL_MAX_REQUESTS - RESERVE_REQUESTS, GLOBAL_BUDGET_S - RESERVE_SECONDS
+
+
 def _remaining():
-    """Seconds left in the current phase (summed request durations, not wall-clock)."""
-    return min(_pb() - _state["p_spent"], GLOBAL_BUDGET_S - _state["g_spent"])
+    """Seconds left in the current phase: summed request durations against the budget, and wall clock
+    against the phase deadline."""
+    g_req, g_sec = _g_limits()
+    return min(_pb() - _state["p_spent"], g_sec - _state["g_spent"], _state["deadline"] - time.time())
 
 
 def _blocked():
     """None if a request may be made, else a reason. Logs ONE 'budget used up' line per phase."""
-    if _state["g_reqs"] >= GLOBAL_MAX_REQUESTS or GLOBAL_BUDGET_S - _state["g_spent"] <= 0.5:
+    g_req, g_sec = _g_limits()
+    if time.time() >= _state["deadline"]:
+        why = "deadline"
+    elif _state["g_reqs"] >= g_req or g_sec - _state["g_spent"] <= 0.5:
         why = "process"
     elif _state["p_reqs"] >= _state["p_max"] or _pb() - _state["p_spent"] <= 0.5:
         why = _state["phase"]
@@ -143,15 +175,16 @@ def _http(method, path, payload=None):
     key = _key()
     if not key or requests is None:
         return None
-    if _blocked():
-        return None
-    left = _remaining()
-    _state["p_reqs"] += 1
-    _state["g_reqs"] += 1
+    with _lock:                      # check and count together, so parallel callers cannot overshoot a cap
+        if _blocked():
+            return None
+        left = _remaining()
+        _state["p_reqs"] += 1
+        _state["g_reqs"] += 1
     t0 = time.monotonic()
     try:
         kw = dict(headers={"Authorization": "Bearer " + key, "Content-Type": "application/json"},
-                  timeout=min(TIMEOUT_S, left), allow_redirects=False)
+                  timeout=max(0.1, min(TIMEOUT_S, left)), allow_redirects=False)
         if method == "POST":
             r = requests.post(BASE_URL + path, json=payload, **kw)
         else:
@@ -165,8 +198,9 @@ def _http(method, path, payload=None):
         return None
     finally:
         dt = max(0.0, time.monotonic() - t0)
-        _state["p_spent"] += dt
-        _state["g_spent"] += dt
+        with _lock:
+            _state["p_spent"] += dt
+            _state["g_spent"] += dt
 
 
 def _model():
@@ -253,6 +287,24 @@ def _interleave(lists):
     return out
 
 
+def _map_chunks(fn, chunks):
+    """fn(chunk) for every chunk, WORKERS at a time; results in chunk order. The model is looked up once,
+    before any thread starts. Chunks that start after the budget or deadline is gone get None. Never raises."""
+    if not chunks:
+        return []
+    if not _model():
+        return [None] * len(chunks)
+
+    def run(chunk):
+        try:
+            return None if _blocked() else fn(chunk)
+        except Exception as e:
+            _log("chunk failed: %s" % type(e).__name__)
+            return None
+    with ThreadPoolExecutor(max_workers=max(1, min(WORKERS, len(chunks)))) as pool:
+        return list(pool.map(run, chunks))
+
+
 # ---------------------------------------------------------------- (1) link verification
 def verify_links(graph, headlines=None, max_links=60) -> dict:
     """{edge_index: p_supported} for causal edges (contradicts/feedback are not checked)."""
@@ -270,25 +322,23 @@ def verify_links(graph, headlines=None, max_links=60) -> dict:
             if a and b:
                 todo.append((i, e, a, b))
         result = {}
-        for s in range(0, len(todo), BATCH):
-            chunk = todo[s:s + BATCH]
+        chunks = [todo[s:s + BATCH] for s in range(0, len(todo), BATCH)]
+
+        def one(chunk):
             texts = _interleave([_node_texts(a) + _node_texts(b) for _, _, a, b in chunk])
             hl = _headlines(texts) or _headlines(headlines)
             if not hl:
-                continue
+                return None
             links, qs = [], {}
             for i, e, a, b in chunk:
                 fl, tl, mech = _clean(a.get("label")), _clean(b.get("label")), _clean(e.get("label"), 80)
                 links.append({"id": "e%d" % i, "from": fl, "to": tl, "mechanism": mech})
                 qs["e%d" % i] = ("Do the headlines support that %s causes the stated effect on %s via %s?"
                                  % (fl, tl, mech))
-            ans = _ask({"headlines": hl, "link": links}, qs)
-            if ans is None:
-                if _blocked():
-                    break
-                continue
+            return _ask({"headlines": hl, "link": links}, qs)
+        for chunk, ans in zip(chunks, _map_chunks(one, chunks)):
             for i, _, _, _ in chunk:
-                if "e%d" % i in ans:
+                if ans and "e%d" % i in ans:
                     result[i] = ans["e%d" % i]
         return result
     except Exception as e:
@@ -356,18 +406,16 @@ def grade_soft(predictions, headlines) -> dict:
         if not hl or not preds:
             return {}
         result = {}
-        for s in range(0, len(preds), BATCH):
-            chunk = preds[s:s + BATCH]
+        chunks = [preds[s:s + BATCH] for s in range(0, len(preds), BATCH)]
+
+        def one(chunk):
             qs = {"p%d" % j: ("Given these headlines from the last few days, has this prediction come true: "
                               "IF %s THEN %s?" % (_clean(p["if"], 200), _clean(p["then"], 200)))
                   for j, p in enumerate(chunk)}
-            ans = _ask({"headlines": hl}, qs)
-            if ans is None:
-                if _blocked():
-                    break
-                continue
+            return _ask({"headlines": hl}, qs)
+        for chunk, ans in zip(chunks, _map_chunks(one, chunks)):
             for j, p in enumerate(chunk):
-                if "p%d" % j in ans:
+                if ans and "p%d" % j in ans:
                     result[p["id"]] = ans["p%d" % j]
         return result
     except Exception as e:
