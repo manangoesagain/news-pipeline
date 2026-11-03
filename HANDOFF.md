@@ -55,19 +55,19 @@ Workflows:
 - `.github/workflows/digest.yml` ("News Digest"): hourly. Restores `_data` from `gh-pages`, runs `archive.py`, then `digest.py`, then `build_page.py`, then deploys to `gh-pages` with `force_orphan: true`. Manual run inputs: `force`, `dry_run` (builds everything, sends nothing, uploads a `preview` artifact), `intel`. Concurrency group `news-digest` so two runs never race.
 - `.github/workflows/deepdive.yml` ("Deep Dive Bot"): every 10 minutes, plus manual run with a topic.
 
-### Branches (as of 2026-11-02)
+### Branches (as of 2026-11-03)
 
 | Branch | State |
 |---|---|
 | `main` | Production. Workflows run from here. |
-| `recursive-learning` | Identical to `main` (0 ahead, 0 behind). |
-| `self-learning-loop` | Fully merged history, 3 commits behind `main`. |
-| `ai-map-reliability` | Fully merged, 4 behind `main`. |
-| `focus-cards-preview` | Fully merged, 10 behind `main`. |
-| `fix/latent-crash-guards` | Open PR #1 (section 5). |
+| `recursive-learning` | Was identical to `main` before PRs #1 to #3; now fully merged and behind `main`. |
+| `self-learning-loop` | Fully merged history, behind `main`. |
+| `ai-map-reliability` | Fully merged, behind `main`. |
+| `focus-cards-preview` | Fully merged, behind `main`. |
+| `fix/latent-crash-guards` | Merged (PR #1). Can be deleted. |
 | `gh-pages` | Generated output, not source. See below. |
 
-The first four non-`main` branches carry no unmerged work; they are old feature branches and could be deleted (Manan's call).
+As of 2026-11-02 the four older non-`main` branches carried no unmerged work; they are old feature branches and could be deleted (Manan's call).
 
 ### gh-pages is not a normal branch
 
@@ -89,13 +89,18 @@ I cannot see which secrets are actually set. **Unverified:** whether `TYPESAFE_A
 
 ## 5. Open work
 
-**PR #1, `fix/latent-crash-guards`** (<https://github.com/manangoesagain/news-pipeline/pull/1>): awaiting Jay's review, no review or CI results seen yet. It does three things, no behaviour change on any path that works today:
+As of 2026-11-03 PRs #1 (crash guards), #2 (this handoff) and #3 (Jev Phase 0 plumbing) are all merged into `main`. `fix/latent-crash-guards` and `docs/handoff` are now merged and can be deleted.
 
-1. `select_digest` skips (and logs) a story whose domain isn't in `DOMAIN_ORDER` instead of raising. Not reachable today; one typo in a feed's domain hint would make it reachable and cost a whole slot.
-2. A test that `DEFAULT_SETTINGS` and `SETTING_BOUNDS` hold the same keys (a mismatch would silently disable the snapshot, auto-revert and weekly tuner path).
-3. A test that ledger keys stay short, because `learning_io` redacts any run of 32 or more hex characters, which would collapse a store keyed by a full md5 or sha digest.
+**What PR #1 did** (no behaviour change on any path that worked): `select_digest` skips and logs a story whose domain isn't in `DOMAIN_ORDER` instead of raising; tests that `DEFAULT_SETTINGS` and `SETTING_BOUNDS` hold the same keys; a test that ledger keys stay short (`learning_io` redacts runs of 32 or more hex characters).
 
-Diff verified: `digest.py` (+9/-2) and new `tests/test_config_guards.py` (122 lines). The PR says 399 tests pass (389 plus 10); I confirmed 389 on `main` and did not re-run the PR branch.
+**What PR #3 did** (`jev_judge.py` and its tests): every Jev phase except `lessons` leaves 25 requests and 20 s of the process-wide allowance untouched so the lesson-safety check can't fail open; `verify_links` and `grade_soft` send chunks through a pool of 8 threads with a lock around the counters; each phase has a deadline of the earlier of `llm.HARD_STOP` and now + 25 s. The per-phase time budget is still the sum of request durations, so with parallel requests the real limit is the 25 s deadline.
+
+**Not done:**
+- **Pin `JEV_MODEL`** (Phase 0 item 3). Blocked: TypeSafe's playground offers only `jev-latest` and `jev-preview`, no versioned id, and the pipeline logs `[JEV] ping ok model=jev-latest`. The `jev-1.13` in older notes is unconfirmed; do not invent a pin. Revisit when a versioned id is published.
+- **Phase 1 shadow logging** (`jev_ledger.py`, stages A to C that ask and log but act on nothing, for the first week). Not started. Do it as its own PR after the Phase 0 changes have run cleanly for a day or two on the real schedule.
+- Jay's two open decisions: the one-time 50-story gold set, and whether `_data/_learning` stays public.
+
+**Test suite:** 406 tests on `main`. One test (`test_partial_batch_failure_keeps_earlier_results`) was flaky after PR #3 because it assumed request arrival order; it is fixed by failing the chunk by content.
 
 ## 6. Verification loop and Jev
 
@@ -139,8 +144,8 @@ I could not read any of these from the cloud; the paths come from the project in
 
 ## 9. What was verified and what wasn't
 
-Verified: repo tree and module docstrings; both workflow files; branch relationships (`git rev-list`); PR #1 contents; `gh-pages` contents and single-commit deploy; recent Actions runs succeeded; the 389-test suite passes on `main`; model list in `llm.py`; schedule, `INTEL_HOUR = 18`, domain list.
+Verified: repo tree and module docstrings; both workflow files; branch relationships (`git rev-list`); PR #1 contents; `gh-pages` contents and single-commit deploy; recent Actions runs succeeded; the offline suite passed on `main` (389 tests on 2026-11-02; 406 on 2026-11-03 after PRs #1 to #3); model list in `llm.py`; schedule, `INTEL_HOUR = 18`, domain list.
 
 Corrected versus the brief: the browser page, market snapshot, intelligence layer and deep dive bot are built, not pending; `gemini-2.0-flash` is no longer the primary model; no `CLAUDE.md` was tracked on `main`, so this PR adds a fresh one (an untracked `CLAUDE.md` in Jay's working copy will conflict on pull; keep whichever you prefer, or merge the two).
 
-Not verified: which secrets are set (so whether Jev is live); the content of delivered Telegram and email messages; Windows-side files; the Jev plan's claims about the code (copied from its doc, not re-checked line by line); PR #1 review status.
+Not verified: which secrets are set (so whether Jev is live); the content of delivered Telegram and email messages; Windows-side files; the Jev plan's claims about the code (copied from its doc, not re-checked line by line).

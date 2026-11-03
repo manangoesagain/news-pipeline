@@ -362,11 +362,12 @@ class Failures(Base):
 
     def test_partial_batch_failure_keeps_earlier_results(self):
         real = self.fake.post
-        state = {"n": 0}
 
         def flaky(url, json=None, **kw):
-            state["n"] += 1
-            if state["n"] == 2:
+            # Fail the chunk that holds links 10-19 by content, not by arrival order: with parallel
+            # requests the order in which chunks reach the fake is not fixed.
+            ids = [l["id"] for l in (json or {}).get("state", {}).get("link", [])]
+            if "e10" in ids:
                 raise ConnectionError("blip")
             return real(url, json=json, **kw)
         self.fake.post = flaky
