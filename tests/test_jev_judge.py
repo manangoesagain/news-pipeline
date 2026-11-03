@@ -404,9 +404,11 @@ class Failures(Base):
 
     def test_partial_batch_failure_keeps_earlier_results(self):
         real = self.fake.post
+        state = {"n": 0}
 
         def flaky(url, json=None, **kw):
-            if "e10" in json["questions"]:                       # the second chunk, whichever thread sends it
+            state["n"] += 1
+            if state["n"] == 2:
                 raise ConnectionError("blip")
             return real(url, json=json, **kw)
         self.fake.post = flaky
