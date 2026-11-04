@@ -365,5 +365,52 @@ class LedgerTests(TmpCwdCase):
         assert [n for n in os.listdir(learning_io.LEARN_DIR) if ".corrupt-" in n]
 
 
+    def _soft_call(self, cid, due_day, status="open", grade=None):
+        return {"id": cid, "made": day(0), "kind": "prediction", "subject": "s", "text": "", "direction": "",
+                "confidence": "medium", "topic": "t", "link_type": "a->prediction", "instrument": "",
+                "due": day(due_day), "status": status, "grade": grade,
+                "if": "AI capex continues", "then": "chips rally"}
+
+    def test_external_soft_wrong_waits_for_the_due_date(self):
+        """'Not true yet' is not 'wrong' before the horizon is over; only 'right' may close a call early."""
+        import learning_ledger as L, learning_io
+        learning_io.safe_write_json(L.CALLS_FILE, {"calls": [
+            self._soft_call("a", 10), self._soft_call("b", 10), self._soft_call("c", 10)]})
+        early = D0 + timedelta(days=3)
+        done = L.apply_external_soft_grades({"a": "right", "b": "wrong", "c": "unclear"}, early, "jev")
+        assert [c["id"] for c in done] == ["a"]
+        by = {c["id"]: c for c in _jload(L.CALLS_FILE)["calls"]}
+        assert by["a"]["status"] == "graded" and by["a"]["grade"]["result"] == "right"
+        assert by["b"]["status"] == "open" and by["c"]["status"] == "open"
+        late = D0 + timedelta(days=11)
+        done = L.apply_external_soft_grades({"b": "wrong", "c": "unclear"}, late, "jev")
+        assert sorted(c["id"] for c in done) == ["b", "c"]
+        by = {c["id"]: c for c in _jload(L.CALLS_FILE)["calls"]}
+        assert by["b"]["status"] == "graded" and by["b"]["grade"]["result"] == "wrong"
+        assert by["c"]["status"] == "unclear"
+
+    def test_premature_soft_wrongs_are_reopened_once(self):
+        import learning_ledger as L, learning_io
+        premature = self._soft_call("p", 10, "graded", {"result": "wrong", "soft": True, "source": "jev", "at": day(3)})
+        after_due = self._soft_call("d", 5, "graded", {"result": "wrong", "soft": True, "source": "jev", "at": day(6)})
+        right = self._soft_call("r", 10, "graded", {"result": "right", "soft": True, "source": "jev", "at": day(3)})
+        price = _fake_call(1, "high", "wrong")
+        price["grade"]["at"] = day(1)          # price call: never touched, even if "early"
+        learning_io.safe_write_json(L.CALLS_FILE, {"calls": [premature, after_due, right, price]})
+        with self.capture():
+            L.grade_calls(D0 + timedelta(days=4))
+        by = {c["id"]: c for c in _jload(L.CALLS_FILE)["calls"]}
+        assert by["p"]["status"] == "open" and by["p"]["grade"] is None
+        assert by["d"]["status"] == "graded" and by["d"]["grade"]["result"] == "wrong"
+        assert by["r"]["status"] == "graded"
+        assert by["c1"]["status"] == "graded" and by["c1"]["grade"]["result"] == "wrong"
+        before = _read(L.CALLS_FILE)
+        with self.capture():
+            L.grade_calls(D0 + timedelta(days=4))   # second run changes nothing
+        assert _read(L.CALLS_FILE) == before
+        sc = L.scorecard(D0 + timedelta(days=4))
+        assert sc["n_soft"] == 2 and sc["hit_rate_soft"] == 0.5
+
+
 if __name__ == "__main__":
     unittest.main()

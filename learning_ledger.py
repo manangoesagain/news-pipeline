@@ -823,6 +823,26 @@ def _grade_soft(c, today, resolved):
     return None, None
 
 
+def _reopen_premature_soft_wrongs(calls):
+    """One-time repair, idempotent: an external grader used to close soft predictions as 'wrong' as soon as they
+    were 2 days old and had not come true yet, long before their due date (153 of 154 soft grades, 2026-11-03).
+    Those 'wrong' grades were never evidence of anything; put them back to open so they are judged at their due
+    date. Returns how many were reopened. Price calls and grades given on or after the due date are untouched."""
+    n = 0
+    for c in calls:
+        g = c.get("grade")
+        if (c.get("status") == "graded" and isinstance(g, dict) and g.get("soft")
+                and g.get("source") == "jev" and g.get("result") == "wrong"
+                and isinstance(g.get("at"), str) and isinstance(c.get("due"), str)
+                and g["at"] <= c["due"]):
+            c["status"] = "open"
+            c["grade"] = None
+            n += 1
+    if n:
+        print(f"[LEARN] reopened {n} soft predictions that were closed as wrong before their due date")
+    return n
+
+
 @_safe(list)
 def grade_calls(now=None):
     """Grade open calls that are due. Returns the newly graded (or closed-unclear) calls."""
@@ -831,6 +851,7 @@ def grade_calls(now=None):
     store = _load_store(CALLS_FILE, strict=True)
     cache, newly = {}, []
     resolved = None
+    reopened = _reopen_premature_soft_wrongs(store["calls"])
     for c in store["calls"]:
         if c.get("status") != "open":
             continue
@@ -855,7 +876,7 @@ def grade_calls(now=None):
                 newly.append(c)
         except Exception as e:
             print(f"[LEARN] ledger could not grade {c.get('id')}: {e}")
-    if newly:
+    if newly or reopened:
         _save_all(store, now)
     return newly
 
@@ -899,15 +920,15 @@ def apply_external_soft_grades(grades, now=None, source="jev"):
             continue
         if c.get("status") != "open" or c.get("kind") != "prediction" or c.get("instrument"):
             continue
-        if res == "unclear":
+        if res in ("unclear", "wrong"):
+            # "not true yet" is not "wrong" until the horizon has passed: a 10-day prediction that has not come
+            # true after 2 days is still open. Only a "right" may close a call early.
             try:
                 if today <= _pdate(c["due"]):
                     continue
             except Exception:
                 continue
-            c["status"] = "unclear"
-        else:
-            c["status"] = "graded"
+        c["status"] = "unclear" if res == "unclear" else "graded"
         c["grade"] = {"result": res, "soft": True, "source": src, "at": _day(today)}
         newly.append(c)
     if newly:

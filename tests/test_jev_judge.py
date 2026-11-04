@@ -204,7 +204,7 @@ class SoftGrading(Base):
         self.assertEqual(len(res), 12)
         self.assertEqual(res["p0"], 0.8)
         self.assertEqual(res["p1"], 0.2)
-        self.assertEqual([len(p[1]["questions"]) for p in self.fake.posts], [10, 2])
+        self.assertEqual(sorted(len(p[1]["questions"]) for p in self.fake.posts), [2, 10])   # parallel: any order
 
     def test_invalid_predictions_and_no_headlines(self):
         bad = [None, {"id": None, "if": "a", "then": "b"}, {"id": "x", "if": "", "then": "b"}, "str", {"id": "y"}]
