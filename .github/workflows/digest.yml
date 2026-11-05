@@ -2,8 +2,10 @@ name: News Digest
 
 on:
   schedule:
-    # Every hour UTC; digest.py delivers each 8/11/15/18 ET slot once (late runs still count)
-    - cron: '0 * * * *'
+    # Twice an hour, at off-peak minutes: GitHub drops or delays scheduled runs most at the top of the hour,
+    # and a plain hourly '0 * * * *' was only starting about 4 runs a day. digest.py delivers each
+    # 8/11/15/18 ET slot once (late runs still count), so extra runs never send duplicates.
+    - cron: '17,47 * * * *'
   workflow_dispatch:       # manual test run from GitHub UI
     inputs:
       force:

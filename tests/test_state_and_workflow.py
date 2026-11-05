@@ -213,5 +213,56 @@ class WorkflowTests(unittest.TestCase):
         self.assertRegex(self.text, r"(?m)^    permissions:")
 
 
+class DueSlotAndScheduleTests(TempDirCase):
+    """The 8/11/15/18 Toronto slots must still be delivered when GitHub starts the run late."""
+
+    def _due(self, hour, minute=0, last_slot=None, day=3):
+        import digest
+        from zoneinfo import ZoneInfo
+        sd = os.path.join(self.tmp, "_data")
+        os.makedirs(sd, exist_ok=True)
+        state = os.path.join(sd, "state.json")
+        with open(state, "w") as f:
+            json.dump({"last_slot": last_slot} if last_slot else {}, f)
+        saved = (digest.NOW, digest.STATE_FILE, digest.FORCE_RUN)
+        self.addCleanup(lambda: [setattr(digest, n, v) for n, v in zip(("NOW", "STATE_FILE", "FORCE_RUN"), saved)])
+        digest.NOW = datetime(2026, 11, day, hour, minute, tzinfo=ZoneInfo("America/Toronto"))
+        digest.STATE_FILE = state
+        digest.FORCE_RUN = False
+        with self.capture_out():
+            return digest.due_slot()
+
+    def capture_out(self):
+        import contextlib
+        import io
+        return contextlib.redirect_stdout(io.StringIO())
+
+    def test_on_time_and_late_runs_deliver_the_slot(self):
+        self.assertEqual(self._due(8, 5), ("2026-11-03T08", 8))
+        self.assertEqual(self._due(10, 59), ("2026-11-03T08", 8))     # 3 h late
+        self.assertEqual(self._due(12, 30), ("2026-11-03T11", 11))
+
+    def test_a_late_run_delivers_the_newest_slot_not_an_old_one(self):
+        self.assertEqual(self._due(13, 17), ("2026-11-03T11", 11))    # the 11:00 slot, 2 h 17 min late
+
+    def test_six_pm_slot_still_delivered_up_to_four_hours_late(self):
+        self.assertEqual(self._due(21, 46), ("2026-11-03T18", 18))    # was skipped with a 3 h grace
+        self.assertEqual(self._due(21, 59), ("2026-11-03T18", 18))
+        self.assertEqual(self._due(22, 0), (None, None))
+
+    def test_slot_is_delivered_once_even_with_more_runs(self):
+        self.assertEqual(self._due(11, 47, last_slot="2026-11-03T11"), (None, None))
+        self.assertEqual(self._due(8, 17), ("2026-11-03T08", 8))
+
+    def test_workflow_avoids_the_top_of_the_hour_and_runs_often_enough(self):
+        text = open(WORKFLOW, encoding="utf-8").read()
+        crons = re.findall(r"(?m)^\s*-\s*cron:\s*'([^']+)'", text)
+        self.assertEqual(len(crons), 1)
+        minutes = crons[0].split()[0].split(",")
+        self.assertGreaterEqual(len(minutes), 2, "at least two runs an hour")
+        for m in minutes:
+            self.assertNotIn(m, ("0", "00"), "GitHub drops most scheduled runs at the top of the hour")
+
+
 if __name__ == "__main__":
     unittest.main()
