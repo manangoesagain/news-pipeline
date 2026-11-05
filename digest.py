@@ -150,8 +150,9 @@ STATE_FILE = os.path.join(SAVE_DIR, "state.json")
 # Allowed run hours in America/Toronto time; the 18:00 run carries the intelligence brief
 ALLOWED_HOURS = [8, 11, 15, 18]
 INTEL_HOUR = 18
-# A slot can still be delivered this many hours late (GitHub cron can lag up to ~1h)
-SLOT_GRACE_HOURS = 3
+# A slot can still be delivered this many hours late. GitHub often starts scheduled runs hours late or skips
+# some; a run that is late still delivers the newest slot rather than nothing.
+SLOT_GRACE_HOURS = 4
 
 # Some feeds (CBC) stall on anything but a plain browser user agent
 HTTP_HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
