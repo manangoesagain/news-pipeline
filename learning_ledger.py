@@ -58,6 +58,15 @@ UNCLEAR_AFTER = 3         # price-tied call with no usable price is closed this 
 SOFT_UNCLEAR_AFTER = 21   # unmatched soft call is closed this many days after due
 MIN_ENOUGH = 20
 MIN_ENOUGH_PRICE = 30
+# Pre-registered, measure-only selection rule (set 2026-11-05, nothing is filtered live). Chosen after looking at
+# the first ~36 scored price calls, so those are in-sample; only calls MADE on or after POLICY_SINCE count as a
+# fair test. Rule: keep a price call only if its horizon is at least 3 days and it has no conflicting evidence.
+# Adopt it for real only if, on at least POLICY_MIN_KEPT kept calls made since the date, the kept hit rate is
+# at least POLICY_TARGET and beats the dropped calls. See README ("Selection rule test").
+POLICY_SINCE = "2026-11-05"
+POLICY_RULE = "horizon of at least 3 days and no conflicting evidence"
+POLICY_MIN_KEPT = 30
+POLICY_TARGET = 0.70
 MAX_OUTCOME_ROWS = 5000
 OUTCOME_BYTES = 370_000     # outcomes.json stays under this (learning_io limit is 400KB)
 RECENT_IDS = 600
@@ -1151,7 +1160,18 @@ def _empty_scorecard():
             "hit_rate_weighted": None, "no_move_share": None, "no_move_flag": False, "brier": None,
             "by_horizon": {}, "by_basis": {}, "by_arm": {}, "n_price_calls_today": 0,
             "n_price_graded_7d": 0, "n_open_price": 0, "recent_30d": {"n": 0, "hit_rate": None},
-            "prev_30d": {"n": 0, "hit_rate": None}}
+            "prev_30d": {"n": 0, "hit_rate": None}, "policy_test": None}
+
+
+def _long_horizon(c):
+    try:
+        return int(c.get("horizon_days")) >= 3
+    except Exception:
+        return False
+
+
+def _policy_keep(c):
+    return _long_horizon(c) and not c.get("conflict")
 
 
 @_safe(_empty_scorecard)
@@ -1174,6 +1194,8 @@ def scorecard(now=None, write=True):
     n_move = 0            # price-graded outcomes with a usable result: right, wrong or flat
     horizon, basis, arm = {}, {}, {}
     arm_base = {}
+    pol = {"kept": [0.0, 0], "dropped": [0.0, 0]}
+    parts = {"horizon_3d_plus": [0.0, 0], "no_conflict": [0.0, 0]}   # each half of the rule on its own, info only
     rec = [0.0, 0]
     prev = [0.0, 0]
     for c in calls:
@@ -1186,6 +1208,16 @@ def scorecard(now=None, write=True):
                 _bucket(topic, c.get("topic") or "other", s)
                 if c.get("link_type"):
                     _bucket(link, c["link_type"], s)
+                # the selection-rule test needs the full call (horizon, conflict flag), which the compact
+                # outcomes rows do not keep; calls stay full here for ARCHIVE_DAYS (60), far longer than the test
+                if str(c.get("made", ""))[:10] >= POLICY_SINCE:
+                    pb = pol["kept" if _policy_keep(c) else "dropped"]
+                    pb[0] += s
+                    pb[1] += 1
+                    for k_, ok_ in (("horizon_3d_plus", _long_horizon(c)), ("no_conflict", not c.get("conflict"))):
+                        if ok_:
+                            parts[k_][0] += s
+                            parts[k_][1] += 1
             continue
         if st == "open":
             sc["n_open"] += 1
@@ -1278,6 +1310,14 @@ def scorecard(now=None, write=True):
         ab = arm_base.get(k)
         v["skill"] = round((ab[0] - ab[1]) / ab[2], 3) if ab and ab[2] else None
     sc["by_arm"] = by_arm
+    kept, dropped = pol["kept"], pol["dropped"]
+    sc["policy_test"] = {
+        "rule": POLICY_RULE, "since": POLICY_SINCE, "target": POLICY_TARGET, "min_kept": POLICY_MIN_KEPT,
+        "kept": {"n": kept[1], "hit_rate": _rate(kept[0], kept[1])},
+        "dropped": {"n": dropped[1], "hit_rate": _rate(dropped[0], dropped[1])},
+        "all": {"n": kept[1] + dropped[1], "hit_rate": _rate(kept[0] + dropped[0], kept[1] + dropped[1])},
+        "ready": bool(kept[1] >= POLICY_MIN_KEPT),
+        "parts": {k_: {"n": v_[1], "hit_rate": _rate(v_[0], v_[1])} for k_, v_ in parts.items()}}
     sc["hit_rate_soft"] = _rate(soft_h, sc["n_soft"])
     sc["by_confidence"] = _finish(conf)
     sc["by_topic"] = _finish(topic)
