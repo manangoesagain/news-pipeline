@@ -412,5 +412,32 @@ class LedgerTests(TmpCwdCase):
         assert sc["n_soft"] == 2 and sc["hit_rate_soft"] == 0.5
 
 
+    def test_policy_test_counts_only_calls_made_since_the_registration_date(self):
+        """The pre-registered rule is measured, not applied: kept = horizon >= 3 and no conflict."""
+        import learning_ledger as L, learning_io
+
+        def call(i, made, horizon, res, conflict=False):
+            c = _fake_call(i, "high", res)
+            c["made"], c["horizon_days"] = made, horizon
+            if conflict:
+                c["conflict"] = True
+            return c
+        calls = [call(1, "2026-11-04", 3, "right"),                 # before the date: ignored
+                 call(2, "2026-11-05", 3, "right"), call(3, "2026-11-06", 7, "wrong"),
+                 call(4, "2026-11-06", 1, "right"),                 # dropped: 1 day
+                 call(5, "2026-11-06", 3, "wrong", conflict=True)]  # dropped: conflict
+        learning_io.safe_write_json(L.CALLS_FILE, {"calls": calls})
+        sc = L.scorecard(datetime(2026, 11, 20))
+        pt = sc["policy_test"]
+        assert pt["since"] == "2026-11-05" and pt["target"] == 0.7
+        assert pt["kept"] == {"n": 2, "hit_rate": 0.5}
+        assert pt["dropped"] == {"n": 2, "hit_rate": 0.5}
+        assert pt["all"]["n"] == 4 and pt["ready"] is False
+        # each half of the rule on its own (information only): calls 2, 3, 5 are 3+ days, calls 2, 3, 4 have no conflict
+        assert pt["parts"]["horizon_3d_plus"] == {"n": 3, "hit_rate": 0.333}
+        assert pt["parts"]["no_conflict"] == {"n": 3, "hit_rate": 0.667}
+        assert sc["n_scored"] == 5                                  # the headline rate is unchanged by the test
+
+
 if __name__ == "__main__":
     unittest.main()
