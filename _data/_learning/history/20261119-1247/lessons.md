@@ -1,0 +1,13 @@
+# Lessons Learned
+- High confidence calls have a 64.3% hit rate (n=42)
+- Medium confidence calls have a 48.6% hit rate (n=70)
+- Low confidence calls have a 62.5% hit rate (n=8)
+- Calls on 'market' kind have a 59.7% hit rate (n=72)
+- Calls on 'currency' kind have a 47.9% hit rate (n=48)
+- Calls on WTI Crude have a 53.3% hit rate (n=15)
+- Calls on Nasdaq have a 63.6% hit rate (n=11)
+- Calls on Nifty 50 have a 50.0% hit rate (n=10)
+- Calls on USD/INR have a 50.0% hit rate (n=24)
+- Calls on USD/CAD have a 47.4% hit rate (n=19)
+- Calls on US Dollar Index have a 50.0% hit rate (n=12)
+- Calls on Gold have a 88.9% hit rate (n=9)

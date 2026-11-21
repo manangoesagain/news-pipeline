@@ -1,0 +1,1 @@
+- oil-shock-to-rupee: Oil shock to rupee
